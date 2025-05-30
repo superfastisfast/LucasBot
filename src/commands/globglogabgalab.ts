@@ -71,6 +71,7 @@ export default class GlobCommand extends Command {
             "eHN3rbUWENI",
             "CVWE9BPo0g0 :flag_se:",
             "lWO8TLqAwNU",
+            "0RxNKzLFxNY",
         ];
 
         const min = Math.ceil(0);
