@@ -38,10 +38,22 @@ class PingCommand extends Command {
     }
 }
 
+class UwuCommand extends Command {
+    constructor() {
+        super("uww");
+    }
+
+    public override async execute(message: Message, args: string[]): Promise<void> {
+        await message.reply("UWU!");
+        console.log("Uwu executed!", args);
+    }
+}
+
+
 
 const commands: Map<string, Command> = new Map();
 commands.set("ping", new PingCommand());
-commands.set("uwu", new PingCommand());
+commands.set("uwu", new UwuCommand());
 
 
 client.once(Events.ClientReady, readyClient => {
@@ -71,7 +83,3 @@ client.once(Events.ClientReady, readyClient => {
 
 
 client.login(process.env.BOT_TOKEN);
-
-
-
-
