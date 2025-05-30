@@ -5,7 +5,7 @@ export default class GlobCommand extends Command {
     override get info(): any {
         console.log("info called");
         return new SlashCommandBuilder()
-            .setName("glob")
+            .setName("globglogabgalab")
             .setDescription("Summons a globglogabgelab")
             .toJSON();
     }
@@ -55,14 +55,10 @@ export default class GlobCommand extends Command {
             "vwyOoX7VGTA"
         ];
 
-        const random = getRandomInt(1, songs.length - 1);
+        const min = Math.ceil(0);
+        const max = Math.floor(songs.length - 1);
+        const random = Math.floor(Math.random() * (max - min + 1)) + min;
 
         await interaction.reply("https://www.youtube.com/watch?v=" + songs[random] + "&list=PLkc09h6aA5tJWVrawBU0NT3m04uwdcirU&index=" + random);
     }
-}
-
-function getRandomInt(min: number, max: number): number {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
