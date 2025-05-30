@@ -6,7 +6,7 @@ export default class GlobCommand extends Command {
         console.log("info called");
         return new SlashCommandBuilder()
             .setName("globglogabgalab")
-            .setDescription("Summons a globglogabgelab")
+            .setDescription("Summons a globglogabgelab https://www.imdb.com/title/tt8141808/")
             .toJSON();
     }
 
