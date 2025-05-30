@@ -21,10 +21,8 @@ export default class GlobCommand extends Command {
             "geWmx4YnRZA",
             "ZSAypaq7log",
             "a-QpDm0A3Ng",
-            "Kw12RyxCHTc",
             "lCS3y1qn4C8",
             "DVQsKYPm7mA",
-            "xrIgihGpcXg",
             "slogfEswemE",
             "-pQnurfQZPI",
             "wSXIblva5No",
@@ -35,11 +33,9 @@ export default class GlobCommand extends Command {
             "7XBjuDkXJ60",
             "uQASsDVChTQ",
             "FSAibrRAUjM",
-            "HUBdfxwWnxA",
-            "nV-ypF0L6Xs EAR WARNING!",
+            "nV-ypF0L6Xs :warning: EAR WARNING!",
             "TtqMwwfhErQ",
             "CaWT1ayLyB0",
-            "wEpJU3xqeSE",
             "okZNjPP1VQ4",
             "-XBaIpW--T4",
             "uPmNlnGNEqw",
@@ -52,13 +48,35 @@ export default class GlobCommand extends Command {
             "oVk0NP02zLs",
             "oS0kaazgJTQ",
             "GfgFuytAWGw",
-            "vwyOoX7VGTA"
+            "vwyOoX7VGTA",
+            "A9cVvHv8j2o",
+            "TO5xjH3wgpc",
+            "52Li3SLj1gE", // Santa??
+            "bfBjUUWvaHg",
+            "LifQbgwfF5M",
+            "vwyOoX7VGTA",
+            "zUYJJ5wZulY",
+            "M9V2l5KDMGY",
+            "Hh-soLTb2uo",
+            "nmjHp_EkR9U",
+            "O5QAJQzeYas",
+            "dDTKAwikm94",
+            "9PT4UnsUvNw",
+            "rCm-R4nZM1s",
+            "OvVWcb8KhPs",
+            "70jd1P6dQDs",
+            "xnl0iddwELA",
+            "bUEBTr4cImY",
+            "89c4Y59z2rc",
+            "eHN3rbUWENI",
+            "CVWE9BPo0g0 :flag_se:",
+            "lWO8TLqAwNU",
         ];
 
         const min = Math.ceil(0);
         const max = Math.floor(songs.length - 1);
         const random = Math.floor(Math.random() * (max - min + 1)) + min;
 
-        await interaction.reply("https://www.youtube.com/watch?v=" + songs[random] + "&list=PLkc09h6aA5tJWVrawBU0NT3m04uwdcirU&index=" + random);
+        await interaction.reply("https://www.youtube.com/watch?v=" + songs[random]);
     }
 }
