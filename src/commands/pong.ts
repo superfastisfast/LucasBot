@@ -10,7 +10,7 @@ export default class PongCommand extends Command {
             .toJSON();
     }
 
-    override async execute(client: Client, interaction: CommandInteraction<any>): Promise<void> {
+    override async executeCommand(client: Client, interaction: CommandInteraction<any>): Promise<void> {
         let member = interaction.options.get("user")?.member;
 
         console.log(member);

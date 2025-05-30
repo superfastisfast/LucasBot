@@ -19,4 +19,5 @@ export interface UserDocument extends Document {
     balance: number;
 }
 
+
 export const UserModel = mongoose.model<UserDocument>("User", userSchema);

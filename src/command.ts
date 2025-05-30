@@ -1,6 +1,9 @@
-import type { Client, CommandInteraction } from "discord.js";
+import type { AutocompleteInteraction, Client, CommandInteraction } from "discord.js";
 
 export abstract class Command {
     abstract get info(): any;
-    abstract execute(client: Client, interaction: CommandInteraction): Promise<void>;
+    async executeAutoComplete(client: Client, interaction: AutocompleteInteraction): Promise<void> {
+        interaction.respond([]);
+    }
+    abstract executeCommand(client: Client, interaction: CommandInteraction): Promise<void>;
 }

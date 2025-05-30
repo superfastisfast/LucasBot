@@ -1,8 +1,8 @@
 import type { Command } from "@/command";
-import PingCommand from "@/commands/ping";
-import { Client, GatewayIntentBits, Events, Message } from "discord.js";
+import { Client, GatewayIntentBits, Events } from "discord.js";
 import mongoose from "mongoose";
 import { UserModel } from "./models/user";
+import { Quest } from "./quest";
 
 const client = new Client({
     intents: [
@@ -13,7 +13,85 @@ const client = new Client({
     ],
 });
 
-let commands = new Map<string, Command>();
+const commands = new Map<string, Command>();
+
+async function registerCommands(client: Client) {
+    const glob = new Bun.Glob("./src/commands/*.ts");
+
+    for (const path of glob.scanSync(".")) {
+        const { default: CommandClass } = await import(
+            path.replace("./src/", "./")
+        );
+        const instance: Command = new CommandClass();
+        const info = instance.info;
+        commands.set(info.name, instance);
+        client.application?.commands.create(info);
+        console.log(`Registered command: ${info.name}`);
+    }
+}
+
+async function handleCommandInteraction(client: Client, interaction: any) {
+    const command = commands.get(interaction.commandName);
+
+    if (!command) {
+        return interaction.reply("Command not found.");
+    }
+
+    try {
+        await command.executeCommand(client, interaction);
+    } catch (err) {
+        console.error(`Error running command ${interaction.commandName}:`, err);
+        interaction.reply("Error executing command.");
+    }
+}
+
+async function handleAutocompleteInteraction(client: Client, interaction: any) {
+    const command = commands.get(interaction.commandName);
+    if (!command) {
+        interaction.respond([]);
+        return;
+    }
+    try {
+        await command.executeAutoComplete(client, interaction);
+    } catch (err) {
+        console.error(
+            `Error running autocomplete for command ${interaction.commandName}:`,
+            err,
+        );
+        interaction.respond([]);
+    }
+}
+
+async function handleButtonInteraction(client: Client, interaction: any) {
+    for (const quest of await Quest.getQuests()) {
+        try {
+            if (await quest.onButtonInteract(client, interaction)) {
+                break;
+            }
+        } catch (err) {
+            console.error(
+                `Error running button interaction for quest ${quest.fileName}:`,
+                err,
+            );
+        }
+    }
+}
+
+async function handleMessageCreate(message: any) {
+    let dbUser = await UserModel.findOne({ id: message.author.id });
+
+    if (dbUser) {
+        if (dbUser.username !== message.author.username) {
+            dbUser.username = message.author.username;
+            await dbUser.save();
+        }
+    } else {
+        dbUser = await UserModel.create({
+            id: message.author.id,
+            username: message.author.username,
+        });
+    }
+}
 
 client.once(Events.ClientReady, async (readyClient) => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
@@ -22,52 +100,22 @@ client.once(Events.ClientReady, async (readyClient) => {
     await mongoose.connect(process.env.MONGO_URI!);
     console.log("Connected to MongoDB");
 
-    const glob = new Bun.Glob("./src/commands/*.ts");
-
-    for (const path of glob.scanSync(".")) {
-        const { default: CommandClass } = await import(path.replace("./src/", "./"));
-        const instance: Command = new CommandClass();
-        const info = instance.info;
-        commands.set(info.name, instance);
-        client.application?.commands.create(info);
-        console.log(`Registered command: ${info.name}`);
-    }
+    await registerCommands(client);
+    await Quest.loadQuests();
 
     client.on(Events.InteractionCreate, async (interaction) => {
-        if (!interaction.isCommand()) return;
-
-        const command = commands.get(interaction.commandName);
-        if (!command) return;
-
-        try {
-            await command.execute(client, interaction);
-        } catch (err) {
-            console.error(`Error running command ${interaction.commandName}:`, err);
-            interaction.reply("Error executing command.");
+        if (interaction.isCommand()) {
+            await handleCommandInteraction(client, interaction);
+        } else if (interaction.isAutocomplete()) {
+            await handleAutocompleteInteraction(client, interaction);
+        } else if (interaction.isButton()) {
+            await handleButtonInteraction(client, interaction);
         }
     });
 
     client.on(Events.MessageCreate, async (message) => {
-        let dbUser = await UserModel.findOne({ id: message.author.id });
-
-        console.log("\nUsername " + message.author.username);
-
-        if (dbUser) {
-            if (dbUser.username !== message.author.username) {
-                dbUser.username = message.author.username;
-                await dbUser.save();
-            }
-        } else {
-            dbUser = await UserModel.create({
-                id: message.author.id,
-                username: message.author.username,
-            });
-        }
-
-        console.log("dbUser", dbUser);
+        await handleMessageCreate(message);
     });
 });
-
-//bun add -D prettier
 
 client.login(process.env.BOT_TOKEN);

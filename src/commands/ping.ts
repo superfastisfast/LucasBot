@@ -7,7 +7,7 @@ export default class PingCommand extends Command {
         return new SlashCommandBuilder().setName("ping").setDescription("test").toJSON();
     }
 
-    override async execute(client: Client, interaction: CommandInteraction): Promise<void> {
+    override async executeCommand(client: Client, interaction: CommandInteraction): Promise<void> {
         interaction.reply("Ping Works!");
     }
 }
