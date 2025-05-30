@@ -19,5 +19,14 @@ export interface UserDocument extends Document {
     balance: number;
 }
 
-
 export const UserModel = mongoose.model<UserDocument>("User", userSchema);
+
+export async function giveXP(userID: string, xp: number) {
+    let dbUser = await UserModel.findOne({ id: userID });
+    if (!dbUser) {
+        return;
+    }
+
+    dbUser.xp = Math.max(-100, dbUser.xp + xp);
+    await dbUser.save();
+}

@@ -7,6 +7,7 @@ const questSchema = new Schema(
         imageUrl: { type: String },
         description: { type: String },
         creatorId: { type: String },
+        data: { type: Object, default: {} },
     },
     { timestamps: true },
 );
@@ -17,6 +18,7 @@ export interface QuestDocument extends Document {
     imageUrl: string;
     description: string;
     creatorId: string;
+    data: Record<string, any>;
 }
 
 export const QuestModel = mongoose.model<QuestDocument>("Quest", questSchema);
