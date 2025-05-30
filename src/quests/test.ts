@@ -11,7 +11,7 @@ import {
 
 export default class TestQuest extends Quest {
     public override async onButtonInteract(
-        client: Client,
+        client:  Client,
         interaction: ButtonInteraction,
     ): Promise<boolean> {
         if (interaction.customId === `${this.fileName}#help`) {
@@ -29,7 +29,7 @@ export default class TestQuest extends Quest {
         console.log("questData", questData);
 
         let questChannel: TextChannel = (await client.channels.fetch(
-            "1377652337702604924",
+            process.env.QUEST_CHANNEL_ID || "undefined",
         )) as TextChannel;
 
         const builder = new EmbedBuilder()
