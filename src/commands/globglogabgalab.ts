@@ -1,16 +1,13 @@
 import { Command } from "@/command";
 import { SlashCommandBuilder, type Client, type CommandInteraction } from "discord.js";
 
-export default class GlobCommand extends Command {
+export default class GlobglogabgalabCommand extends Command {
     override get info(): any {
         console.log("info called");
-        return new SlashCommandBuilder()
-            .setName("globglogabgalab")
-            .setDescription("Summons a globglogabgelab https://www.imdb.com/title/tt8141808/")
-            .toJSON();
+        return new SlashCommandBuilder().setName("ping").setDescription("test").toJSON();
     }
 
-    override async execute(client: Client, interaction: CommandInteraction): Promise<void> {
+    override async executeCommand(client: Client, interaction: CommandInteraction): Promise<void> {
         const songs: string[] = [
             "hLljd8pfiFg", 
             "cIwRQwAS_YY", 
