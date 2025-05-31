@@ -95,11 +95,13 @@ export default class GlobglogabgalabCommand extends Command {
         const max = songs.length - 1;
         const option = interaction.options.get("index", false)?.value as number;
         const index = option ?? Math.floor(Math.random() * (max + 1));
+        const youtubeId = songs[index]?.slice(0, 11) || "";
+        const comment = songs[index]?.slice(11) || "";
 
         let message: string;
-        
+
         message = index <= max
-            ? `**Index: ${index}/${max}** video *[here](https://www.youtube.com/watch?v=${songs[index]?.slice(0, 11) || ""})* ${songs[index]?.slice(11) || ""}`
+            ? `**Index: ${index}/${max}** video *[here](https://www.youtube.com/watch?v=${youtubeId})* ${comment}`
             : `The max index is ${max}`;
         
 
@@ -107,7 +109,7 @@ export default class GlobglogabgalabCommand extends Command {
         const today = new Date(2025, 5, 24); // Month is 0-based: 5 = June
         const isChristmas = (today.getDate() === 25 || today.getDate() === 24) && today.getMonth() === 11;
         if (isChristmas) 
-            message = "🎄 Merry Christmas! **video** [here](https://www.youtube.com/watch?v=52Li3SLj1gE)";
+            message = "🎄 Merry Christmas! video *[here](https://www.youtube.com/watch?v=52Li3SLj1gE)*";
 
         await interaction.reply(message);
     }
