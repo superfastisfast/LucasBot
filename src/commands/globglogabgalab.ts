@@ -99,7 +99,7 @@ export default class GlobglogabgalabCommand extends Command {
         let message: string;
         
         message = index <= max
-            ? `**Index: ${index}/${max}** video *[here](https://www.youtube.com/watch?v=${songs[index]})*`
+            ? `**Index: ${index}/${max}** video *[here](https://www.youtube.com/watch?v=${songs[index]?.split(" ", 11)[0]})* ${songs[index]?.split(" ", 11)[1] || ""}`
             : `The max index is ${max}`;
         
 
