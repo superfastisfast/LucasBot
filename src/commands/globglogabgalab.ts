@@ -23,7 +23,7 @@ const songs: string[] = [
     "7XBjuDkXJ60",
     "uQASsDVChTQ",
     "FSAibrRAUjM",
-    "nV-ypF0L6Xs :warning: EAR WARNING!",
+    "nV-ypF0L6Xs EAR WARNING ⚠️!",
     "TtqMwwfhErQ",
     "CaWT1ayLyB0",
     "okZNjPP1VQ4",
@@ -99,7 +99,7 @@ export default class GlobglogabgalabCommand extends Command {
         let message: string;
         
         message = index <= max
-            ? `**Index: ${index}/${max}** video *[here](https://www.youtube.com/watch?v=${songs[index]?.split(" ", 11)[0]})* ${songs[index]?.split(" ", 11)[1] || ""}`
+            ? `**Index: ${index}/${max}** video *[here](https://www.youtube.com/watch?v=${songs[index]?.slice(0, 11) || ""})* ${songs[index]?.slice(11) || ""}`
             : `The max index is ${max}`;
         
 
