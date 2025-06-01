@@ -64,7 +64,6 @@ const songs: string[] = [
     "vel-CyHrvb4",
     "yNOlOqLSAwk",
     "D-iX9mF6wcM",
-    "2VePeXzGup0",
     "xrIgihGpcXg",
     "y81WZvnHTt8",
     "YeemJlrNx2Q <= Secretly a globglogebgelab",
@@ -76,7 +75,6 @@ const songs: string[] = [
     "h6EuSlzO4m0",
     "aTtnRjRJstc",
 ];
-
 export default class GlobglogabgalabCommand extends Command {
     override get info(): any {
         console.log("info called");
