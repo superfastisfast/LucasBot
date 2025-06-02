@@ -51,15 +51,19 @@ export async function giveXP(userID: string, xp: number) {
     if (!dbUser) {
         return;
     }
+    console.log("xp: " + xp);
     if (xp > 0 && dbUser.timeouts > 0) {
-        let xpToAward = xp;
         const maxTimeoutsForReduction = 20;
         const minTimeoutsForReduction = 1;
-        let reducedFactor =
+        let reductionFactor =
             (dbUser.timeouts - minTimeoutsForReduction) /
             (maxTimeoutsForReduction - minTimeoutsForReduction);
-        xp = xp * (1 / dbUser.timeouts);
+        reductionFactor = Math.max(0, Math.min(1, reductionFactor));
+        xp = xp * (1 - reductionFactor);
     }
+    console.log("new xp: " + xp);
+
     dbUser.xp = Math.max(-100, dbUser.xp + xp);
     await dbUser.save();
+    return xp;
 }

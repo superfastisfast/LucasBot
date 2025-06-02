@@ -16,13 +16,15 @@ export default class SubscribedQuest extends Quest {
         interaction: ButtonInteraction,
     ): Promise<boolean> {
         if (interaction.customId === `${this.fileName}#yes`) {
+            const xpRecived = await giveXP(interaction.user.id, 10);
             let message = await interaction.reply(
                 "**" +
                     interaction.member?.user.username +
                     "**" +
-                    " Good 😊 \nYou gained 10xp! \nNow tell a friend?",
+                    " Good 😊 \nYou gained " +
+                    xpRecived +
+                    "xp! \nNow tell a friend?",
             );
-            await giveXP(interaction.user.id, 10);
 
             return true;
         } else if (interaction.customId === `${this.fileName}#no`) {
@@ -45,9 +47,10 @@ export default class SubscribedQuest extends Quest {
 
         questData.data;
 
-        if (!process.env.QUEST_CHANNEL_ID) throw new Error('QUEST_CHANNEL_ID is not defined in .env');
+        if (!process.env.QUEST_CHANNEL_ID)
+            throw new Error("QUEST_CHANNEL_ID is not defined in .env");
         let questChannel: TextChannel = (await client.channels.fetch(
-            process.env.QUEST_CHANNEL_ID
+            process.env.QUEST_CHANNEL_ID,
         )) as TextChannel;
 
         const builder = new EmbedBuilder()
