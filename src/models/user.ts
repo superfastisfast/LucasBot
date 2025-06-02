@@ -1,4 +1,6 @@
+import type { User } from "discord.js";
 import mongoose, { Document, Schema } from "mongoose";
+import { client } from "..";
 
 const userSchema = new Schema(
     {
@@ -46,8 +48,21 @@ export interface UserDocument extends Document {
 export type UserModel = mongoose.InferSchemaType<typeof userSchema>;
 export const UserModel = mongoose.model<UserDocument>("User", userSchema);
 
-export async function giveXP(userID: string, xp: number) {
-    let dbUser = await UserModel.findOne({ id: userID });
+export async function getUserFromId(id: string): Promise<User> {
+    return await client.users.fetch(id);
+}
+
+
+export async function getIdFromUser(user: User | string): Promise<string> {
+    if (typeof user === "object" && user !== null && "id" in user) {
+        return user.id;
+    }
+    return user;
+}
+
+export async function giveXP(user: User | string, xp: number) {
+    const id = getIdFromUser(user);
+    let dbUser = await UserModel.findOne({ id: id });
     if (!dbUser) {
         return;
     }

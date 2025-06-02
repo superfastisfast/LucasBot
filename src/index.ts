@@ -5,7 +5,7 @@ import { giveXP, UserModel } from "./models/user";
 import { Quest } from "./quest";
 import { timeoutTracking } from "./system/timeoutSystem";
 
-const client = new Client({
+export const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMembers,
