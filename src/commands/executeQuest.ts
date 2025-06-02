@@ -1,6 +1,11 @@
 import { Command } from "@/command";
 import { Quest } from "@/quest";
-import { SlashCommandBuilder, type Client, type CommandInteraction } from "discord.js";
+import {
+    AutocompleteInteraction,
+    SlashCommandBuilder,
+    type Client,
+    type CommandInteraction,
+} from "discord.js";
 
 export default class ExecuteQuestCommand extends Command {
     override get info(): any {
@@ -8,13 +13,37 @@ export default class ExecuteQuestCommand extends Command {
             .setName("executequest")
             .setDescription("Execute a Quest")
             .addStringOption((option) =>
-                option.setName("class").setDescription("class of quest").setAutocomplete(true).setRequired(true),
+                option
+                    .setName("class")
+                    .setDescription("class of quest")
+                    .setAutocomplete(true)
+                    .setRequired(true),
             )
             .toJSON();
     }
 
-    override async executeCommand(client: Client, interaction: CommandInteraction): Promise<void> {
-        const className = interaction.options.get("class", true).value as string;
+    override async executeAutoComplete(
+        client: Client,
+        interaction: AutocompleteInteraction,
+    ): Promise<void> {
+        const focusedOption = interaction.options.getFocused(true).name;
+        if (focusedOption == "class") {
+            interaction.respond(
+                await Quest.getQuests().map((q) => ({
+                    name: q.fileName,
+                    value: q.fileName,
+                })),
+            );
+            return;
+        }
+    }
+
+    override async executeCommand(
+        client: Client,
+        interaction: CommandInteraction,
+    ): Promise<void> {
+        const className = interaction.options.get("class", true)
+            .value as string;
 
         const quest = Quest.getQuest(className);
         if (!quest) {

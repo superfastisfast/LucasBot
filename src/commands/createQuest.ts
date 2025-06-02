@@ -15,46 +15,82 @@ export default class CreateQuestCommand extends Command {
         return new SlashCommandBuilder()
             .setName("createquest")
             .setDescription("create a quest")
-            .addStringOption((option) => option.setName("title").setDescription("title of the quest").setRequired(true))
-            .addAttachmentOption((option) => option.setName("image").setDescription("image").setRequired(true))
             .addStringOption((option) =>
-                option.setName("description").setDescription("description of the quest").setRequired(true),
+                option
+                    .setName("title")
+                    .setDescription("title of the quest")
+                    .setRequired(true),
             )
             .addStringOption((option) =>
-                option.setName("class").setDescription("class of the quest").setAutocomplete(true).setRequired(true),
+                option
+                    .setName("image")
+                    .setDescription("image link")
+                    .setRequired(true),
+            )
+            .addStringOption((option) =>
+                option
+                    .setName("description")
+                    .setDescription("description of the quest")
+                    .setRequired(true),
+            )
+            .addStringOption((option) =>
+                option
+                    .setName("class")
+                    .setDescription("class of the quest")
+                    .setAutocomplete(true)
+                    .setRequired(true),
             )
             .toJSON();
     }
 
-    override async executeAutoComplete(client: Client, interaction: AutocompleteInteraction): Promise<void> {
+    override async executeAutoComplete(
+        client: Client,
+        interaction: AutocompleteInteraction,
+    ): Promise<void> {
         const focusedOption = interaction.options.getFocused(true).name;
 
         console.log("executeAutoComplete:focusedOption", focusedOption);
 
         if (focusedOption == "class") {
-            interaction.respond(await Quest.getQuests().map((q) => ({ name: q.fileName, value: q.fileName })));
+            interaction.respond(
+                await Quest.getQuests().map((q) => ({
+                    name: q.fileName,
+                    value: q.fileName,
+                })),
+            );
             return;
         }
     }
 
-    override async executeCommand(client: Client, interaction: CommandInteraction<any>): Promise<void> {
+    override async executeCommand(
+        client: Client,
+        interaction: CommandInteraction<any>,
+    ): Promise<void> {
         console.log("getting classes");
 
         const title = interaction.options.get("title", true).value as string;
-        const imageUrl = interaction.options.get("image", true)!.attachment!.url as string;
-        const description = interaction.options.get("description", true).value as string;
-        const questClass = interaction.options.get("class", true).value as string;
+        const imageUrl = interaction.options.get("image", true).value as string;
+        const description = interaction.options.get("description", true)
+            .value as string;
+        const questClass = interaction.options.get("class", true)
+            .value as string;
         const creatorId = interaction.member!.id as string;
 
         let questClassFilesNames = Quest.getQuests().map((q) => q.fileName);
         if (!questClassFilesNames.includes(questClass)) {
-            await interaction.reply(`Quest class '${questClass}' does not exist.`);
+            await interaction.reply(
+                `Quest class '${questClass}' does not exist.`,
+            );
             return;
         }
 
-        const existingQuest = await QuestModel.findOne({ className: questClass });
+        const existingQuest = await QuestModel.findOne({
+            className: questClass,
+        });
         if (existingQuest) {
-            await interaction.reply(`A quest with the class name '${questClass}' already exists.`);
+            await interaction.reply(
+                `A quest with the class name '${questClass}' already exists.`,
+            );
             return;
         }
 
@@ -66,6 +102,8 @@ export default class CreateQuestCommand extends Command {
             creatorId: creatorId,
         });
 
-        interaction.reply(`Created quest ${title} ${imageUrl} ${description} ${questClass} - ${quest._id}`);
+        interaction.reply(
+            `Created quest ${title} ${imageUrl} ${description} ${questClass} - ${quest._id}`,
+        );
     }
 }
