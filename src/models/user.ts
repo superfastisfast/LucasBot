@@ -52,7 +52,6 @@ export async function getUserFromId(id: string): Promise<User> {
     return await client.users.fetch(id);
 }
 
-
 export async function getIdFromUser(user: User | string): Promise<string> {
     if (typeof user === "object" && user !== null && "id" in user) {
         return user.id;
