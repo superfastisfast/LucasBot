@@ -56,7 +56,9 @@ export async function giveXP(userID: string, xp: number) {
         let xpToAward = xp;
         const maxTimeoutsForReduction = 20;
         const minTimeoutsForReduction = 1;
-        let reducedFactor = dbUser.timeouts;
+        let reducedFactor =
+            (dbUser.timeouts - minTimeoutsForReduction) /
+            (maxTimeoutsForReduction - minTimeoutsForReduction);
         xp = xp * (1 / dbUser.timeouts);
     }
     dbUser.xp = Math.max(-100, dbUser.xp + xp);
