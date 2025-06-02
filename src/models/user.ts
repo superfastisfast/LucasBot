@@ -4,6 +4,7 @@ const userSchema = new Schema(
     {
         id: { type: String },
         username: { type: String },
+        timeouts: { type: Number, default: 0.0 },
         xp: { type: Number, default: 0.0 },
         lastXpMessageAt: { type: Schema.Types.Date, default: Date.now },
         balance: { type: Number, default: 0.0 },
@@ -25,6 +26,7 @@ const userSchema = new Schema(
 export interface UserDocument extends Document {
     id: string;
     username: string;
+    timeouts: number;
     xp: number;
     lastXpMessageAt: Date;
     balance: number;

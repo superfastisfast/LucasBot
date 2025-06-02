@@ -3,6 +3,7 @@ import { Client, GatewayIntentBits, Events } from "discord.js";
 import mongoose from "mongoose";
 import { giveXP, UserModel } from "./models/user";
 import { Quest } from "./quest";
+import { timeoutTracking } from "./system/timeoutSystem";
 
 const client = new Client({
     intents: [
@@ -125,6 +126,10 @@ client.once(Events.ClientReady, async (readyClient) => {
 
     client.on(Events.MessageCreate, async (message) => {
         await handleMessageCreate(message);
+    });
+
+    client.on(Events.GuildMemberUpdate, async (oldMemeber, newMember) => {
+        timeoutTracking(oldMemeber, newMember);
     });
 });
 
