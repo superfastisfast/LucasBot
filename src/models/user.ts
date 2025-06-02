@@ -44,7 +44,6 @@ export interface UserDocument extends Document {
 }
 
 export type UserModel = mongoose.InferSchemaType<typeof userSchema>;
-
 export const UserModel = mongoose.model<UserDocument>("User", userSchema);
 
 export async function giveXP(userID: string, xp: number) {
