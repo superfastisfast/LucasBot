@@ -91,7 +91,7 @@ async function handleMessageCreate(message: any) {
             currentTime.getTime() - dbUser.lastXpMessageAt.getTime();
         const timeDifferenceMinutes = timeDifferenceMs / (1000 * 60);
         if (timeDifferenceMinutes >= 1) {
-            giveXP(dbUser.id, 10);
+            giveXP(dbUser.id, 1);
             dbUser.lastXpMessageAt = currentTime;
             await dbUser.save();
         }

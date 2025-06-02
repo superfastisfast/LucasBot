@@ -7,6 +7,7 @@ const userSchema = new Schema(
         xp: { type: Number, default: 0.0 },
         lastXpMessageAt: { type: Schema.Types.Date, default: Date.now },
         balance: { type: Number, default: 0.0 },
+        skillPoints: { type: Number, default: 0.0 },
         strength: { type: Number, default: 0.0 },
         agility: { type: Number, default: 0.0 },
         charisma: { type: Number, default: 0.0 },
@@ -27,6 +28,7 @@ export interface UserDocument extends Document {
     xp: number;
     lastXpMessageAt: Date;
     balance: number;
+    skillPoints: number;
     strength: number;
     agility: number;
     charisma: number;
@@ -39,10 +41,7 @@ export interface UserDocument extends Document {
     maxArmor: number;
 }
 
-
-
 export type UserModel = mongoose.InferSchemaType<typeof userSchema>;
-
 
 export const UserModel = mongoose.model<UserDocument>("User", userSchema);
 
