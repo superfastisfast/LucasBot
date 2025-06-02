@@ -54,13 +54,13 @@ export async function getUserFromId(id: string): Promise<User> {
 
 export async function getIdFromUser(user: User | string): Promise<string> {
     if (typeof user === "object" && user !== null && "id" in user) {
-        return user.id;
+        return String(user.id);
     }
     return user;
 }
 
 export async function giveXP(user: User | string, xp: number) {
-    const id = getIdFromUser(user);
+    const id = await getIdFromUser(user);
     let dbUser = await UserModel.findOne({ id: id });
     if (!dbUser) {
         return;
@@ -78,6 +78,29 @@ export async function giveXP(user: User | string, xp: number) {
     console.log("new xp: " + xp);
 
     dbUser.xp = Math.max(-100, dbUser.xp + xp);
+    await dbUser.save();
+    return xp;
+}
+
+export async function setXP(user: User | string, xp: number) {
+    const id = await getIdFromUser(user);
+    let dbUser = await UserModel.findOne({ id: id });
+    if (!dbUser) {
+        return;
+    }
+    console.log("xp: " + xp);
+    if (xp > 0 && dbUser.timeouts > 0) {
+        const maxTimeoutsForReduction = 20;
+        const minTimeoutsForReduction = 1;
+        let reductionFactor =
+            (dbUser.timeouts - minTimeoutsForReduction) /
+            (maxTimeoutsForReduction - minTimeoutsForReduction);
+        reductionFactor = Math.max(0, Math.min(1, reductionFactor));
+        xp = xp * (1 - reductionFactor);
+    }
+    console.log("new xp: " + xp);
+
+    dbUser.xp = Math.max(-100, xp);
     await dbUser.save();
     return xp;
 }

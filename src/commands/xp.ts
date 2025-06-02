@@ -1,68 +1,78 @@
 import { Command } from "@/command";
 import { SlashCommandBuilder, User, type Client, type CommandInteraction } from "discord.js";
-import mongoose from "mongoose";
-import { giveXP, UserModel } from '../models/user';
+import { giveXP, setXP, UserModel } from "../models/user";
 
 export default class XpCommand extends Command {
     override get info(): any {
         return new SlashCommandBuilder()
             .setName("xp")
             .setDescription("XP related stuff")
-            .addUserOption((option) => 
-                option.setName("user")
-                .setDescription("User")
-                .setRequired(false)
+            .addSubcommand(sub =>
+                sub.setName("view")
+                .setDescription("View the XP of a user")
+                .addUserOption(opt =>
+                    opt.setName("target").setDescription("Users XP that gets viewed").setRequired(true)
+                )
             )
-            .addStringOption((option) =>
-                option.setName("command")
-                .setDescription("The command you want to perform to the user")
-                .setRequired(false)
+            .addSubcommand(sub =>
+                sub.setName("add")
+                .setDescription("Add XP to a user")
+                .addUserOption(opt =>
+                    opt.setName("target").setDescription("User to give XP to").setRequired(true)
+                )
+                .addIntegerOption(opt =>
+                    opt.setName("amount").setDescription("Amount of XP").setRequired(true)
+                )
+            )
+            .addSubcommand(sub =>
+                sub.setName("set")
+                .setDescription("Set a users XP to a value")
+                .addUserOption(opt =>
+                    opt.setName("target").setDescription("User to set XP to").setRequired(true)
+                )
+                .addIntegerOption(opt =>
+                    opt.setName("amount").setDescription("Amount of XP").setRequired(true)
+                )
             )
             .toJSON();
     }
 
     override async executeCommand(client: Client, interaction: CommandInteraction<any>): Promise<void> {
-        const userOption = interaction.options.get("user", false);
-        const user = userOption?.user ?? interaction.user;
+        const sub = interaction.options.getSubcommand();
+        const targetOption = interaction.options.get("target", false);
+        const target = targetOption?.user ?? interaction.user;
 
-        let message: string;
-
-        let xp: number | undefined;
-
-        const usersModel = await UserModel.find();
-        for (const userModel of usersModel) {
-            if (userModel.id == user.id) {
-                xp = userModel.xp;
+        switch (sub) {
+            case "view": {
+                const usersModel = await UserModel.find();
+                for (const userModel of usersModel) {
+                    if (userModel.id == target.id) {
+                        interaction.reply(`${target} has ${userModel.xp || "no"} xp`);
+                    }
+                }
                 break;
             }
-        }
-        message = `${user} has ${xp || "no"} xp`;
+            case "add": {                
+                if (!interaction.memberPermissions?.has('Administrator')) break;
 
-        // Command stuff
-        const commandOption = interaction.options.get("command", false);
-        if (commandOption != null) { // Needs to be checked for admin
-            const command: string[] = commandOption.value?.toString().split(" ") || [];
-            switch (command[0]) {
-                case "grant":
-                    const xp = Number(command[1]);
-                    giveXP(user.id, xp);
-                    message = `${interaction.user} granted ${user} ${xp} xp`;
-                    break;
+                const amount = interaction.options.get("amount")?.value as number;
+                giveXP(target.id, amount);
+                interaction.reply(`${interaction.user} added ${amount}xp to ${target}`)
 
-                default:
-                    message = `Command not found: "${commandOption.value as string}" ¯\\_(ツ)_/¯`;
-                    break;
+                break;
             }
+            case "set": {
+                if (!interaction.memberPermissions?.has('Administrator')) break;
 
-            // if (command[0] == "grant") {
-            //     const xp = Number(command[1]);
-            //     giveXP(user.id, xp);
-            //     message = `${interaction.user} granted ${user} ${xp} xp`;
-            // } else  {
-            //     message = `Command not found: "${commandOption.value as string}" ¯\_(ツ)_/¯`;
-            // }
+                const amount = interaction.options.get("amount")?.value as number;
+                setXP(target.id, amount);
+                interaction.reply(`${interaction.user} set ${target}'s xp to ${amount}`)
+
+                break;
+            }
+            default:
+                
+            interaction.reply("You do not have permission to do this!")
         }
-
-        interaction.reply(message);
     }
 }
