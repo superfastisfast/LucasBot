@@ -1,7 +1,7 @@
 import type { Command } from "@/command";
 import { Client, GatewayIntentBits, Events } from "discord.js";
 import mongoose from "mongoose";
-import { UserModel } from "./models/user";
+import { giveXP, UserModel } from "./models/user";
 import { Quest } from "./quest";
 
 const client = new Client({
@@ -83,6 +83,16 @@ async function handleMessageCreate(message: any) {
     if (dbUser) {
         if (dbUser.username !== message.author.username) {
             dbUser.username = message.author.username;
+            await dbUser.save();
+        }
+        //Message rewards xp
+        const currentTime = new Date();
+        const timeDifferenceMs =
+            currentTime.getTime() - dbUser.lastXpMessageAt.getTime();
+        const timeDifferenceMinutes = timeDifferenceMs / (1000 * 60);
+        if (timeDifferenceMinutes >= 1) {
+            giveXP(dbUser.id, 10);
+            dbUser.lastXpMessageAt = currentTime;
             await dbUser.save();
         }
     } else {
