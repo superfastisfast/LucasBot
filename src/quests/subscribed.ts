@@ -22,7 +22,7 @@ export default class SubscribedQuest extends Quest {
                     interaction.member?.user.username +
                     "**" +
                     " Good 😊 \nYou gained " +
-                    xpRecived +
+                    xpRecived?.toFixed(2) +
                     "xp! \nNow tell a friend?",
             );
 
