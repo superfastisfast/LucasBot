@@ -29,7 +29,7 @@ export default class EscapeJailCommand extends Command {
                 break;
             case "pay_bail":
                 // handle pay bail
-                interaction.reply("You pay the bail and you are freed")
+                interaction.reply("You pay the bail and you are freed or were you *vsauce music plays*")
                 break;
             default:
                 // handle unknown option
