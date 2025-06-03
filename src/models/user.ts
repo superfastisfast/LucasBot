@@ -17,10 +17,7 @@ const userSchema = new Schema(
         magicka: { type: Number, default: 0.0 },
         stamina: { type: Number, default: 0.0 },
         defense: { type: Number, default: 0.0 },
-        currentHealth: { type: Number, default: 0.0 },
-        maxHealth: { type: Number, default: 0.0 },
-        currentArmor: { type: Number, default: 0.0 },
-        maxArmor: { type: Number, default: 0.0 },
+        vitality: { type: Number, default: 5.0 },
     },
     { timestamps: true },
 );
@@ -39,10 +36,7 @@ export interface UserDocument extends Document {
     magicka: number;
     stamina: number;
     defense: number;
-    currentHealth: number;
-    maxHealth: number;
-    currentArmor: number;
-    maxArmor: number;
+    vitality: number;
 }
 
 export type UserModel = mongoose.InferSchemaType<typeof userSchema>;
