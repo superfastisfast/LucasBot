@@ -3,8 +3,8 @@ import { Client, GatewayIntentBits, Events } from "discord.js";
 import mongoose from "mongoose";
 import { giveXP, UserModel } from "./models/user";
 import { Quest } from "./quest";
-import { timeoutTracking } from "./system/timeoutSystem";
-import {BotServices} from "@/outcasts/damon/botServices.ts";
+import { timeoutTracking } from "./system/timeoutService";
+import { BotServices } from "@/system/botServices";
 
 export const client = new Client({
     intents: [
@@ -133,6 +133,7 @@ client.once(Events.ClientReady, async (readyClient) => {
         await handleMessageCreate(message);
     });
 
+    //TODO: move to be service
     client.on(Events.GuildMemberUpdate, async (oldMemeber, newMember) => {
         timeoutTracking(oldMemeber, newMember);
     });
