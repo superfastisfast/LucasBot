@@ -108,9 +108,11 @@ async function handleMessageCreate(message: any) {
 client.once(Events.ClientReady, async (readyClient) => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 
+    //TODO: Integrate Demons code to the the main system
     let responder: MessageResponderService;
     responder = new MessageResponderService(client);
     responder.start();
+    //End of Demons code
 
     console.log("Connecting to MongoDB...");
     await mongoose.connect(process.env.MONGO_URI!);

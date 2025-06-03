@@ -2,6 +2,7 @@ import { Command } from "@/command";
 import { Quest } from "@/quest";
 import {
     AutocompleteInteraction,
+    InteractionContextType,
     SlashCommandBuilder,
     type Client,
     type CommandInteraction,
@@ -19,6 +20,8 @@ export default class ExecuteQuestCommand extends Command {
                     .setAutocomplete(true)
                     .setRequired(true),
             )
+            .setDefaultMemberPermissions(0n)
+            .setContexts(InteractionContextType.Guild)
             .toJSON();
     }
 
