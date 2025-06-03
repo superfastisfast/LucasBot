@@ -104,3 +104,27 @@ export async function setXP(user: User | string, xp: number) {
     await dbUser.save();
     return xp;
 }
+
+export async function giveGold(user: User | string, amount: number) {
+    const id = await getIdFromUser(user);
+    let dbUser = await UserModel.findOne({ id: id });
+    if (!dbUser) {
+        return;
+    }
+
+    dbUser.balance = Math.max(-1000, dbUser.balance + amount);
+    await dbUser.save();
+    return amount;
+}
+
+export async function setGold(user: User | string, amount: number) {
+    const id = await getIdFromUser(user);
+    let dbUser = await UserModel.findOne({ id: id });
+    if (!dbUser) {
+        return;
+    }
+
+    dbUser.balance = Math.max(-1000, amount);
+    await dbUser.save();
+    return amount;
+}
