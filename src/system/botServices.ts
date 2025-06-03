@@ -1,6 +1,6 @@
-﻿import {Client} from "discord.js";
-import {MessageResponderService} from "@/outcasts/damon/messageResponderService.ts";
-import {DamonsFakeService} from "@/outcasts/damon/DamonsFakeService.ts";
+﻿import { Client } from "discord.js";
+import { MessageResponderService } from "@/system/messageResponderService";
+import { DamonsFakeService } from "@/system/DamonsFakeService";
 
 export interface ILogger {
     info(message: string): void;
@@ -14,12 +14,15 @@ export class BotServices {
         client: Client,
         private readonly logger: ILogger = console, // default to console
     ) {
-        this.messageResponderService = new MessageResponderService(client, logger);
+        this.messageResponderService = new MessageResponderService(
+            client,
+            logger,
+        );
         this.damonsFakeService = new DamonsFakeService(client, logger);
     }
 
     start(): void {
-        this.logger.info('Bot Services starting.');
+        this.logger.info("Bot Services starting.");
         this.messageResponderService.start();
         this.damonsFakeService.start();
     }
@@ -27,6 +30,6 @@ export class BotServices {
     stop(): void {
         this.messageResponderService.stop();
         this.damonsFakeService.stop();
-        this.logger.info('Bot Services stopped.');
+        this.logger.info("Bot Services stopped.");
     }
 }
