@@ -14,7 +14,7 @@ LucasBot was designed for rapid iteration, minimal runtime overhead, and no‑fr
 | ------------------ | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | 🎲 **Mini‑games**  | `/diceplayer`                   | Competitive dice roll that awards XP & gold to the highest roller. Ties trigger a sudden‑death throw‑off.                       |
 | 🗺️ **Quests**     | `/createquest`, `/executequest` | Create narrative quests with branching outcomes. Quests support Markdown in descriptions, optional images, and dynamic rewards. |
-| 💬 **Fun**         | `/globglogabgalab`, `/deeznuts`              | A single‑slash gateway to everyone’s favourite library creature. Plays a random quote plus an Easter‑egg GIF.                   |
+| 💬 **Fun**         | `/globglogabgalab`, `/deeznuts` | A single‑slash gateway to everyone’s favourite library creature. Plays a random quote plus an Easter‑egg GIF...  and a command featuring a random deceased meme called "Deez Nuts" |
 | 📈 **Progression** | `/xp`, `/award`                 | View personal stats or manually award XP & gold to a user or role. Includes leaderboard auto‑pagination.                        |
 | 🛡️ **Roles**      | `/role add/remove/list`         | Self‑assignable roles with optional level requirements and emoji icons.                                                         |
 | 🔧 **Utilities**   | `/ping`, `/pong`, `/uptime`     | Latency test, Easter‑egg reply, and how long the bot has been running.                                                          |
