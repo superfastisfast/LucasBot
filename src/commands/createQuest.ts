@@ -3,6 +3,7 @@ import { QuestModel } from "@/models/quest";
 import { Quest } from "@/quest";
 import {
     AutocompleteInteraction,
+    InteractionContextType,
     messageLink,
     SlashCommandBuilder,
     User,
@@ -40,6 +41,8 @@ export default class CreateQuestCommand extends Command {
                     .setAutocomplete(true)
                     .setRequired(true),
             )
+            .setDefaultMemberPermissions(0n)
+            .setContexts(InteractionContextType.Guild)
             .toJSON();
     }
 

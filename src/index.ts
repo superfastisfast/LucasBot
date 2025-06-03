@@ -1,9 +1,9 @@
-import type { Command } from "@/command";
-import { Client, GatewayIntentBits, Events } from "discord.js";
+import type {Command} from "@/command";
+import {Client, GatewayIntentBits, Events} from "discord.js";
 import mongoose from "mongoose";
-import { giveXP, UserModel } from "./models/user";
-import { Quest } from "./quest";
-import { timeoutTracking } from "./system/timeoutSystem";
+import {giveXP, UserModel} from "./models/user";
+import {Quest} from "./quest";
+import {BotServices} from "@/services/botServices";
 
 export const client = new Client({
     intents: [
@@ -20,9 +20,9 @@ async function registerCommands(client: Client) {
     const glob = new Bun.Glob("./src/commands/*.ts");
 
     for (const path of glob.scanSync(".")) {
-        const { default: CommandClass } = await import(
+        const {default: CommandClass} = await import(
             path.replace("./src/", "./")
-        );
+            );
         const instance: Command = new CommandClass();
         const info = instance.info;
         commands.set(info.name, instance);
@@ -79,7 +79,7 @@ async function handleButtonInteraction(client: Client, interaction: any) {
 }
 
 async function handleMessageCreate(message: any) {
-    let dbUser = await UserModel.findOne({ id: message.author.id });
+    let dbUser = await UserModel.findOne({id: message.author.id});
 
     if (dbUser) {
         if (dbUser.username !== message.author.username) {
@@ -107,6 +107,10 @@ async function handleMessageCreate(message: any) {
 client.once(Events.ClientReady, async (readyClient) => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 
+    let services: BotServices;
+    services = new BotServices(client);
+    services.start();
+
     console.log("Connecting to MongoDB...");
     await mongoose.connect(process.env.MONGO_URI!);
     console.log("Connected to MongoDB");
@@ -126,10 +130,6 @@ client.once(Events.ClientReady, async (readyClient) => {
 
     client.on(Events.MessageCreate, async (message) => {
         await handleMessageCreate(message);
-    });
-
-    client.on(Events.GuildMemberUpdate, async (oldMemeber, newMember) => {
-        timeoutTracking(oldMemeber, newMember);
     });
 });
 
