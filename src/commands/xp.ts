@@ -39,8 +39,7 @@ export default class XpCommand extends Command {
 
     override async executeCommand(client: Client, interaction: CommandInteraction<any>): Promise<void> {
         const sub = interaction.options.getSubcommand();
-        const targetOption = interaction.options.get("target", false);
-        const target = targetOption?.user ?? interaction.user;
+        const target = interaction.options.get("target")?.user || interaction.user;
 
         switch (sub) {
             case "view": {
@@ -56,8 +55,13 @@ export default class XpCommand extends Command {
                 if (!interaction.memberPermissions?.has('Administrator')) break;
 
                 const amount = interaction.options.get("amount")?.value as number;
-                giveXP(target.id, amount);
-                interaction.reply(`${interaction.user} added ${amount}xp to ${target}`)
+                try {
+                    giveXP(target.id, amount);
+                    interaction.reply({ content: `${interaction.user} added ${amount}xp to ${target}`, flags: 'Ephemeral' })
+                } catch (err) {
+                    console.error(err);
+                    interaction.reply({ content: `${interaction.user} failed to give ${target} ${amount}xp`, flags: 'Ephemeral' });
+                }
 
                 break;
             }
@@ -65,8 +69,13 @@ export default class XpCommand extends Command {
                 if (!interaction.memberPermissions?.has('Administrator')) break;
 
                 const amount = interaction.options.get("amount")?.value as number;
-                setXP(target.id, amount);
-                interaction.reply(`${interaction.user} set ${target}'s xp to ${amount}`)
+                try {
+                    setXP(target.id, amount);
+                    interaction.reply({ content: `${interaction.user} set ${target}'s xp to ${amount}`, flags: 'Ephemeral' })
+                } catch (err) {
+                    console.error(err);
+                    interaction.reply({ content: `${interaction.user} failed to set ${target}'s xp to ${amount}`, flags: 'Ephemeral' });
+                }
 
                 break;
             }
