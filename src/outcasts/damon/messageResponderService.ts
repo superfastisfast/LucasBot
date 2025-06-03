@@ -1,11 +1,5 @@
 ﻿// messageResponderService.ts
-import {
-    Client,
-    Message,
-    type EmojiIdentifierResolvable,
-    Events,
-} from 'discord.js';
-
+import {Client, type EmojiIdentifierResolvable, Events, Message,} from 'discord.js';
 
 export interface ILogger {
     info(message: string): void;
