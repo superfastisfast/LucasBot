@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 import { giveXP, UserModel } from "./models/user";
 import { Quest } from "./quest";
 import { timeoutTracking } from "./system/timeoutSystem";
-import { MessageResponderService } from "./outcasts/damon/messageResponderService";
+import {BotServices} from "@/outcasts/damon/botServices.ts";
 
 export const client = new Client({
     intents: [
@@ -108,9 +108,9 @@ async function handleMessageCreate(message: any) {
 client.once(Events.ClientReady, async (readyClient) => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 
-    let responder: MessageResponderService;
-    responder = new MessageResponderService(client);
-    responder.start();
+    let services: BotServices;
+    services = new BotServices(client);
+    services.start();
 
     console.log("Connecting to MongoDB...");
     await mongoose.connect(process.env.MONGO_URI!);
