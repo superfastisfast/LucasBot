@@ -56,7 +56,7 @@ export default class FightCommand extends Command {
     isActive: boolean = false;
     players: Fighter[] = [];
     arenaSize: number = 6;
-    playerTurn: number = 0;
+    playerTurn: number = 1;
     override get info(): any {
         console.log("Fight called");
 
@@ -95,7 +95,9 @@ export default class FightCommand extends Command {
             });
             return true;
         }
-        if (this.validateTurn(interaction.user.id)) {
+        if (this.isActive && this.validateTurn(interaction.user.id)) {
+            const currentPlayer = this.players[this.playerTurn]!;
+            const opponentPlayer = this.players[this.playerTurn === 0 ? 1 : 0]!;
             if (interaction.customId === "#moveLeft") {
                 if (this.players[this.playerTurn]!.posX > 0) {
                     this.players[this.playerTurn]!.posX -= 1;
@@ -111,9 +113,6 @@ export default class FightCommand extends Command {
                     );
                 }
             } else if (interaction.customId === "#attack") {
-                const currentPlayer = this.players[this.playerTurn]!;
-                const opponentPlayer =
-                    this.players[this.playerTurn === 0 ? 1 : 0]!;
                 const actionInfo: string = currentPlayer.attack(opponentPlayer);
                 if (opponentPlayer.currentHealth <= 0) {
                     await interaction.update({
@@ -126,6 +125,19 @@ export default class FightCommand extends Command {
                 await interaction.update(
                     this.getFightDisplayOptions("Attacked\n" + actionInfo),
                 );
+            } else if (interaction.customId === "#flee") {
+                if (currentPlayer.dbUser!.agility / 100 > Math.random()) {
+                    await interaction.update({
+                        content: `The fight is over! ${currentPlayer.dbUser!.username} escaped!`,
+                        components: [],
+                    });
+                    this.isActive = false;
+                    return true;
+                } else {
+                    await interaction.update(
+                        this.getFightDisplayOptions("Failed to flee!"),
+                    );
+                }
             }
             if (this.playerTurn == 0) {
                 this.playerTurn = 1;
@@ -138,19 +150,21 @@ export default class FightCommand extends Command {
             interaction.customId === "#acceptFight" &&
             interaction.user.id === this.players[1]?.dbUser!.id
         ) {
-            interaction.update(
+            await interaction.update(
                 this.getFightDisplayOptions("Accepted the fight"),
             );
+            this.isActive = true;
+            this.playerTurn = 0;
             return true;
         } else if (interaction.customId === "#declineFight") {
-            interaction.update({
+            await interaction.update({
                 content: `The fight was cancelled by ${interaction.user.username}.`,
                 components: [],
             });
             this.isActive = false;
             return true;
         } else if (interaction.customId === "#end") {
-            interaction.update({
+            await interaction.update({
                 content: `The fight was ended by ${interaction.user.username}.`,
                 components: [],
             });
@@ -167,15 +181,15 @@ export default class FightCommand extends Command {
         const filledBar = "█".repeat(filled);
         const emptyBar = " ".repeat(empty);
         // Using ANSI code block for better visual consistency of the bar
-        return `\`\`\`ansi\n[2;31m${filledBar}[0m[2;37m${emptyBar}[0m\n\`\`\` ${current.toFixed(2)}/${max}`;
+        return `\`\`\`ansi\n[2;31m${filledBar}[0m[2;37m${emptyBar}[0m\n\`\`\` ${current.toFixed(2)}/${max.toFixed(2)}`;
     }
 
     private getFightDisplayOptions(action: string) {
         let fieldArray: string[] = Array(this.arenaSize).fill("⬜");
-        fieldArray[this.players[0]!.posX] = ":person_bald:";
-        fieldArray[this.players[1]!.posX] = ":smirk_cat:";
         const currentPlayer = this.players[this.playerTurn]!;
         const nextPlayer = this.players[this.playerTurn === 0 ? 1 : 0]!;
+        fieldArray[this.players[0]!.posX] = ":person_bald:";
+        fieldArray[this.players[1]!.posX] = ":smirk_cat:";
         const player1HealthBar = this.createHealthBar(
             this.players[0]!.currentHealth,
             this.players[0]!.getMaxHealthStats(),
@@ -233,18 +247,28 @@ export default class FightCommand extends Command {
             })
             .setTimestamp();
         const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder()
-                .setCustomId("#moveLeft")
-                .setLabel("<<<")
-                .setStyle(ButtonStyle.Primary),
+            nextPlayer.posX === 0
+                ? new ButtonBuilder()
+                      .setCustomId("#flee")
+                      .setLabel("Flee")
+                      .setStyle(ButtonStyle.Danger)
+                : new ButtonBuilder()
+                      .setCustomId("#moveLeft")
+                      .setLabel("<<<")
+                      .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
                 .setCustomId("#attack")
                 .setLabel("Attack")
                 .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
-                .setCustomId("#moveRight")
-                .setLabel(">>>")
-                .setStyle(ButtonStyle.Primary),
+            nextPlayer.posX === this.arenaSize - 1
+                ? new ButtonBuilder()
+                      .setCustomId("#flee")
+                      .setLabel("Flee")
+                      .setStyle(ButtonStyle.Danger)
+                : new ButtonBuilder()
+                      .setCustomId("#moveRight")
+                      .setLabel(">>>")
+                      .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
                 .setCustomId("#end")
                 .setLabel("End Fight (TEST)")
@@ -316,7 +340,7 @@ export default class FightCommand extends Command {
             });
             return;
         }
-        this.isActive = true;
+        this.playerTurn = 1;
         this.players[0] = new Fighter(
             dbCommandUser,
             0,
