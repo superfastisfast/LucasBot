@@ -17,7 +17,7 @@ const userSchema = new Schema(
         magicka: { type: Number, default: 0.0 },
         stamina: { type: Number, default: 0.0 },
         defense: { type: Number, default: 0.0 },
-        vitality: { type: Number, default: 5.0 },
+        vitality: { type: Number, default: 1.0 },
     },
     { timestamps: true },
 );
