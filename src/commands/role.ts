@@ -71,7 +71,11 @@ export default class XpCommand extends Command {
 
         switch (sub) {
             case "give": {
-                if (!interaction.memberPermissions?.has("Administrator")) break;
+                if (
+                    !interaction.memberPermissions?.has("Administrator") &&
+                    !interaction.member.roles.cache.has("1379498052431384687")
+                )
+                    break;
 
                 try {
                     member.roles.add(role);

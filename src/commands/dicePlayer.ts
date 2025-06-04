@@ -29,7 +29,8 @@ export default class PingCommand extends Command {
                     .setMinValue(0.01)
                     .setMaxValue(100.0)
                     .setRequired(true),
-            );
+            )
+            .toJSON();
     }
 
     override async executeCommand(

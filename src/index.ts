@@ -1,9 +1,20 @@
-import type {Command} from "@/command";
-import {Client, GatewayIntentBits, Events} from "discord.js";
+import type { Command } from "@/command";
+import {
+    Client,
+    GatewayIntentBits,
+    Events,
+    REST,
+    Guild,
+    GuildScheduledEvent,
+    ApplicationCommandPermissionType,
+    Routes,
+} from "discord.js";
+// import { Routes } from "discord-api-types/v10";
+// import { ApplicationCommandPermissionType } from "discord-api-types/v10";
 import mongoose from "mongoose";
-import {giveXP, UserModel} from "./models/user";
-import {Quest} from "./quest";
-import {BotServices} from "@/services/botServices";
+import { giveXP, UserModel } from "./models/user";
+import { Quest } from "./quest";
+import { BotServices } from "@/services/botServices";
 
 export const client = new Client({
     intents: [
@@ -20,9 +31,9 @@ async function registerCommands(client: Client) {
     const glob = new Bun.Glob("./src/commands/*.ts");
 
     for (const path of glob.scanSync(".")) {
-        const {default: CommandClass} = await import(
+        const { default: CommandClass } = await import(
             path.replace("./src/", "./")
-            );
+        );
         const instance: Command = new CommandClass();
         const info = instance.info;
         commands.set(info.name, instance);
@@ -76,10 +87,22 @@ async function handleButtonInteraction(client: Client, interaction: any) {
             );
         }
     }
+    for (const command of await commands) {
+        try {
+            if (await command[1].onButtonInteract(client, interaction)) {
+                break;
+            }
+        } catch (err) {
+            console.error(
+                `Error running button interaction for quest ${command[0]}:`,
+                err,
+            );
+        }
+    }
 }
 
 async function handleMessageCreate(message: any) {
-    let dbUser = await UserModel.findOne({id: message.author.id});
+    let dbUser = await UserModel.findOne({ id: message.author.id });
 
     if (dbUser) {
         if (dbUser.username !== message.author.username) {
