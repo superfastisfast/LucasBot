@@ -26,10 +26,9 @@ class Fighter {
 
 export default class FightCommand extends Command {
     isActive: boolean = false;
-    player1?: Fighter;
-    player2?: Fighter;
+    players: Fighter[] = [];
     arenaSize: number = 6;
-    player1Turn: boolean = true;
+    playerTurn: number = 0;
     override get info(): any {
         console.log("Fight called");
 
@@ -45,13 +44,24 @@ export default class FightCommand extends Command {
             .toJSON();
     }
 
+    validateTurn(id: string): boolean {
+        if (this.playerTurn == 0 && id === this.players[0]?.playerId) {
+            this.playerTurn = 1;
+            return true;
+        } else if (this.playerTurn == 1 && id === this.players[1]?.playerId) {
+            this.playerTurn = 0;
+            return true;
+        }
+        return false;
+    }
+
     public override async onButtonInteract(
         client: Client,
         interaction: ButtonInteraction,
     ): Promise<boolean> {
         if (
-            interaction.user.id !== this.player1?.playerId &&
-            interaction.user.id !== this.player2?.playerId
+            interaction.user.id !== this.players[0]?.playerId &&
+            interaction.user.id !== this.players[1]?.playerId
         ) {
             interaction.reply({
                 content: "You are not part of this fight!",
@@ -59,27 +69,43 @@ export default class FightCommand extends Command {
             });
             return true;
         }
-        if (interaction.customId === "#moveLeft") {
-            if (this.player1!.posX > 0) {
-                this.player1!.posX -= 1;
+        if (
+            interaction.customId === "#moveLeft" &&
+            this.validateTurn(interaction.user.id)
+        ) {
+            if (this.players[this.playerTurn]!.posX > 0) {
+                this.players[this.playerTurn]!.posX -= 1;
                 interaction.update(this.getFightDisplayOptions());
                 return true;
             }
-        } else if (interaction.customId === "#moveRight") {
-            if (this.player1!.posX < this.arenaSize - 1) {
-                this.player1!.posX += 1;
+        } else if (
+            interaction.customId === "#moveRight" &&
+            this.validateTurn(interaction.user.id)
+        ) {
+            console.log(
+                "Player " +
+                    this.playerTurn +
+                    " : " +
+                    this.players[this.playerTurn]!.username +
+                    " is moving right.",
+            );
+            if (this.players[this.playerTurn]!.posX < this.arenaSize - 1) {
+                this.players[this.playerTurn]!.posX += 1;
                 interaction.update(this.getFightDisplayOptions());
                 return true;
             }
-        } else if (interaction.customId === "#attack") {
+        } else if (
+            interaction.customId === "#attack" &&
+            this.validateTurn(interaction.user.id)
+        ) {
             interaction.reply({
-                content: `${this.player1!.username} attacks!`,
+                content: `${this.players[this.playerTurn]!.username} attacks!`,
                 flags: "Ephemeral",
             });
             return true;
         } else if (
             interaction.customId === "#acceptFight" &&
-            interaction.user.id === this.player2?.playerId
+            interaction.user.id === this.players[1]?.playerId
         ) {
             interaction.update(this.getFightDisplayOptions());
             return true;
@@ -89,8 +115,6 @@ export default class FightCommand extends Command {
                 components: [],
             });
             this.isActive = false;
-            this.player1 = undefined;
-            this.player2 = undefined;
             return true;
         } else if (interaction.customId === "#end") {
             interaction.update({
@@ -98,22 +122,20 @@ export default class FightCommand extends Command {
                 components: [],
             });
             this.isActive = false;
-            this.player1 = undefined;
-            this.player2 = undefined;
         }
         return false;
     }
 
     private getFightDisplayOptions() {
         let fieldArray: string[] = Array(this.arenaSize).fill("⬜");
-        fieldArray[this.player1!.posX] = ":person_bald:";
-        fieldArray[this.player2!.posX] = ":smirk_cat:";
+        fieldArray[this.players[0]!.posX] = ":person_bald:";
+        fieldArray[this.players[1]!.posX] = ":smirk_cat:";
         const builder = new EmbedBuilder()
             .setTitle(
                 ":crossed_swords:" +
-                    this.player1?.username +
+                    this.players[0]?.username +
                     " -VS- " +
-                    this.player2?.username +
+                    this.players[1]?.username +
                     ":crossed_swords:",
             )
             .setDescription("Field:\n " + fieldArray.join(""))
@@ -147,13 +169,13 @@ export default class FightCommand extends Command {
         const builder = new EmbedBuilder()
             .setTitle(
                 ":crossed_swords:" +
-                    this.player1?.username +
+                    this.players[0]?.username +
                     " -VS- " +
-                    this.player2?.username +
+                    this.players[1]?.username +
                     ":crossed_swords:",
             )
             .setDescription(
-                this.player2?.username + " do you accept the fight?",
+                this.players[1]?.username + " do you accept the fight?",
             )
             .setTimestamp();
         const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -198,12 +220,12 @@ export default class FightCommand extends Command {
         const dbCommandUser = await getUserFromId(commandUser.id);
         const dbOpponentUser = await getUserFromId(opponentUser.id);
 
-        this.player1 = new Fighter(
+        this.players[0] = new Fighter(
             dbCommandUser.displayName,
             commandUser.id,
             0,
         );
-        this.player2 = new Fighter(
+        this.players[1] = new Fighter(
             dbOpponentUser.displayName,
             opponentUser.id,
             this.arenaSize - 1,
