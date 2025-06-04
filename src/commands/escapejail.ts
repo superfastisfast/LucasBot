@@ -1,5 +1,8 @@
 import { Command } from "@/command";
 import {
+    giveGold, UserModel 
+} from "@/models/user";
+import {
     SlashCommandBuilder,
     type Client,
     type CommandInteraction,
@@ -36,13 +39,21 @@ export default class EscapeJailCommand extends Command {
         switch (action) {
             case "use_charisma":
                 // handle the user using charisma
-                interaction.reply(
-                    "You failed to escape... the bail becomes bigger.",
-                );
+                let randomNumber = Math.floor(Math.random() * 6);
+                if (randomNumber <= 3) {
+                    interaction.reply(
+                        "You failed to escape... you were fined extra 10 gold.",
+                    );
+                    await giveGold(interaction.user.id, -10)
+                } else {
+                    interaction.reply("The security guard gives in and releases you... congrats.")
+                }
+                
                 break;
             case "pay_bail":
                 // handle pay bail
-                interaction.reply("You pay the bail and you are freed or were you *vsauce music plays*")
+                interaction.reply("You pay the bail of 100 gold and you were freed...")
+                await giveGold(interaction.user.id, -100);
                 break;
             default:
                 // handle unknown option
