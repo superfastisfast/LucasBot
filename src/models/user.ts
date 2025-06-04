@@ -42,8 +42,15 @@ export interface UserDocument extends Document {
 export type UserModel = mongoose.InferSchemaType<typeof userSchema>;
 export const UserModel = mongoose.model<UserDocument>("User", userSchema);
 
-export async function getUserFromId(id: string): Promise<User> {
-    return await client.users.fetch(id);
+export async function getUserFromId(id: string): Promise<UserDocument | null> {
+    try {
+        const user = await UserModel.findOne({ id: id });
+        return user;
+        // return await client.users.fetch(id);
+    } catch (error) {
+        console.error(`Failed to fetch user with ID ${id}:`, error);
+        return null;
+    }
 }
 
 export async function getIdFromUser(user: User | string): Promise<string> {
