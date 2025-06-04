@@ -39,10 +39,16 @@ export default class EscapeJailCommand extends Command {
         switch (action) {
             case "use_charisma":
                 // handle the user using charisma
-                interaction.reply(
-                    "You failed to escape... you were fined extra 10 gold.",
-                );
-                await giveGold(interaction.user.id, -10)
+                let randomNumber = Math.floor(Math.random() * 6);
+                if (randomNumber <= 3) {
+                    interaction.reply(
+                        "You failed to escape... you were fined extra 10 gold.",
+                    );
+                    await giveGold(interaction.user.id, -10)
+                } else {
+                    interaction.reply("The security guard gives in and releases you... congrats.")
+                }
+                
                 break;
             case "pay_bail":
                 // handle pay bail
