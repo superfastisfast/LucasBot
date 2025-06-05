@@ -85,79 +85,52 @@ export default class GlobglogabgalabCommand extends Command {
             .addNumberOption((option) =>
                 option.setName("song")
                 .setDescription("The song you want")
-                // .setChoices(
-                //     ...songs.slice(0, 25).map((song, i) => ({
-                //         name: song.option,
-                //         value: i,
-                //     }))
-                // )
                 .setAutocomplete(true)
                 .setRequired(false),
             )
             .toJSON();
     }
 
-    // override async executeAutoComplete(
-    //     client: Client,
-    //     interaction: AutocompleteInteraction,
-    // ): Promise<void> {
-    //     const focusedValue = interaction.options.getFocused().toString().toLowerCase();
-    //     const random = Math.floor(Math.random() * (songs.length - 25));
-
-    //     const filtered = songs
-    //         .map((song, index) => ({
-    //             name: song.option,
-    //             value: index,
-    //         }))
-    //         .filter(choice => choice.name.toLowerCase().includes(focusedValue))
-    //         .slice(random, random + 25);
-
-    //     await interaction.respond(filtered);
-    // }
-
     override async executeAutoComplete(
-    client: Client,
-    interaction: AutocompleteInteraction,
-): Promise<void> {
-    const focusedValue = interaction.options.getFocused().toString().toLowerCase();
+        client: Client,
+        interaction: AutocompleteInteraction,
+    ): Promise<void> {
+        const rawInput = interaction.options.getFocused().toString();
+        const focusedValue = rawInput.toLowerCase().replace(/[^a-z\s]/g, "");
 
-    if (!focusedValue) {
-        // No input = pick 25 random songs
-        const shuffled = songs
-            .map((song, index) => ({ name: song.option, value: index }))
-            .sort(() => Math.random() - 0.5) // shuffle
-            .slice(0, 25);
+        if (!focusedValue) {
+            // Show 25 random songs when no input
+            const shuffled = songs
+                .map((song, index) => ({ name: song.option, value: index }))
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 25);
 
-        await interaction.respond(shuffled);
-        return;
+            await interaction.respond(shuffled);
+            return;
+        }
+
+        const searchWords = focusedValue.split(/\s+/).filter(Boolean);
+
+        const filtered = songs
+            .map((song, index) => ({
+                name: song.option,
+                value: index,
+                cleanedName: song.option.toLowerCase().replace(/[^a-z\s]/g, ""),
+            }))
+            .filter(choice =>
+                searchWords.every(word => choice.cleanedName.includes(word))
+            )
+                .sort((a, b) => {
+                const firstWord = searchWords[0] || "";
+                const aIndex = a.cleanedName.indexOf(firstWord);
+                const bIndex = b.cleanedName.indexOf(firstWord);
+                return aIndex - bIndex;
+            })
+            .slice(0, 25)
+            .map(({ name, value }) => ({ name, value })); // Clean up object for Discord
+
+        await interaction.respond(filtered);
     }
-
-    // Search
-    const searchWords = focusedValue.split(/\s+/);
-
-    const filtered = songs
-        .map((song, index) => ({ name: song.option, value: index }))
-        .filter(choice =>
-            searchWords.every(word => choice.name.toLowerCase().includes(word))
-        )
-        .sort((a, b) => {
-            const aName = a.name.toLowerCase();
-            const bName = b.name.toLowerCase();
-            const firstWord = searchWords[0] || "";
-
-            const aStarts = aName.startsWith(firstWord);
-            const bStarts = bName.startsWith(firstWord);
-            if (aStarts && !bStarts) return -1;
-            if (bStarts && !aStarts) return 1;
-
-            const aIndex = aName.indexOf(firstWord);
-            const bIndex = bName.indexOf(firstWord);
-            return aIndex - bIndex;
-        })
-        .slice(0, 25);
-
-    await interaction.respond(filtered);
-}
 
 
     override async executeCommand(client: Client, interaction: CommandInteraction): Promise<void> {
