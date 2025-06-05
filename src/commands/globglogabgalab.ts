@@ -1,75 +1,81 @@
 import { Command } from "@/command";
-import { SlashCommandBuilder, type Client, type CommandInteraction } from "discord.js";
+import { AutocompleteInteraction, SlashCommandBuilder, type Client, type CommandInteraction } from "discord.js";
 
-const songs: string[] = [
-    "hLljd8pfiFg", 
-    "cIwRQwAS_YY", 
-    "7C5zM8CnZF0",
-    "2vhQBN0xJJ8",
-    "47ZSI7nPAqo",
-    "xnl0iddwELA",
-    "geWmx4YnRZA",
-    "ZSAypaq7log",
-    "a-QpDm0A3Ng",
-    "lCS3y1qn4C8",
-    "DVQsKYPm7mA",
-    "slogfEswemE",
-    "-pQnurfQZPI",
-    "wSXIblva5No",
-    "OT4MyqrWo6E",
-    "_OFN2Uztp34",
-    "WMemX2uKUNI",
-    "7XBjuDkXJ60",
-    "uQASsDVChTQ",
-    "FSAibrRAUjM",
-    "nV-ypF0L6Xs EAR WARNING ⚠️!",
-    "TtqMwwfhErQ",
-    "CaWT1ayLyB0",
-    "okZNjPP1VQ4",
-    "-XBaIpW--T4",
-    "uPmNlnGNEqw",
-    "e5WwKh5Nuqo",
-    "G_hsLsKJmMM",
-    "3pDdF4WC6mw",
-    "NqAFlFE-b98",
-    "YHxhHz0tBqA",
-    "oVk0NP02zLs",
-    "oS0kaazgJTQ",
-    "GfgFuytAWGw",
-    "vwyOoX7VGTA",
-    "A9cVvHv8j2o",
-    "TO5xjH3wgpc",
-    "bfBjUUWvaHg",
-    "LifQbgwfF5M",
-    "zUYJJ5wZulY",
-    "M9V2l5KDMGY",
-    "Hh-soLTb2uo",
-    "nmjHp_EkR9U",
-    "O5QAJQzeYas",
-    "dDTKAwikm94",
-    "9PT4UnsUvNw",
-    "rCm-R4nZM1s",
-    "OvVWcb8KhPs",
-    "bUEBTr4cImY",
-    "89c4Y59z2rc",
-    "eHN3rbUWENI",
-    "CVWE9BPo0g0 🇸🇪",
-    "lWO8TLqAwNU",
-    "0RxNKzLFxNY 🇵🇱",
-    "ostAWWuazsc",
-    "vel-CyHrvb4",
-    "yNOlOqLSAwk",
-    "D-iX9mF6wcM",
-    "y81WZvnHTt8 This man ruined Lucas's life",
-    "YeemJlrNx2Q <-- Secretly a globglogebgelab",
-    "zISYDnXs5QI",
-    "U19kFq-zxzU",
-    "X5MUf95qzGI",
-    "oxqCKsUiIWg",
-    "nxdTMhJa_rw 🇸🇦",
-    "h6EuSlzO4m0",
-    "aTtnRjRJstc",
-];
+interface Globglogabgelab {
+    url: string;
+    option: string;
+    desc?: string;
+}
+
+const songs: Globglogabgelab[] = [
+    { url: "hLljd8pfiFg", option: "Official" },
+    { url: "cIwRQwAS_YY", option: "Lil"},
+    { url: "7C5zM8CnZF0", option: "XXX"},
+    { url: "2vhQBN0xJJ8", option: "Havana"},
+    { url: "47ZSI7nPAqo", option: "Stressed" },
+    { url: "xnl0iddwELA", option: "Pumped up"},
+    { url: "geWmx4YnRZA", option: "Gangnam style" },
+    { url: "ZSAypaq7log", option: "Gods Plan" },
+    { url: "a-QpDm0A3Ng", option: "Bad and Boujee" },
+    { url: "lCS3y1qn4C8", option: "What is Love" },
+    { url: "DVQsKYPm7mA", option: "Piano Man" },
+    { url: "slogfEswemE", option: "I'm blue"},
+    { url: "-pQnurfQZPI", option: "Believer" },
+    { url: "wSXIblva5No", option: "Osaki" },
+    { url: "OT4MyqrWo6E", option: "Darude - Sandstorm" },
+    { url: "_OFN2Uztp34", option: "Schwabblestorm" },
+    { url: "WMemX2uKUNI", option: "The Glob Man" },
+    { url: "7XBjuDkXJ60", option: "Rap Glob" },
+    { url: "uQASsDVChTQ", option: "Loves Books"},
+    { url: "FSAibrRAUjM", option: "Glob On Me" },
+    { url: "nV-ypF0L6Xs", option: "Ear Rape", desc: "EAR WARNING ⚠️" },
+    { url: "TtqMwwfhErQ", option: "Globglogabgalab Busters" },
+    { url: "CaWT1ayLyB0", option: "Chop Suey" },
+    { url: "okZNjPP1VQ4", option: "PPAP" },
+    { url: "-XBaIpW--T4", option: "wii" },
+    { url: "uPmNlnGNEqw", option: "Tyrone" },
+    { url: "e5WwKh5Nuqo", option: "Polkka" },
+    { url: "G_hsLsKJmMM", option: "USA" },
+    { url: "3pDdF4WC6mw", option: "The Fresh Prince" },
+    { url: "NqAFlFE-b98", option: "In the house" },
+    { url: "YHxhHz0tBqA", option: "Stronger" },
+    { url: "oVk0NP02zLs", option: "Redbone" },
+    { url: "oS0kaazgJTQ", option: "Tokyo Drift", desc: "🚗" },
+    { url: "GfgFuytAWGw", option: "MF DOOM" },
+    { url: "vwyOoX7VGTA", option: "Crab Rave" },
+    { url: "A9cVvHv8j2o", option: "GTA San Andreas" },
+    { url: "TO5xjH3wgpc", option: "Zeze" },
+    { url: "bfBjUUWvaHg", option: "Thug" },
+    { url: "LifQbgwfF5M", option: "x10000000 speed" },
+    { url: "zUYJJ5wZulY", option: "But I'm blue" },
+    { url: "M9V2l5KDMGY", option: "Amazon" },
+    { url: "Hh-soLTb2uo", option: "Wrong Notes" },
+    { url: "nmjHp_EkR9U", option: "360" },
+    { url: "O5QAJQzeYas", option: "Minecraft" },
+    { url: "dDTKAwikm94", option: "Ｇｌｏｂｇｌｏｇａｂｇｅｌａｂ"},
+    { url: "9PT4UnsUvNw", option: "Africa" },
+    { url: "rCm-R4nZM1s", option: "Likes To Party"},
+    { url: "OvVWcb8KhPs", option: "All Star" },
+    { url: "bUEBTr4cImY", option: "Wrong Singing" },
+    { url: "89c4Y59z2rc", option: "Faster and faster" },
+    { url: "lWO8TLqAwNU", option: "Drunk"},
+    { url: "eHN3rbUWENI", option: "Vocoded" },
+    { url: "CVWE9BPo0g0", option: "Swedish", desc: "🇸🇪" },
+    { url: "0RxNKzLFxNY", option: "Polish", desc: "🇵🇱" },
+    { url: "nxdTMhJa_rw", option: "Arabic", desc: "🇸🇦" },
+    { url: "ostAWWuazsc", option: "bstchld", desc: "Sigma" },
+    { url: "vel-CyHrvb4", option: "Strawinski" },
+    { url: "yNOlOqLSAwk", option: "Walter" },
+    { url: "y81WZvnHTt8", option: "The Creator", desc: "This man ruined Lucas's life" },
+    { url: "YeemJlrNx2Q", option: "Mark", desc: "Secretly a globglogebgelab" },
+    { url: "zISYDnXs5QI", option: "Globzilla" },
+    { url: "U19kFq-zxzU", option: "GMod" },
+    { url: "X5MUf95qzGI", option: "Freaky" },
+    { url: "oxqCKsUiIWg", option: "Instrumental" },
+    { url: "h6EuSlzO4m0", option: "Ends it all" },
+    { url: "aTtnRjRJstc", option: "Spiderman" },
+]
+
 export default class GlobglogabgalabCommand extends Command {
     override get info(): any {
         console.log("info called");
@@ -77,33 +83,68 @@ export default class GlobglogabgalabCommand extends Command {
             .setName("globglogabgalab")
             .setDescription("Plays a random globglogabgalab song")
             .addNumberOption((option) =>
-                option.setName("index")
-                .setDescription("The index of a specific song")
+                option.setName("song")
+                .setDescription("The song you want")
+                .setAutocomplete(true)
                 .setRequired(false),
             )
             .toJSON();
     }
 
+    override async executeAutoComplete(
+        client: Client,
+        interaction: AutocompleteInteraction,
+    ): Promise<void> {
+        const rawInput = interaction.options.getFocused().toString();
+        const focusedValue = rawInput.toLowerCase().replace(/[^a-z\s]/g, "");
+
+        if (!focusedValue) {
+            // Show 25 random songs when no input
+            const shuffled = songs
+                .map((song, index) => ({ name: song.option, value: index }))
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 25);
+
+            await interaction.respond(shuffled);
+            return;
+        }
+
+        const searchWords = focusedValue.split(/\s+/).filter(Boolean);
+
+        const filtered = songs
+            .map((song, index) => ({
+                name: song.option,
+                value: index,
+                cleanedName: song.option.toLowerCase().replace(/[^a-z\s]/g, ""),
+            }))
+            .filter(choice =>
+                searchWords.every(word => choice.cleanedName.includes(word))
+            )
+                .sort((a, b) => {
+                const firstWord = searchWords[0] || "";
+                const aIndex = a.cleanedName.indexOf(firstWord);
+                const bIndex = b.cleanedName.indexOf(firstWord);
+                return aIndex - bIndex;
+            })
+            .slice(0, 25)
+            .map(({ name, value }) => ({ name, value })); // Clean up object for Discord
+
+        await interaction.respond(filtered);
+    }
+
+
     override async executeCommand(client: Client, interaction: CommandInteraction): Promise<void> {
-        const max = songs.length - 1;
-        const option = interaction.options.get("index", false)?.value as number;
-        const index = option ?? Math.floor(Math.random() * (max + 1));
-        const youtubeId = songs[index]?.slice(0, 11) || "";
-        const comment = songs[index]?.slice(11) || "";
+        const song = interaction.options.get("song", false)?.value as number;
+        const index = song ?? Math.floor(Math.random() * (songs.length));
 
-        let message: string;
 
-        message = index <= max
-            ? `**Index: ${index}/${max}** video *[here](https://www.youtube.com/watch?v=${youtubeId})* ${comment}`
-            : `The max index is ${max}`;
+        interaction.reply(`**${songs[index]?.option}** video *[here](https://www.youtube.com/watch?v=${songs[index]?.url})* ${songs[index]?.desc || "..."}`)
         
-
         // Check for "Christmas"
         const today = new Date(2025, 5, 24); // Month is 0-based: 5 = June
         const isChristmas = (today.getDate() === 25 || today.getDate() === 24) && today.getMonth() === 11;
         if (isChristmas) 
-            message = "🎄 Merry Christmas! video *[here](https://www.youtube.com/watch?v=52Li3SLj1gE)*";
+            interaction.reply("🎄 Merry Christmas! video *[here](https://www.youtube.com/watch?v=52Li3SLj1gE)*");
 
-        await interaction.reply(message);
     }
 }
