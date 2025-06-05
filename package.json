@@ -16,6 +16,7 @@
         "typescript": "^5"
     },
     "dependencies": {
+        "@napi-rs/canvas": "^0.1.70",
         "discord.js": "^14.19.3",
         "mongoose": "^8.15.1"
     }

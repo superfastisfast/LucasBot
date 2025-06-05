@@ -1,5 +1,5 @@
 import { Command } from "@/command";
-import { getUserFromId, giveGold, type UserDocument } from "@/models/user";
+import { getUserFromId } from "@/models/user";
 import {
     ActionRowBuilder,
     ButtonBuilder,
@@ -10,53 +10,12 @@ import {
     type Client,
     type CommandInteraction,
 } from "discord.js";
-
-class Fighter {
-    dbUser?: UserDocument;
-    posX: number = 0;
-    currentHealth: number = 0;
-    imgeUrl: string = "";
-
-    constructor(dbUser: UserDocument, startPosition: number, imgUrl: string) {
-        this.dbUser = dbUser;
-        this.posX = startPosition;
-        this.currentHealth = this.getMaxHealthStats();
-        this.imgeUrl = imgUrl;
-    }
-
-    getMaxHealthStats(): number {
-        return (this.dbUser?.vitality || 1) * 10;
-    }
-    attack(opponent: Fighter) {
-        if (Math.abs(this.posX - opponent.posX) < 2) {
-            const damage = Math.random() * this.dbUser!.strength + 1;
-            return opponent.receiveDamage(damage);
-        } else {
-            return "Too far away to attack!";
-        }
-    }
-    receiveDamage(damage: number) {
-        if (this.dbUser!.defense > 0) {
-            if (Math.random() > damage / this.dbUser!.defense) {
-                return this.dbUser!.username + ": Blocked the attack!";
-            }
-        }
-        this.currentHealth = Math.max(0, this.currentHealth - damage);
-        return (
-            this.dbUser!.username +
-            ": Received " +
-            damage.toFixed(2) +
-            " damage!"
-        );
-    }
-}
+import FightGame from "./fight/fightGame";
 
 //TODO list of active fights; Becaouse otherwise there is only one running.
 export default class FightCommand extends Command {
-    isActive: boolean = false;
-    players: Fighter[] = [];
-    arenaSize: number = 6;
-    playerTurn: number = 1;
+    game?: FightGame;
+
     override get info(): any {
         console.log("Fight called");
 
@@ -72,108 +31,88 @@ export default class FightCommand extends Command {
             .toJSON();
     }
 
-    validateTurn(id: string): boolean {
-        if (this.playerTurn == 0 && id === this.players[0]?.dbUser!.id) {
-            return true;
-        } else if (this.playerTurn == 1 && id === this.players[1]?.dbUser!.id) {
-            return true;
-        }
-        return false;
-    }
-
     public override async onButtonInteract(
         client: Client,
         interaction: ButtonInteraction,
     ): Promise<boolean> {
-        if (
-            interaction.user.id !== this.players[0]?.dbUser!.id &&
-            interaction.user.id !== this.players[1]?.dbUser!.id
-        ) {
+        //TODO Verify Undefined?
+        if (this.game?.getDiscordUserById(interaction.user.id) === undefined) {
             interaction.reply({
                 content: "You are not part of this fight!",
                 flags: "Ephemeral",
             });
             return true;
         }
-        if (this.isActive && this.validateTurn(interaction.user.id)) {
-            const currentPlayer = this.players[this.playerTurn]!;
-            const opponentPlayer = this.players[this.playerTurn === 0 ? 1 : 0]!;
+        if (this.game!.isValidCombatMovement(interaction.user.id)) {
             if (interaction.customId === "#moveLeft") {
-                if (this.players[this.playerTurn]!.posX > 0) {
-                    this.players[this.playerTurn]!.posX -= 1;
-                    await interaction.update(
-                        this.getFightDisplayOptions("Moved left"),
-                    );
-                }
+                this.game!.movePlayer("left");
+                interaction.update(this.getFightDisplayOptions("Moved left"));
             } else if (interaction.customId === "#moveRight") {
-                if (this.players[this.playerTurn]!.posX < this.arenaSize - 1) {
-                    this.players[this.playerTurn]!.posX += 1;
-                    await interaction.update(
-                        this.getFightDisplayOptions("Moved right"),
-                    );
-                }
+                this.game!.movePlayer("right");
+                interaction.update(this.getFightDisplayOptions("Moved right"));
             } else if (interaction.customId === "#attack") {
-                const actionInfo: string = currentPlayer.attack(opponentPlayer);
-                if (opponentPlayer.currentHealth <= 0) {
-                    await interaction.update({
-                        content: `The fight is over! ${currentPlayer.dbUser!.username} wins!`,
-                        components: [],
-                    });
-                    this.isActive = false;
-                    return true;
-                }
-                await interaction.update(
+                const actionInfo: string = this.game!.playerAttack();
+                interaction.update(
                     this.getFightDisplayOptions("Attacked\n" + actionInfo),
                 );
             } else if (interaction.customId === "#flee") {
-                if (currentPlayer.dbUser!.agility / 100 > Math.random()) {
-                    await interaction.update({
-                        content: `The fight is over! ${currentPlayer.dbUser!.username} escaped!`,
+                if (this.game!.playerFlee()) {
+                    interaction.update({
+                        content: `The fight is over! ${this.game!.getCurrentPlayer().dbUser!.username} escaped!`,
                         components: [],
                     });
-                    this.isActive = false;
-                    return true;
+                    this.game!.resetGame();
                 } else {
-                    await interaction.update(
-                        this.getFightDisplayOptions("Failed to flee!"),
+                    interaction.update(
+                        this.getFightDisplayOptions(
+                            `${this.game!.getCurrentPlayer().dbUser!.username} Failed to flee!`,
+                        ),
                     );
                 }
             }
-            if (this.playerTurn == 0) {
-                this.playerTurn = 1;
-            } else {
-                this.playerTurn = 0;
+            this.game!.nextTurn();
+            return true;
+        } else {
+            if (interaction.customId === "#acceptFight") {
+                const res = await this.game!.initGame(interaction.user.id);
+                if (res.success) {
+                    await interaction.update(
+                        this.getFightDisplayOptions(res.reason),
+                    );
+                    this.game!.nextTurn();
+                } else {
+                    interaction.reply({
+                        content: res.reason,
+                        components: [],
+                        flags: "Ephemeral",
+                    });
+                    return true;
+                }
+            } else if (interaction.customId === "#declineFight") {
+                interaction.update({
+                    content: `The fight was cancelled by ${interaction.user.username}.`,
+                    components: [],
+                });
+                this.game!.resetGame();
+                return true;
+            } else if (interaction.customId === "#end") {
+                //TODO REMOVE TEST BUTTON
+                interaction.update({
+                    content: `The fight was ended by ${interaction.user.username}.`,
+                    components: [],
+                });
+                this.game!.resetGame();
+                return false;
             }
-            return true;
-        }
-        if (
-            interaction.customId === "#acceptFight" &&
-            interaction.user.id === this.players[1]?.dbUser!.id
-        ) {
-            await interaction.update(
-                this.getFightDisplayOptions("Accepted the fight"),
-            );
-            this.isActive = true;
-            this.playerTurn = 0;
-            return true;
-        } else if (interaction.customId === "#declineFight") {
-            await interaction.update({
-                content: `The fight was cancelled by ${interaction.user.username}.`,
-                components: [],
-            });
-            this.isActive = false;
-            return true;
-        } else if (interaction.customId === "#end") {
-            await interaction.update({
-                content: `The fight was ended by ${interaction.user.username}.`,
-                components: [],
-            });
-            this.isActive = false;
         }
         return false;
     }
 
-    createHealthBar(current: number, max: number, length: number = 10): string {
+    async createHealthBar(
+        current: number,
+        max: number,
+        length: number = 10,
+    ): Promise<string> {
         if (max <= 0) return "[:red_square:]";
         const percentage = current / max;
         const filled = Math.round(length * percentage);
@@ -185,59 +124,58 @@ export default class FightCommand extends Command {
     }
 
     private getFightDisplayOptions(action: string) {
-        let fieldArray: string[] = Array(this.arenaSize).fill("⬜");
-        const currentPlayer = this.players[this.playerTurn]!;
-        const nextPlayer = this.players[this.playerTurn === 0 ? 1 : 0]!;
-        fieldArray[this.players[0]!.posX] = ":person_bald:";
-        fieldArray[this.players[1]!.posX] = ":smirk_cat:";
+        let fieldArray: string[] = Array(this.game!.arenaSize).fill("🔳");
+        const currentPlayer = this.game!.getCurrentPlayer();
+        const nextPlayer = this.game!.getNextPlayer();
+        fieldArray[this.game!.getPlayers()[0]!.posX] = ":person_bald:";
+        fieldArray[this.game!.getPlayers()[1]!.posX] = ":smirk_cat:";
         const player1HealthBar = this.createHealthBar(
-            this.players[0]!.currentHealth,
-            this.players[0]!.getMaxHealthStats(),
+            this.game!.getPlayers()[0]!.currentHealth,
+            this.game!.getPlayers()[0]!.getMaxHealthStats(),
         );
         const player2HealthBar = this.createHealthBar(
-            this.players[1]!.currentHealth,
-            this.players[1]!.getMaxHealthStats(),
+            this.game!.getPlayers()[1]!.currentHealth,
+            this.game!.getPlayers()[1]!.getMaxHealthStats(),
         );
         const builder = new EmbedBuilder()
             .setTitle(
                 ":crossed_swords:" +
-                    this.players[0]?.dbUser!.username +
+                    this.game!.getPlayers()[0]!.dbUser!.username +
                     " -VS- " +
-                    this.players[1]?.dbUser!.username +
+                    this.game!.getPlayers()[1]!.dbUser!.username +
                     ":crossed_swords:",
             )
-            .setDescription(
-                currentPlayer.dbUser?.username +
-                    ": " +
-                    action +
-                    "\nField:\n " +
-                    fieldArray.join(""),
-            )
+            .setDescription(currentPlayer.dbUser?.username + ": " + action)
             .addFields(
+                {
+                    name: "Field",
+                    value: fieldArray.join(""),
+                    inline: false,
+                },
                 // Player 1 Stats
                 {
-                    name: `${this.players[0]?.dbUser!.username}'s Status`,
+                    name: `${this.game!.getPlayers()[0]!.dbUser!.username}'s Status`,
                     value:
                         `❤️ Health: ${player1HealthBar}\n` +
-                        `⚔️ Strength: **${this.players[0]?.dbUser!.strength}**\n` +
-                        `🛡️ Defense: **${this.players[0]?.dbUser!.defense}**\n` +
-                        `🏃 Agility: **${this.players[0]?.dbUser!.agility}** \n` +
-                        `✨ Magicka: **${this.players[0]?.dbUser!.magicka}**\n` +
-                        `🔋 Stamina: **${this.players[0]?.dbUser!.stamina}**\n` +
-                        `🗣️ Charisma: **${this.players[0]?.dbUser!.charisma}**`,
+                        `⚔️ Strength: **${this.game!.getPlayers()[0]!.dbUser!.strength}**\n` +
+                        `🛡️ Defense: **${this.game!.getPlayers()[0]!.dbUser!.defense}**\n` +
+                        `🏃 Agility: **${this.game!.getPlayers()[0]!.dbUser!.agility}** \n` +
+                        `✨ Magicka: **${this.game!.getPlayers()[0]!.dbUser!.magicka}**\n` +
+                        `🔋 Stamina: **${this.game!.getPlayers()[0]!.dbUser!.stamina}**\n` +
+                        `🗣️ Charisma: **${this.game!.getPlayers()[0]!.dbUser!.charisma}**`,
                     inline: true,
                 },
                 // Player 2 Stats
                 {
-                    name: `${this.players[1]?.dbUser!.username}'s Status`,
+                    name: `${this.game!.getPlayers()[1]!.dbUser!.username}'s Status`,
                     value:
                         `❤️ Health: ${player2HealthBar}\n` +
-                        `⚔️ Strength: **${this.players[1]?.dbUser!.strength}**\n` +
-                        `🛡️ Defense: **${this.players[1]?.dbUser!.defense}**\n` +
-                        `🏃 Agility: **${this.players[1]?.dbUser!.agility}**\n` +
-                        `✨ Magicka: **${this.players[1]?.dbUser!.magicka}**\n` +
-                        `🔋 Stamina: **${this.players[1]?.dbUser!.stamina}**\n` +
-                        `🗣️ Charisma: **${this.players[1]?.dbUser!.charisma}**`,
+                        `⚔️ Strength: **${this.game!.getPlayers()[1]!.dbUser!.strength}**\n` +
+                        `🛡️ Defense: **${this.game!.getPlayers()[1]!.dbUser!.defense}**\n` +
+                        `🏃 Agility: **${this.game!.getPlayers()[1]!.dbUser!.agility}**\n` +
+                        `✨ Magicka: **${this.game!.getPlayers()[1]!.dbUser!.magicka}**\n` +
+                        `🔋 Stamina: **${this.game!.getPlayers()[1]!.dbUser!.stamina}**\n` +
+                        `🗣️ Charisma: **${this.game!.getPlayers()[1]!.dbUser!.charisma}**`,
                     inline: true,
                 },
             )
@@ -260,7 +198,7 @@ export default class FightCommand extends Command {
                 .setCustomId("#attack")
                 .setLabel("Attack")
                 .setStyle(ButtonStyle.Primary),
-            nextPlayer.posX === this.arenaSize - 1
+            nextPlayer.posX === this.game!.arenaSize - 1
                 ? new ButtonBuilder()
                       .setCustomId("#flee")
                       .setLabel("Flee")
@@ -281,18 +219,19 @@ export default class FightCommand extends Command {
         };
     }
 
-    private InitiateFight() {
+    private InitiateFight(
+        user1: string | undefined,
+        user2: string | undefined,
+    ) {
         const builder = new EmbedBuilder()
             .setTitle(
                 ":crossed_swords:" +
-                    this.players[0]?.dbUser!.username +
+                    user1 +
                     " -VS- " +
-                    this.players[1]?.dbUser!.username +
+                    user2 +
                     ":crossed_swords:",
             )
-            .setDescription(
-                this.players[1]?.dbUser!.username + " do you accept the fight?",
-            )
+            .setDescription(user2 + " do you accept the fight?")
             .setTimestamp();
         const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
@@ -314,45 +253,28 @@ export default class FightCommand extends Command {
         client: Client,
         interaction: CommandInteraction,
     ): Promise<void> {
-        if (this.isActive) {
-            interaction.reply({
-                content: "A fight is already in progress!",
-                flags: "Ephemeral",
-            });
-            return;
-        }
-        const commandUser = interaction.user;
-        const opponentUser =
-            interaction.options.get("opponent")?.user || commandUser;
-        if (commandUser === opponentUser) {
+        if (interaction.user === interaction.options.get("opponent")?.user) {
             interaction.reply({
                 content: "You cannot fight yourself!",
                 flags: "Ephemeral",
             });
             return;
         }
-        const dbCommandUser = await getUserFromId(commandUser.id);
-        const dbOpponentUser = await getUserFromId(opponentUser.id);
-        if (!dbCommandUser || !dbOpponentUser) {
+
+        if (this.game?.isActive) {
             interaction.reply({
-                content: "One of the users is not registered in the database.",
+                content: "A fight is already in progress!",
                 flags: "Ephemeral",
             });
             return;
         }
-        this.playerTurn = 1;
-        this.players[0] = new Fighter(
-            dbCommandUser,
-            0,
-            commandUser.displayAvatarURL(),
+        const otherUser =
+            interaction.options.get("opponent")?.user || interaction.user;
+        this.game = new FightGame(interaction.user, otherUser);
+        let msg = this.InitiateFight(
+            interaction.user.username,
+            otherUser.username || "Unknown",
         );
-        this.players[1] = new Fighter(
-            dbOpponentUser,
-            this.arenaSize - 1,
-            opponentUser.displayAvatarURL(),
-        );
-
-        let msg = this.InitiateFight();
         interaction.reply({
             embeds: msg.embeds,
             components: msg.components,
