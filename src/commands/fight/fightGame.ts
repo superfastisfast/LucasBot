@@ -14,7 +14,11 @@ export default class FightGame {
     playerTurn: number = 1;
     discordUsers: DiscordUser[] = [];
 
+    private static nextId: number = 0;
+    id: number = 0;
+
     constructor(discordUser1: DiscordUser, discordUser2: DiscordUser) {
+        this.id = FightGame.nextId++;
         this.discordUsers = [discordUser1, discordUser2];
     }
 

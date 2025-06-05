@@ -94,7 +94,7 @@ async function handleButtonInteraction(client: Client, interaction: any) {
             }
         } catch (err) {
             console.error(
-                `Error running button interaction for quest ${command[0]}:`,
+                `Error running button interaction for command ${command[0]}:`,
                 err,
             );
         }

@@ -27,7 +27,6 @@ export async function getWeaponFromName(
     try {
         const weapon = await ItemModel.findOne({ name: name });
         return weapon;
-        // return await client.users.fetch(id);
     } catch (error) {
         console.error(`Failed to fetch weapon with name ${name}:`, error);
         return null;

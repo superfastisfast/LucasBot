@@ -1,16 +1,19 @@
 import { Command } from "@/command";
 import {
     ActionRowBuilder,
+    AttachmentBuilder,
     ButtonBuilder,
     ButtonInteraction,
     ButtonStyle,
     EmbedBuilder,
     SlashCommandBuilder,
+    User as UserDiscord,
     type Client,
     type CommandInteraction,
     type InteractionUpdateOptions,
 } from "discord.js";
 import FightGame from "./fight/fightGame";
+const path = require("path");
 import { getFieldImage } from "./fight/fieldGenerate";
 import type Fighter from "./fight/fighter";
 
@@ -22,7 +25,7 @@ interface PlayerDisplay {
 
 //TODO list of active fights; Becaouse otherwise there is only one running.
 export default class FightCommand extends Command {
-    game?: FightGame;
+    games: Map<number, FightGame> = new Map<number, FightGame>();
 
     override get info(): any {
         console.log("Fight called");
@@ -39,94 +42,153 @@ export default class FightCommand extends Command {
             .toJSON();
     }
 
+    isUserPartOfFight(userId: string): FightGame | undefined {
+        for (const [id, game] of this.games) {
+            if (game.getDiscordUserById(userId) !== undefined) {
+                return game;
+            }
+        }
+        return undefined;
+    }
+
     public override async onButtonInteract(
         client: Client,
         interaction: ButtonInteraction,
     ): Promise<boolean> {
-        if (this.game?.getDiscordUserById(interaction.user.id) === undefined) {
+        console.log("=============[1]=============");
+        let currentGame: FightGame | undefined = this.isUserPartOfFight(
+            interaction.user.id,
+        );
+        console.log("=============[2]=============");
+
+        if (currentGame === undefined) {
             interaction.reply({
-                content: "You are not part of this fight!",
+                content: "You are not part of any fight!",
                 flags: "Ephemeral",
             });
             return true;
         }
-        if (this.game!.isValidCombatMovement(interaction.user.id)) {
-            if (interaction.customId === "#moveLeft") {
-                this.game!.movePlayer("left");
-                interaction.update(
-                    await this.getFightDisplayOptions("Moved left"),
-                );
-            } else if (interaction.customId === "#moveRight") {
-                this.game!.movePlayer("right");
-                interaction.update(
-                    await this.getFightDisplayOptions("Moved right"),
-                );
-            } else if (interaction.customId === "#attack") {
-                const actionInfo: string = this.game!.playerAttack();
-                interaction.update(
+        await interaction.deferUpdate();
+        console.log("=============[3]=============");
+        if (currentGame!.isValidCombatMovement(interaction.user.id)) {
+            console.log("=============[3.1]=============");
+            if (interaction.customId === currentGame.id + "#moveLeft") {
+                currentGame!.movePlayer("left");
+                interaction.editReply(
                     await this.getFightDisplayOptions(
+                        currentGame,
+                        "Moved left",
+                    ),
+                );
+            } else if (interaction.customId === currentGame.id + "#moveRight") {
+                currentGame!.movePlayer("right");
+                interaction.editReply(
+                    await this.getFightDisplayOptions(
+                        currentGame,
+                        "Moved right",
+                    ),
+                );
+            } else if (interaction.customId === currentGame.id + "#attack") {
+                const actionInfo: string = currentGame!.playerAttack();
+                interaction.editReply(
+                    await this.getFightDisplayOptions(
+                        currentGame,
                         "Attacked\n" + actionInfo,
                     ),
                 );
-                if (this.game!.getNextPlayer().currentHealth <= 0) {
-                    this.game!.resetGame();
+                if (currentGame!.getNextPlayer().currentHealth <= 0) {
+                    this.games.delete(currentGame!.id);
                     return true;
                 }
-            } else if (interaction.customId === "#flee") {
-                if (this.game!.playerFlee()) {
-                    interaction.update({
-                        content: `The fight is over! ${this.game!.getCurrentPlayer().dbUser!.username} escaped!`,
+            } else if (interaction.customId === currentGame.id + "#flee") {
+                if (currentGame!.playerFlee()) {
+                    interaction.editReply({
+                        content: `The fight is over! ${currentGame!.getCurrentPlayer().dbUser!.username} escaped!`,
                         components: [],
                     });
-                    this.game!.resetGame();
+                    this.games.delete(currentGame!.id);
                 } else {
-                    interaction.update(
+                    interaction.editReply(
                         await this.getFightDisplayOptions(
-                            `${this.game!.getCurrentPlayer().dbUser!.username} Failed to flee!`,
+                            currentGame,
+                            `${currentGame!.getCurrentPlayer().dbUser!.username} Failed to flee!`,
                         ),
                     );
                 }
-            } else if (interaction.customId === "#sleep") {
-                const manaAndHealthGainedMsg = this.game!.playerSleep();
-                interaction.update(
-                    await this.getFightDisplayOptions(manaAndHealthGainedMsg),
+            } else if (interaction.customId === currentGame.id + "#sleep") {
+                const manaAndHealthGainedMsg = currentGame!.playerSleep();
+                interaction.editReply(
+                    await this.getFightDisplayOptions(
+                        currentGame,
+                        manaAndHealthGainedMsg,
+                    ),
                 );
+            } else if (interaction.customId === currentGame.id + "#end") {
+                console.log("=============[3.9]=============");
+                //TODO REMOVE TEST BUTTON
+                interaction.editReply({
+                    content: `The fight was ended by ${interaction.user.username}.`,
+                    components: [],
+                });
+                this.games.delete(currentGame!.id);
+                return true;
             }
-            this.game!.nextTurn();
+            currentGame!.nextTurn();
             return true;
         } else {
-            if (interaction.customId === "#acceptFight") {
-                const res = await this.game!.initGame(interaction.user.id);
+            console.log("=============[4]=============");
+            if (interaction.customId === currentGame.id + "#acceptFight") {
+                console.log("=============[4.1]=============");
+                const res = await currentGame!.initGame(interaction.user.id);
+                console.log("=============[4.2]=============");
                 if (res.success) {
-                    await interaction.update(
-                        await this.getFightDisplayOptions(res.reason),
+                    const result = await this.getFightDisplayOptions(
+                        currentGame,
+                        res.reason,
                     );
-                    this.game!.nextTurn();
+                    console.log("=============[4.2.1]=============");
+                    await interaction.editReply({
+                        embeds: result.embeds,
+                        files: result.files,
+                        components: result.components,
+                    });
+                    currentGame!.nextTurn();
+                    console.log("=============[4.3]=============");
                 } else {
-                    interaction.reply({
+                    console.log("=============[4.4]=============");
+                    interaction.followUp({
                         content: res.reason,
                         components: [],
                         flags: "Ephemeral",
                     });
+                    console.log("=============[4.5]=============");
                     return true;
                 }
-            } else if (interaction.customId === "#declineFight") {
-                interaction.update({
+            } else if (
+                interaction.customId ===
+                currentGame.id + "#declineFight"
+            ) {
+                console.log("=============[4.6]=============");
+                interaction.editReply({
                     content: `The fight was cancelled by ${interaction.user.username}.`,
                     components: [],
                 });
-                this.game!.resetGame();
+                this.games.delete(currentGame!.id);
                 return true;
-            } else if (interaction.customId === "#end") {
+            } else if (interaction.customId === currentGame.id + "#end") {
+                console.log("=============[4.7]=============");
                 //TODO REMOVE TEST BUTTON
-                interaction.update({
+                interaction.editReply({
                     content: `The fight was ended by ${interaction.user.username}.`,
                     components: [],
                 });
-                this.game!.resetGame();
+                this.games.delete(currentGame!.id);
                 return false;
             }
+            console.log("=============[5]=============");
         }
+        console.log("=============[6]=============");
+
         return false;
     }
 
@@ -151,12 +213,12 @@ export default class FightCommand extends Command {
         };
     }
 
-    async createStatBar(
+    createStatBar(
         current: number,
         max: number,
         length: number = 10,
         filledColorCode: string = "31",
-    ): Promise<string> {
+    ): string {
         if (max <= 0) return ":no_entry_sign: ";
         const percentage = current / max;
         const filled = Math.round(length * percentage);
@@ -168,12 +230,13 @@ export default class FightCommand extends Command {
     }
 
     private async getFightDisplayOptions(
+        currentGame: FightGame,
         action: string,
     ): Promise<InteractionUpdateOptions> {
-        const currentPlayer = this.game!.getCurrentPlayer();
-        const nextPlayer = this.game!.getNextPlayer();
-        const player1 = this.game!.getPlayers()[0]!;
-        const player2 = this.game!.getPlayers()[1]!;
+        const currentPlayer = currentGame.getCurrentPlayer();
+        const nextPlayer = currentGame.getNextPlayer();
+        const player1 = currentGame.getPlayers()[0]!;
+        const player2 = currentGame.getPlayers()[1]!;
         const player1HealthBar = await this.createStatBar(
             player1.currentHealth,
             player1.getMaxHealthStats(),
@@ -208,10 +271,21 @@ export default class FightCommand extends Command {
             player2HealthBar,
             player2ManaBar,
         );
+
+        //==========[LAG]==============
         const fieldImageAttachment = await getFieldImage(
-            this.game!.getPlayers(),
-            this.game!.arenaSize,
+            currentGame.getPlayers(),
+            currentGame.arenaSize,
         );
+        // console.log(fieldImageAttachment);
+        // const imagePath = path.join(__dirname, "assets", "square.png"); // Adjust path as needed
+        const attachment = new AttachmentBuilder(
+            "/root/Project/LucasBot/assets/square.png",
+            {
+                name: "square.png",
+            },
+        );
+
         const builder = new EmbedBuilder()
             .setTitle(
                 ":crossed_swords:" +
@@ -221,7 +295,8 @@ export default class FightCommand extends Command {
                     ":crossed_swords:",
             )
             .setDescription(currentPlayer.dbUser?.username + ": " + action)
-            .setImage("attachment://game-field.png")
+            .setImage("attachment://square.png")
+            // .setImage("attachment://game-field.png")
             .addFields(player1DisplayStats, player2DisplayStats)
             .setFooter({
                 text: `➡️ It's ${nextPlayer.dbUser!.username}'s Turn!`,
@@ -246,7 +321,7 @@ export default class FightCommand extends Command {
                 .setLabel("Attack")
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(allowActionsButtons),
-            nextPlayer.posX === this.game!.arenaSize - 1
+            nextPlayer.posX === currentGame.arenaSize - 1
                 ? new ButtonBuilder()
                       .setCustomId("#flee")
                       .setLabel("Flee")
@@ -269,32 +344,29 @@ export default class FightCommand extends Command {
 
         return {
             embeds: [builder],
-            files: [fieldImageAttachment],
+            files: [fieldImageAttachment], //==========[LAG]==============
+            // files: [attachment],
             components: [actionRow],
         };
     }
-
     private InitiateFight(
-        user1: string | undefined,
-        user2: string | undefined,
+        user1: UserDiscord | undefined,
+        user2: UserDiscord | undefined,
+        gameIndex: number,
     ) {
         const builder = new EmbedBuilder()
             .setTitle(
-                ":crossed_swords:" +
-                    user1 +
-                    " -VS- " +
-                    user2 +
-                    ":crossed_swords:",
+                `:crossed_swords: ${user1?.displayName} -VS- ${user2?.displayName} :crossed_swords:`,
             )
-            .setDescription(user2 + " do you accept the fight?")
+            .setDescription(`${user2} do you accept the fight?`)
             .setTimestamp();
         const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
-                .setCustomId("#acceptFight")
+                .setCustomId(gameIndex + "#acceptFight")
                 .setLabel("Accept Fight")
                 .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
-                .setCustomId("#declineFight")
+                .setCustomId(gameIndex + "#declineFight")
                 .setLabel("Decline Fight")
                 .setStyle(ButtonStyle.Danger),
         );
@@ -316,23 +388,33 @@ export default class FightCommand extends Command {
             return;
         }
 
-        if (this.game?.isActive) {
+        const otherUser =
+            interaction.options.get("opponent")?.user || interaction.user;
+        if (this.isUserPartOfFight(interaction.user.id) !== undefined) {
             interaction.reply({
-                content: "A fight is already in progress!",
+                content: "You are already in a fight!",
                 flags: "Ephemeral",
             });
             return;
         }
-        const otherUser =
-            interaction.options.get("opponent")?.user || interaction.user;
-        this.game = new FightGame(interaction.user, otherUser);
+        if (this.isUserPartOfFight(otherUser.id) !== undefined) {
+            interaction.reply({
+                content: `${otherUser.username} is already in a fight!`,
+                flags: "Ephemeral",
+            });
+            return;
+        }
+        let newGame = new FightGame(interaction.user, otherUser);
+        this.games.set(newGame.id, newGame);
         let msg = this.InitiateFight(
-            interaction.user.username,
-            otherUser.username || "Unknown",
+            interaction.user,
+            otherUser || "Unknown",
+            newGame.id,
         );
         interaction.reply({
             embeds: msg.embeds,
             components: msg.components,
         });
+        console.log("Games:", this.games.size);
     }
 }

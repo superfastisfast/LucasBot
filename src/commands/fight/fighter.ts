@@ -32,6 +32,8 @@ export default class Fighter {
             self.items.push(weapon);
         }
         self.calculateStats();
+        self.currentHealth = self.getMaxHealthStats();
+        self.currentMana = self.getMaxManaStats();
 
         return self;
     }
@@ -43,8 +45,6 @@ export default class Fighter {
     ) {
         this.dbUser = dbUser;
         this.posX = startPosition;
-        this.currentHealth = this.getMaxHealthStats();
-        this.currentMana = this.getMaxManaStats();
         this.imgeUrl = imgUrl;
     }
 
@@ -60,9 +60,9 @@ export default class Fighter {
         };
         if (this.items.length > 0) {
             for (const item of this.items) {
-                console.log(
-                    `Applying item ${item} to fighter ${this.dbUser!.username}`,
-                );
+                // console.log(
+                //     `Applying item ${item} to fighter ${this.dbUser!.username}`,
+                // );
                 for (const [key, value] of item.flatStatModifiers.entries()) {
                     this.fighterStats[key as keyof FighterStats] += value;
                 }

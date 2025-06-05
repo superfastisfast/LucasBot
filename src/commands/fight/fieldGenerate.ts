@@ -1,5 +1,5 @@
 import { createCanvas, loadImage, type SKRSContext2D } from "@napi-rs/canvas";
-import { AttachmentBuilder, EmbedBuilder } from "discord.js";
+import { AttachmentBuilder } from "discord.js";
 import type Fighter from "./fighter";
 
 export const BLOCK_SIZE = 64;
