@@ -1,7 +1,7 @@
 import { getUserFromId } from "@/models/user";
 import Fighter from "./fighter";
 import type { User as DiscordUser } from "discord.js";
-
+import { BLOCK_SIZE } from "./fieldGenerate";
 interface GameInitializationResult {
     success: boolean;
     reason: string;
@@ -33,12 +33,18 @@ export default class FightGame {
         this.players[0] = new Fighter(
             dbCommandUser,
             0,
-            this.discordUsers[0]!.displayAvatarURL(),
+            this.discordUsers[0]!.displayAvatarURL({
+                extension: "png",
+                size: BLOCK_SIZE,
+            }),
         );
         this.players[1] = new Fighter(
             dbOpponentUser,
             this.arenaSize - 1,
-            this.discordUsers[1]!.displayAvatarURL(),
+            this.discordUsers[1]!.displayAvatarURL({
+                extension: "png",
+                size: BLOCK_SIZE,
+            }),
         );
         this.isActive = true;
         return {
@@ -87,7 +93,6 @@ export default class FightGame {
         const opponent = this.getNextPlayer();
         const actionInfo: string = currentPlayer.attack(opponent);
         if (opponent.currentHealth <= 0) {
-            this.resetGame();
             return `${opponent.dbUser!.username} has been defeated!`;
         }
         return actionInfo;

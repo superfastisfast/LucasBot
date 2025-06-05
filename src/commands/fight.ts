@@ -9,8 +9,10 @@ import {
     SlashCommandBuilder,
     type Client,
     type CommandInteraction,
+    type InteractionUpdateOptions,
 } from "discord.js";
 import FightGame from "./fight/fightGame";
+import { getFieldImage } from "./fight/fieldGenerate";
 
 //TODO list of active fights; Becaouse otherwise there is only one running.
 export default class FightCommand extends Command {
@@ -35,7 +37,6 @@ export default class FightCommand extends Command {
         client: Client,
         interaction: ButtonInteraction,
     ): Promise<boolean> {
-        //TODO Verify Undefined?
         if (this.game?.getDiscordUserById(interaction.user.id) === undefined) {
             interaction.reply({
                 content: "You are not part of this fight!",
@@ -46,15 +47,25 @@ export default class FightCommand extends Command {
         if (this.game!.isValidCombatMovement(interaction.user.id)) {
             if (interaction.customId === "#moveLeft") {
                 this.game!.movePlayer("left");
-                interaction.update(this.getFightDisplayOptions("Moved left"));
+                interaction.update(
+                    await this.getFightDisplayOptions("Moved left"),
+                );
             } else if (interaction.customId === "#moveRight") {
                 this.game!.movePlayer("right");
-                interaction.update(this.getFightDisplayOptions("Moved right"));
+                interaction.update(
+                    await this.getFightDisplayOptions("Moved right"),
+                );
             } else if (interaction.customId === "#attack") {
                 const actionInfo: string = this.game!.playerAttack();
                 interaction.update(
-                    this.getFightDisplayOptions("Attacked\n" + actionInfo),
+                    await this.getFightDisplayOptions(
+                        "Attacked\n" + actionInfo,
+                    ),
                 );
+                if (this.game!.getNextPlayer().currentHealth <= 0) {
+                    this.game!.resetGame();
+                    return true;
+                }
             } else if (interaction.customId === "#flee") {
                 if (this.game!.playerFlee()) {
                     interaction.update({
@@ -64,7 +75,7 @@ export default class FightCommand extends Command {
                     this.game!.resetGame();
                 } else {
                     interaction.update(
-                        this.getFightDisplayOptions(
+                        await this.getFightDisplayOptions(
                             `${this.game!.getCurrentPlayer().dbUser!.username} Failed to flee!`,
                         ),
                     );
@@ -77,7 +88,7 @@ export default class FightCommand extends Command {
                 const res = await this.game!.initGame(interaction.user.id);
                 if (res.success) {
                     await interaction.update(
-                        this.getFightDisplayOptions(res.reason),
+                        await this.getFightDisplayOptions(res.reason),
                     );
                     this.game!.nextTurn();
                 } else {
@@ -123,19 +134,22 @@ export default class FightCommand extends Command {
         return `\`\`\`ansi\n[2;31m${filledBar}[0m[2;37m${emptyBar}[0m\n\`\`\` ${current.toFixed(2)}/${max.toFixed(2)}`;
     }
 
-    private getFightDisplayOptions(action: string) {
-        let fieldArray: string[] = Array(this.game!.arenaSize).fill("🔳");
+    private async getFightDisplayOptions(
+        action: string,
+    ): Promise<InteractionUpdateOptions> {
         const currentPlayer = this.game!.getCurrentPlayer();
         const nextPlayer = this.game!.getNextPlayer();
-        fieldArray[this.game!.getPlayers()[0]!.posX] = ":person_bald:";
-        fieldArray[this.game!.getPlayers()[1]!.posX] = ":smirk_cat:";
-        const player1HealthBar = this.createHealthBar(
+        const player1HealthBar = await this.createHealthBar(
             this.game!.getPlayers()[0]!.currentHealth,
             this.game!.getPlayers()[0]!.getMaxHealthStats(),
         );
-        const player2HealthBar = this.createHealthBar(
+        const player2HealthBar = await this.createHealthBar(
             this.game!.getPlayers()[1]!.currentHealth,
             this.game!.getPlayers()[1]!.getMaxHealthStats(),
+        );
+        const fieldImageAttachment = await getFieldImage(
+            this.game!.getPlayers(),
+            this.game!.arenaSize,
         );
         const builder = new EmbedBuilder()
             .setTitle(
@@ -146,12 +160,8 @@ export default class FightCommand extends Command {
                     ":crossed_swords:",
             )
             .setDescription(currentPlayer.dbUser?.username + ": " + action)
+            .setImage("attachment://game-field.png")
             .addFields(
-                {
-                    name: "Field",
-                    value: fieldArray.join(""),
-                    inline: false,
-                },
                 // Player 1 Stats
                 {
                     name: `${this.game!.getPlayers()[0]!.dbUser!.username}'s Status`,
@@ -215,6 +225,7 @@ export default class FightCommand extends Command {
 
         return {
             embeds: [builder],
+            files: [fieldImageAttachment],
             components: [actionRow],
         };
     }
