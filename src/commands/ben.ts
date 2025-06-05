@@ -14,7 +14,11 @@ export default class BenCommand extends Command {
                 .setChoices(
                     { name: "Yes", value: "yes" },
                     { name: "No", value: "no" },
-                    { name: "Huhuhu", value: "huhuhu" }
+                    { name: "Huhuhu", value: "huhuhu" },
+                    { name: "Bean", value: "bean" },
+                    { name: "Ben", value: "ben" },
+                    { name: "Russian", value: "russian" },
+                    { name: "Cought", value: "cought" },
                 )
             )
             .toJSON();
@@ -22,8 +26,19 @@ export default class BenCommand extends Command {
 
     override async executeCommand(client: Client, interaction: CommandInteraction): Promise<void> {
         const option = interaction.options.get("option")?.value as string;
-        //                                           Yes                                NO          Huhuhu/Beans
-        const video: string = option === "Yes" ? "WGYOpG8KglY" : option === "No" ? "FRj_hAO1Sgs" : "lgI93MzC3ZU";
+
+        const videoMap: Record<string, string> = {
+            "yes": "QcWOFbXAVBY",
+            "no": "XqRgACTk7QI",
+            "huhuhu": "HQFIaj1Ko4A&s=4",
+            "bean": "lgI93MzC3ZU",
+            "ben": "On-TQRl6ULs",
+            "russian": "dlMT9rh4jMc",
+            "cought": "z6ee9ZHCTt4",
+        };
+
+        const video = videoMap[option] ?? "Invalid";
+
 
         interaction.reply(`https://www.youtube.com/watch?v=${video}`);
     }
