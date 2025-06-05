@@ -79,6 +79,7 @@ export default class FightGame {
     }
     movePlayer(direction: "left" | "right") {
         const currentPlayer = this.getCurrentPlayer();
+        currentPlayer.drainMana(1);
         if (direction === "left") {
             currentPlayer.posX = Math.max(0, currentPlayer.posX - 1);
         } else if (direction === "right") {
@@ -91,6 +92,7 @@ export default class FightGame {
     playerAttack(): string {
         const currentPlayer = this.getCurrentPlayer();
         const opponent = this.getNextPlayer();
+        currentPlayer.drainMana(1);
         const actionInfo: string = currentPlayer.attack(opponent);
         if (opponent.currentHealth <= 0) {
             return `${opponent.dbUser!.username} has been defeated!`;
@@ -99,7 +101,20 @@ export default class FightGame {
     }
     playerFlee(): boolean {
         const currentPlayer = this.getCurrentPlayer();
+        currentPlayer.drainMana(1);
         return currentPlayer.dbUser!.agility / 100 > Math.random();
+    }
+
+    playerSleep(): string {
+        const currentPlayer = this.getCurrentPlayer();
+        console.log(`${currentPlayer.dbUser!.username} is trying to sleep...`);
+        const healthToGain =
+            Math.random() * (currentPlayer.dbUser?.vitality || 1);
+        const manaToGain =
+            (Math.random() * (currentPlayer.dbUser?.stamina || 1)) / 3 + 1;
+        currentPlayer.gainHealth(healthToGain);
+        currentPlayer.gainMana(manaToGain);
+        return `rested and regained ${healthToGain.toFixed(2)} health and ${manaToGain.toFixed(2)} mana.`;
     }
 
     nextTurn() {

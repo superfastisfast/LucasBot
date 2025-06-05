@@ -80,6 +80,11 @@ export default class FightCommand extends Command {
                         ),
                     );
                 }
+            } else if (interaction.customId === "#sleep") {
+                const manaAndHealthGainedMsg = this.game!.playerSleep();
+                interaction.update(
+                    await this.getFightDisplayOptions(manaAndHealthGainedMsg),
+                );
             }
             this.game!.nextTurn();
             return true;
@@ -119,19 +124,20 @@ export default class FightCommand extends Command {
         return false;
     }
 
-    async createHealthBar(
+    async createStatBar(
         current: number,
         max: number,
         length: number = 10,
+        filledColorCode: string = "31",
     ): Promise<string> {
-        if (max <= 0) return "[:red_square:]";
+        if (max <= 0) return ":no_entry_sign: ";
         const percentage = current / max;
         const filled = Math.round(length * percentage);
         const empty = length - filled;
         const filledBar = "█".repeat(filled);
         const emptyBar = " ".repeat(empty);
         // Using ANSI code block for better visual consistency of the bar
-        return `\`\`\`ansi\n[2;31m${filledBar}[0m[2;37m${emptyBar}[0m\n\`\`\` ${current.toFixed(2)}/${max.toFixed(2)}`;
+        return `\`\`\`ansi\n[2;${filledColorCode}m${filledBar}[0m[2;37m${emptyBar}[0m\n\`\`\` ${current.toFixed(2)}/${max.toFixed(2)}`;
     }
 
     private async getFightDisplayOptions(
@@ -139,13 +145,29 @@ export default class FightCommand extends Command {
     ): Promise<InteractionUpdateOptions> {
         const currentPlayer = this.game!.getCurrentPlayer();
         const nextPlayer = this.game!.getNextPlayer();
-        const player1HealthBar = await this.createHealthBar(
+        const player1HealthBar = await this.createStatBar(
             this.game!.getPlayers()[0]!.currentHealth,
             this.game!.getPlayers()[0]!.getMaxHealthStats(),
+            this.game!.getPlayers()[0]!.getMaxHealthStats(),
+            "31",
         );
-        const player2HealthBar = await this.createHealthBar(
+        const player1ManaBar = await this.createStatBar(
+            this.game!.getPlayers()[0]!.currentMana,
+            this.game!.getPlayers()[0]!.getMaxManaStats(),
+            this.game!.getPlayers()[0]!.getMaxManaStats(),
+            "34",
+        );
+        const player2HealthBar = await this.createStatBar(
             this.game!.getPlayers()[1]!.currentHealth,
             this.game!.getPlayers()[1]!.getMaxHealthStats(),
+            this.game!.getPlayers()[1]!.getMaxHealthStats(),
+            "31",
+        );
+        const player2ManaBar = await this.createStatBar(
+            this.game!.getPlayers()[1]!.currentMana,
+            this.game!.getPlayers()[1]!.getMaxManaStats(),
+            this.game!.getPlayers()[1]!.getMaxManaStats(),
+            "34",
         );
         const fieldImageAttachment = await getFieldImage(
             this.game!.getPlayers(),
@@ -167,11 +189,13 @@ export default class FightCommand extends Command {
                     name: `${this.game!.getPlayers()[0]!.dbUser!.username}'s Status`,
                     value:
                         `❤️ Health: ${player1HealthBar}\n` +
+                        `🔵 Mana: ${player1ManaBar}\n` +
                         `⚔️ Strength: **${this.game!.getPlayers()[0]!.dbUser!.strength}**\n` +
                         `🛡️ Defense: **${this.game!.getPlayers()[0]!.dbUser!.defense}**\n` +
                         `🏃 Agility: **${this.game!.getPlayers()[0]!.dbUser!.agility}** \n` +
                         `✨ Magicka: **${this.game!.getPlayers()[0]!.dbUser!.magicka}**\n` +
-                        `🔋 Stamina: **${this.game!.getPlayers()[0]!.dbUser!.stamina}**\n` +
+                        `🔋 Vitality: **${this.game!.getPlayers()[0]!.dbUser!.vitality}**\n` +
+                        `🏃‍♂️ Stamina: **${this.game!.getPlayers()[0]!.dbUser!.stamina}**\n` +
                         `🗣️ Charisma: **${this.game!.getPlayers()[0]!.dbUser!.charisma}**`,
                     inline: true,
                 },
@@ -180,11 +204,13 @@ export default class FightCommand extends Command {
                     name: `${this.game!.getPlayers()[1]!.dbUser!.username}'s Status`,
                     value:
                         `❤️ Health: ${player2HealthBar}\n` +
+                        `🔵 Mana: ${player2ManaBar}\n` +
                         `⚔️ Strength: **${this.game!.getPlayers()[1]!.dbUser!.strength}**\n` +
                         `🛡️ Defense: **${this.game!.getPlayers()[1]!.dbUser!.defense}**\n` +
                         `🏃 Agility: **${this.game!.getPlayers()[1]!.dbUser!.agility}**\n` +
                         `✨ Magicka: **${this.game!.getPlayers()[1]!.dbUser!.magicka}**\n` +
-                        `🔋 Stamina: **${this.game!.getPlayers()[1]!.dbUser!.stamina}**\n` +
+                        `🔋 Vitality: **${this.game!.getPlayers()[1]!.dbUser!.vitality}**\n` +
+                        `🏃‍♂️ Stamina: **${this.game!.getPlayers()[1]!.dbUser!.stamina}**\n` +
                         `🗣️ Charisma: **${this.game!.getPlayers()[1]!.dbUser!.charisma}**`,
                     inline: true,
                 },
@@ -194,29 +220,39 @@ export default class FightCommand extends Command {
                 iconURL: nextPlayer.imgeUrl,
             })
             .setTimestamp();
+        const allowActionsButtons = nextPlayer.currentMana < 1;
         const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
             nextPlayer.posX === 0
                 ? new ButtonBuilder()
                       .setCustomId("#flee")
                       .setLabel("Flee")
                       .setStyle(ButtonStyle.Danger)
+                      .setDisabled(allowActionsButtons)
                 : new ButtonBuilder()
                       .setCustomId("#moveLeft")
                       .setLabel("<<<")
-                      .setStyle(ButtonStyle.Primary),
+                      .setStyle(ButtonStyle.Primary)
+                      .setDisabled(allowActionsButtons),
             new ButtonBuilder()
                 .setCustomId("#attack")
                 .setLabel("Attack")
-                .setStyle(ButtonStyle.Primary),
+                .setStyle(ButtonStyle.Primary)
+                .setDisabled(allowActionsButtons),
             nextPlayer.posX === this.game!.arenaSize - 1
                 ? new ButtonBuilder()
                       .setCustomId("#flee")
                       .setLabel("Flee")
                       .setStyle(ButtonStyle.Danger)
+                      .setDisabled(allowActionsButtons)
                 : new ButtonBuilder()
                       .setCustomId("#moveRight")
                       .setLabel(">>>")
-                      .setStyle(ButtonStyle.Primary),
+                      .setStyle(ButtonStyle.Primary)
+                      .setDisabled(allowActionsButtons),
+            new ButtonBuilder()
+                .setCustomId("#sleep")
+                .setLabel("sleep")
+                .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
                 .setCustomId("#end")
                 .setLabel("End Fight (TEST)")
