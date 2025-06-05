@@ -30,7 +30,7 @@ export default class FightGame {
                 reason: "One or both users could not be found in the database.",
             };
         }
-        this.players[0] = new Fighter(
+        this.players[0] = await Fighter.create(
             dbCommandUser,
             0,
             this.discordUsers[0]!.displayAvatarURL({
@@ -38,7 +38,7 @@ export default class FightGame {
                 size: BLOCK_SIZE,
             }),
         );
-        this.players[1] = new Fighter(
+        this.players[1] = await Fighter.create(
             dbOpponentUser,
             this.arenaSize - 1,
             this.discordUsers[1]!.displayAvatarURL({
@@ -102,16 +102,16 @@ export default class FightGame {
     playerFlee(): boolean {
         const currentPlayer = this.getCurrentPlayer();
         currentPlayer.drainMana(1);
-        return currentPlayer.dbUser!.agility / 100 > Math.random();
+        return currentPlayer.fighterStats.agility / 100 > Math.random();
     }
 
     playerSleep(): string {
         const currentPlayer = this.getCurrentPlayer();
         console.log(`${currentPlayer.dbUser!.username} is trying to sleep...`);
         const healthToGain =
-            Math.random() * (currentPlayer.dbUser?.vitality || 1);
+            Math.random() * (currentPlayer.fighterStats.vitality || 1);
         const manaToGain =
-            (Math.random() * (currentPlayer.dbUser?.stamina || 1)) / 3 + 1;
+            (Math.random() * (currentPlayer.fighterStats.stamina || 1)) / 3 + 1;
         currentPlayer.gainHealth(healthToGain);
         currentPlayer.gainMana(manaToGain);
         return `rested and regained ${healthToGain.toFixed(2)} health and ${manaToGain.toFixed(2)} mana.`;
@@ -119,6 +119,8 @@ export default class FightGame {
 
     nextTurn() {
         this.playerTurn = this.playerTurn === 0 ? 1 : 0;
+        this.getCurrentPlayer().calculateStats();
+        this.getNextPlayer().calculateStats();
     }
 
     resetGame() {

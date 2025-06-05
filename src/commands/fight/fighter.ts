@@ -1,4 +1,15 @@
+import { getWeaponFromName, type ItemDocument } from "@/models/item";
 import type { UserDocument } from "@/models/user";
+
+interface FighterStats {
+    strength: number;
+    agility: number;
+    charisma: number;
+    magicka: number;
+    stamina: number;
+    defense: number;
+    vitality: number;
+}
 
 export default class Fighter {
     dbUser?: UserDocument;
@@ -6,8 +17,30 @@ export default class Fighter {
     currentHealth: number = 0;
     currentMana: number = 0;
     imgeUrl: string = "";
+    items: Array<ItemDocument> = [];
+    fighterStats: FighterStats = 0 as any;
 
-    constructor(dbUser: UserDocument, startPosition: number, imgUrl: string) {
+    static async create(
+        dbUser: UserDocument,
+        startPosition: number,
+        imgUrl: string,
+    ): Promise<Fighter> {
+        let self = new Fighter(dbUser, startPosition, imgUrl);
+
+        const weapon = await getWeaponFromName(self.dbUser!.Weapon);
+        if (weapon) {
+            self.items.push(weapon);
+        }
+        self.calculateStats();
+
+        return self;
+    }
+
+    private constructor(
+        dbUser: UserDocument,
+        startPosition: number,
+        imgUrl: string,
+    ) {
         this.dbUser = dbUser;
         this.posX = startPosition;
         this.currentHealth = this.getMaxHealthStats();
@@ -15,23 +48,52 @@ export default class Fighter {
         this.imgeUrl = imgUrl;
     }
 
+    calculateStats() {
+        this.fighterStats = {
+            strength: this.dbUser!.strength,
+            agility: this.dbUser!.agility,
+            charisma: this.dbUser!.charisma,
+            magicka: this.dbUser!.magicka,
+            stamina: this.dbUser!.stamina,
+            defense: this.dbUser!.defense,
+            vitality: this.dbUser!.vitality,
+        };
+        if (this.items.length > 0) {
+            for (const item of this.items) {
+                console.log(
+                    `Applying item ${item} to fighter ${this.dbUser!.username}`,
+                );
+                for (const [key, value] of item.flatStatModifiers.entries()) {
+                    this.fighterStats[key as keyof FighterStats] += value;
+                }
+                for (const [
+                    key,
+                    value,
+                ] of item.percentageStatModifiers.entries()) {
+                    this.fighterStats[key as keyof FighterStats] *= 1 + value;
+                }
+            }
+        }
+    }
+
     getMaxHealthStats(): number {
-        return (this.dbUser?.vitality || 1) * 10;
+        return (this.fighterStats.vitality || 1) * 10;
     }
     getMaxManaStats(): number {
-        return this.dbUser?.stamina || 1;
+        return this.fighterStats.stamina || 1;
     }
+
     attack(opponent: Fighter) {
         if (Math.abs(this.posX - opponent.posX) < 2) {
-            const damage = Math.random() * this.dbUser!.strength + 1;
+            const damage = Math.random() * this.fighterStats.strength + 1;
             return opponent.receiveDamage(damage);
         } else {
             return "Too far away to attack!";
         }
     }
     receiveDamage(damage: number) {
-        if (this.dbUser!.defense > 0) {
-            if (Math.random() > damage / this.dbUser!.defense) {
+        if (this.fighterStats.defense > 0) {
+            if (Math.random() > damage / this.fighterStats.defense) {
                 return this.dbUser!.username + ": Blocked the attack!";
             }
         }

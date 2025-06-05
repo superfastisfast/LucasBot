@@ -11,6 +11,7 @@ const userSchema = new Schema(
         lastXpMessageAt: { type: Schema.Types.Date, default: Date.now },
         balance: { type: Number, default: 0.0 },
         skillPoints: { type: Number, default: 0.0 },
+        Weapon: { type: String, default: "Fists" },
         strength: { type: Number, default: 3.0 },
         agility: { type: Number, default: 10.0 },
         charisma: { type: Number, default: 0.0 },
@@ -30,6 +31,7 @@ export interface UserDocument extends Document {
     lastXpMessageAt: Date;
     balance: number;
     skillPoints: number;
+    Weapon: string;
     strength: number;
     agility: number;
     charisma: number;

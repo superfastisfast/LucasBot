@@ -1,5 +1,4 @@
 import { Command } from "@/command";
-import { getUserFromId } from "@/models/user";
 import {
     ActionRowBuilder,
     ButtonBuilder,
@@ -13,6 +12,13 @@ import {
 } from "discord.js";
 import FightGame from "./fight/fightGame";
 import { getFieldImage } from "./fight/fieldGenerate";
+import type Fighter from "./fight/fighter";
+
+interface PlayerDisplay {
+    name: string;
+    value: string;
+    inline: boolean;
+}
 
 //TODO list of active fights; Becaouse otherwise there is only one running.
 export default class FightCommand extends Command {
@@ -124,6 +130,27 @@ export default class FightCommand extends Command {
         return false;
     }
 
+    getPlayerDisplay(
+        player: Fighter,
+        healthbar: string,
+        manaBar: string,
+    ): PlayerDisplay {
+        return {
+            name: `${player.dbUser!.username}'s Status`,
+            value:
+                `❤️ Health: ${healthbar}\n` +
+                `🔵 Mana: ${manaBar}\n` +
+                `⚔️ Strength: **${player.fighterStats.strength}**\n` +
+                `🛡️ Defense: **${player.fighterStats.defense}**\n` +
+                `🏃 Agility: **${player.fighterStats.agility}** \n` +
+                `✨ Magicka: **${player.fighterStats.magicka}**\n` +
+                `🔋 Vitality: **${player.fighterStats.vitality}**\n` +
+                `🏃‍♂️ Stamina: **${player.fighterStats.stamina}**\n` +
+                `🗣️ Charisma: **${player.fighterStats.charisma}**`,
+            inline: true,
+        };
+    }
+
     async createStatBar(
         current: number,
         max: number,
@@ -145,29 +172,41 @@ export default class FightCommand extends Command {
     ): Promise<InteractionUpdateOptions> {
         const currentPlayer = this.game!.getCurrentPlayer();
         const nextPlayer = this.game!.getNextPlayer();
+        const player1 = this.game!.getPlayers()[0]!;
+        const player2 = this.game!.getPlayers()[1]!;
         const player1HealthBar = await this.createStatBar(
-            this.game!.getPlayers()[0]!.currentHealth,
-            this.game!.getPlayers()[0]!.getMaxHealthStats(),
-            this.game!.getPlayers()[0]!.getMaxHealthStats(),
+            player1.currentHealth,
+            player1.getMaxHealthStats(),
+            player1.getMaxHealthStats(),
             "31",
         );
         const player1ManaBar = await this.createStatBar(
-            this.game!.getPlayers()[0]!.currentMana,
-            this.game!.getPlayers()[0]!.getMaxManaStats(),
-            this.game!.getPlayers()[0]!.getMaxManaStats(),
+            player1.currentMana,
+            player1.getMaxManaStats(),
+            player1.getMaxManaStats(),
             "34",
         );
         const player2HealthBar = await this.createStatBar(
-            this.game!.getPlayers()[1]!.currentHealth,
-            this.game!.getPlayers()[1]!.getMaxHealthStats(),
-            this.game!.getPlayers()[1]!.getMaxHealthStats(),
+            player2.currentHealth,
+            player2.getMaxHealthStats(),
+            player2.getMaxHealthStats(),
             "31",
         );
         const player2ManaBar = await this.createStatBar(
-            this.game!.getPlayers()[1]!.currentMana,
-            this.game!.getPlayers()[1]!.getMaxManaStats(),
-            this.game!.getPlayers()[1]!.getMaxManaStats(),
+            player2.currentMana,
+            player2.getMaxManaStats(),
+            player2.getMaxManaStats(),
             "34",
+        );
+        const player1DisplayStats = this.getPlayerDisplay(
+            player1,
+            player1HealthBar,
+            player1ManaBar,
+        );
+        const player2DisplayStats = this.getPlayerDisplay(
+            player2,
+            player2HealthBar,
+            player2ManaBar,
         );
         const fieldImageAttachment = await getFieldImage(
             this.game!.getPlayers(),
@@ -176,45 +215,14 @@ export default class FightCommand extends Command {
         const builder = new EmbedBuilder()
             .setTitle(
                 ":crossed_swords:" +
-                    this.game!.getPlayers()[0]!.dbUser!.username +
+                    player1.dbUser!.username +
                     " -VS- " +
-                    this.game!.getPlayers()[1]!.dbUser!.username +
+                    player2.dbUser!.username +
                     ":crossed_swords:",
             )
             .setDescription(currentPlayer.dbUser?.username + ": " + action)
             .setImage("attachment://game-field.png")
-            .addFields(
-                // Player 1 Stats
-                {
-                    name: `${this.game!.getPlayers()[0]!.dbUser!.username}'s Status`,
-                    value:
-                        `❤️ Health: ${player1HealthBar}\n` +
-                        `🔵 Mana: ${player1ManaBar}\n` +
-                        `⚔️ Strength: **${this.game!.getPlayers()[0]!.dbUser!.strength}**\n` +
-                        `🛡️ Defense: **${this.game!.getPlayers()[0]!.dbUser!.defense}**\n` +
-                        `🏃 Agility: **${this.game!.getPlayers()[0]!.dbUser!.agility}** \n` +
-                        `✨ Magicka: **${this.game!.getPlayers()[0]!.dbUser!.magicka}**\n` +
-                        `🔋 Vitality: **${this.game!.getPlayers()[0]!.dbUser!.vitality}**\n` +
-                        `🏃‍♂️ Stamina: **${this.game!.getPlayers()[0]!.dbUser!.stamina}**\n` +
-                        `🗣️ Charisma: **${this.game!.getPlayers()[0]!.dbUser!.charisma}**`,
-                    inline: true,
-                },
-                // Player 2 Stats
-                {
-                    name: `${this.game!.getPlayers()[1]!.dbUser!.username}'s Status`,
-                    value:
-                        `❤️ Health: ${player2HealthBar}\n` +
-                        `🔵 Mana: ${player2ManaBar}\n` +
-                        `⚔️ Strength: **${this.game!.getPlayers()[1]!.dbUser!.strength}**\n` +
-                        `🛡️ Defense: **${this.game!.getPlayers()[1]!.dbUser!.defense}**\n` +
-                        `🏃 Agility: **${this.game!.getPlayers()[1]!.dbUser!.agility}**\n` +
-                        `✨ Magicka: **${this.game!.getPlayers()[1]!.dbUser!.magicka}**\n` +
-                        `🔋 Vitality: **${this.game!.getPlayers()[1]!.dbUser!.vitality}**\n` +
-                        `🏃‍♂️ Stamina: **${this.game!.getPlayers()[1]!.dbUser!.stamina}**\n` +
-                        `🗣️ Charisma: **${this.game!.getPlayers()[1]!.dbUser!.charisma}**`,
-                    inline: true,
-                },
-            )
+            .addFields(player1DisplayStats, player2DisplayStats)
             .setFooter({
                 text: `➡️ It's ${nextPlayer.dbUser!.username}'s Turn!`,
                 iconURL: nextPlayer.imgeUrl,
