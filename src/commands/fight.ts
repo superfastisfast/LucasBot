@@ -21,7 +21,6 @@ interface PlayerDisplay {
     inline: boolean;
 }
 
-//TODO list of active fights; Becaouse otherwise there is only one running.
 export default class FightCommand extends Command.Base {
     games: Map<number, FightGame> = new Map<number, FightGame>();
 
@@ -35,6 +34,16 @@ export default class FightCommand extends Command.Base {
                 option
                     .setName("opponent")
                     .setDescription("The opponent to fight")
+                    .setRequired(true),
+            )
+            .addNumberOption((option) =>
+                option
+                    .setName("bet")
+                    .setDescription(
+                        "how much money to bet (both players must be able to afford)",
+                    )
+                    .setMinValue(0)
+                    .setMaxValue(100)
                     .setRequired(true),
             )
             .toJSON();
@@ -145,7 +154,7 @@ export default class FightCommand extends Command.Base {
                     );
                     currentGame.nextTurn();
                 } else {
-                    interaction.reply({
+                    interaction.followUp({
                         content: res.reason,
                         components: [],
                         flags: "Ephemeral",
@@ -186,6 +195,40 @@ export default class FightCommand extends Command.Base {
         healthbar: string,
         manaBar: string,
     ): PlayerDisplay {
+        const formattedItems = player.items
+            .map((item) => {
+                let itemDetails = `**${item.name}**`;
+                const flatStatsParts: string[] = [];
+                for (const [
+                    statName,
+                    amplifier,
+                ] of item.flatStatModifiers.entries()) {
+                    flatStatsParts.push(`${statName}: +${amplifier}`);
+                }
+                if (flatStatsParts.length > 0) {
+                    itemDetails += `\n  - Flat: ${flatStatsParts.join(", ")}`;
+                }
+
+                const percentageStatsParts: string[] = [];
+                for (const [
+                    statName,
+                    amplifier,
+                ] of item.percentageStatModifiers.entries()) {
+                    percentageStatsParts.push(
+                        `${statName}: +${(amplifier * 100).toFixed(0)}%`,
+                    );
+                }
+                if (percentageStatsParts.length > 0) {
+                    itemDetails += `\n  - Percent: ${percentageStatsParts.join(", ")}`;
+                }
+
+                return itemDetails;
+            })
+            .join("\n\n");
+
+        const itemsDisplay =
+            formattedItems.length > 0 ? formattedItems : "None";
+
         return {
             name: `${player.dbUser!.username}'s Status`,
             value:
@@ -197,7 +240,8 @@ export default class FightCommand extends Command.Base {
                 `✨ Magicka: **${player.fighterStats.magicka}**\n` +
                 `🔋 Vitality: **${player.fighterStats.vitality}**\n` +
                 `🏃‍♂️ Stamina: **${player.fighterStats.stamina}**\n` +
-                `🗣️ Charisma: **${player.fighterStats.charisma}**`,
+                `🗣️ Charisma: **${player.fighterStats.charisma}**\n` +
+                `📦 Items: ${itemsDisplay}`,
             inline: true,
         };
     }

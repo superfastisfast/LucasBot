@@ -1,4 +1,8 @@
-import { getWeaponFromName, type ItemDocument } from "@/models/item";
+import {
+    getHelmetFromName,
+    getWeaponFromName,
+    type ItemDocument,
+} from "@/models/item";
 import type { UserDocument } from "@/models/user";
 
 interface FighterStats {
@@ -31,7 +35,14 @@ export default class Fighter {
         if (weapon) {
             self.items.push(weapon);
         }
+        const Helmet = await getHelmetFromName(self.dbUser!.Helmet);
+        if (Helmet) {
+            self.items.push(Helmet);
+        }
         self.calculateStats();
+        self.currentHealth = self.getMaxHealthStats();
+        self.currentMana = self.getMaxManaStats();
+
         return self;
     }
 
@@ -71,8 +82,6 @@ export default class Fighter {
                 }
             }
         }
-        this.currentHealth = this.getMaxHealthStats();
-        this.currentMana = this.getMaxManaStats();
     }
 
     getMaxHealthStats(): number {

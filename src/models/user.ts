@@ -1,9 +1,5 @@
-import {
-    User,
-    type PartialUser
-} from "discord.js";
+import { User, type PartialUser } from "discord.js";
 import mongoose, { Document, Schema } from "mongoose";
-
 
 const userSchema = new Schema(
     {
@@ -15,6 +11,7 @@ const userSchema = new Schema(
         balance: { type: Number, default: 0.0 },
         skillPoints: { type: Number, default: 0.0 },
         Weapon: { type: String, default: "Fists" },
+        Helmet: { type: String, default: "none" },
         strength: { type: Number, default: 3.0 },
         agility: { type: Number, default: 10.0 },
         charisma: { type: Number, default: 0.0 },
@@ -35,6 +32,7 @@ export interface UserDocument extends Document {
     balance: number;
     skillPoints: number;
     Weapon: string;
+    Helmet: string;
     strength: number;
     agility: number;
     charisma: number;
@@ -57,7 +55,9 @@ export async function getUserFromId(id: string): Promise<UserDocument | null> {
     }
 }
 
-export async function getIdFromUser(user: User | PartialUser | string): Promise<string> {
+export async function getIdFromUser(
+    user: User | PartialUser | string,
+): Promise<string> {
     if (typeof user === "object" && user !== null && "id" in user) {
         return String(user.id);
     }
@@ -109,7 +109,10 @@ export async function setXP(user: User | PartialUser | string, xp: number) {
     return xp;
 }
 
-export async function giveGold(user: User | PartialUser | string, amount: number) {
+export async function giveGold(
+    user: User | PartialUser | string,
+    amount: number,
+) {
     const id = await getIdFromUser(user);
     let dbUser = await UserModel.findOne({ id: id });
     if (!dbUser) {
@@ -121,7 +124,10 @@ export async function giveGold(user: User | PartialUser | string, amount: number
     return amount;
 }
 
-export async function setGold(user: User | PartialUser | string, amount: number) {
+export async function setGold(
+    user: User | PartialUser | string,
+    amount: number,
+) {
     const id = await getIdFromUser(user);
     let dbUser = await UserModel.findOne({ id: id });
     if (!dbUser) {

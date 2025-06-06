@@ -33,3 +33,16 @@ export async function getWeaponFromName(
         return null;
     }
 }
+
+export async function getHelmetFromName(
+    name: string,
+): Promise<ItemDocument | null> {
+    try {
+        const Helmet = await ItemModel.findOne({ name: name });
+        return Helmet;
+        // return await client.users.fetch(id);
+    } catch (error) {
+        console.error(`Failed to fetch Helmet with name ${name}:`, error);
+        return null;
+    }
+}

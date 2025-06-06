@@ -1,4 +1,4 @@
-import { getUserFromId } from "@/models/user";
+import { getUserFromId, giveGold } from "@/models/user";
 import Fighter from "./fighter";
 import type { User as DiscordUser } from "discord.js";
 import { BLOCK_SIZE } from "./fieldGenerate";
@@ -13,6 +13,7 @@ export default class FightGame {
     arenaSize: number = 6;
     playerTurn: number = 1;
     discordUsers: DiscordUser[] = [];
+    reward: number = 0;
 
     private static nextId: number = 0;
     id: number = 0;
@@ -127,10 +128,12 @@ export default class FightGame {
         this.getNextPlayer().calculateStats();
     }
 
-    resetGame() {
-        this.isActive = false;
-        this.players = [];
-        this.playerTurn = 1;
-        this.discordUsers = [];
+    gameOver() {
+        if (this.players[0]!.currentHealth <= 0) {
+            console.log(`${}`)
+            giveGold(this.discordUsers[1])
+        } else if (this.players[1]!.currentHealth <= 0) {
+        } else {
+        }
     }
 }
