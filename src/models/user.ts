@@ -48,16 +48,6 @@ export type UserModel = mongoose.InferSchemaType<typeof userSchema>;
 export const UserModel = mongoose.model<UserDocument>("User", userSchema);
 
 export namespace DataBase {
-    export async function getDBUserFromId(id: string): Promise<UserDocument | null> {
-        try {
-            const user = await UserModel.findOne({ id: id });
-            return user;
-        } catch (error) {
-            console.error(`Failed to fetch user with ID ${id}:`, error);
-            return null;
-        }
-    }
-
     export async function getIDFromUser(user: User | PartialUser | string): Promise<string> {
         if (typeof user === "object" && user !== null && "id" in user) {
             return String(user.id);
@@ -65,37 +55,30 @@ export namespace DataBase {
         return user;
     }
 
+    export async function getDBUserFromUser(user: User | PartialUser | string): Promise<UserDocument> {
+        const id = await getIDFromUser(user);
+        
+        try {    
+            const user = await UserModel.findOne({ id: id });
+            return user!;
+        } catch (err) {
+            throw new Error(`Failed to fetch user with ID ${id}: ${err}`);
+        }
+    }
+
 
     export async function giveXP(user: User | PartialUser | string, xp: number) {
-        const id = await getIDFromUser(user);
-        let dbUser = await UserModel.findOne({ id: id });
-        if (!dbUser) {
-            return;
-        }
+        let dbUser = await getDBUserFromUser(user);
 
-        if (xp > 0 && dbUser.timeouts > 0) {
-            const maxTimeoutsForReduction = 20;
-            const minTimeoutsForReduction = 1;
-            let reductionFactor =
-                (dbUser.timeouts - minTimeoutsForReduction) /
-                (maxTimeoutsForReduction - minTimeoutsForReduction);
-            reductionFactor = Math.max(0, Math.min(1, reductionFactor));
-            xp = xp * (1 - reductionFactor);
-        }
-
-        dbUser.xp = Math.max(-100, dbUser.xp + xp);
+        await setXP(user, dbUser.xp + xp);
         await dbUser.save();
         return xp;
     }
 
 
     export async function setXP(user: User | PartialUser | string, xp: number) {
-        const id = await getIDFromUser(user);
-        let dbUser = await UserModel.findOne({ id: id });
-        if (!dbUser) {
-            return;
-        }
-        console.log("xp: " + xp);
+        let dbUser = await getDBUserFromUser(user);
+
         if (xp > 0 && dbUser.timeouts > 0) {
             const maxTimeoutsForReduction = 20;
             const minTimeoutsForReduction = 1;
@@ -105,19 +88,15 @@ export namespace DataBase {
             reductionFactor = Math.max(0, Math.min(1, reductionFactor));
             xp = xp * (1 - reductionFactor);
         }
-        console.log("new xp: " + xp);
 
+        await level(user, xp);
         dbUser.xp = Math.max(-100, xp);
         await dbUser.save();
         return xp;
     }
 
     export async function giveGold(user: User | PartialUser | string, amount: number) {
-        const id = await getIDFromUser(user);
-        let dbUser = await UserModel.findOne({ id: id });
-        if (!dbUser) {
-            return;
-        }
+        let dbUser = await getDBUserFromUser(user);
 
         dbUser.balance = Math.max(-1000, dbUser.balance + amount);
         await dbUser.save();
@@ -125,14 +104,38 @@ export namespace DataBase {
     }
 
     export async function setGold(user: User | PartialUser | string, amount: number) {
-        const id = await getIDFromUser(user);
-        let dbUser = await UserModel.findOne({ id: id });
-        if (!dbUser) {
-            return;
-        }
+        let dbUser = await getDBUserFromUser(user);
 
         dbUser.balance = Math.max(-1000, amount);
         await dbUser.save();
         return amount;
     }
+}
+
+async function level(user: User | PartialUser | string, newXp: number): Promise<number> {
+    let dbUser = await DataBase.getDBUserFromUser(user);
+    const oldXp = dbUser.xp;
+
+    (async () => {
+        let dbUser = await DataBase.getDBUserFromUser(user);
+
+        let level: number = 0;
+        await calculateLevel(newXp);
+
+        const currentLevel
+
+        if (oldXp + newXp >= 100 && oldXp <= newXp) {}
+
+        return level;
+    })();
+    
+    return 0;
+}
+
+async function calculateLevel(xp: number): Promise<number> {
+    return Math.floor(xp / 10);
+}
+
+async function requiredXPForNextLevel(level: number): Promise<number> {
+    return 0;
 }
