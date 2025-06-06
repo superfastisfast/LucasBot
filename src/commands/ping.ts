@@ -1,7 +1,7 @@
 import { Command } from "@/command";
 import { SlashCommandBuilder, type Client, type CommandInteraction } from "discord.js";
 
-export default class PingCommand extends Command {
+export default class PingCommand extends Command.Base {
     override get info(): any {
         return new SlashCommandBuilder().setName("ping").setDescription("test").toJSON();
     }

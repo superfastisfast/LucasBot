@@ -7,19 +7,19 @@ import type {
 import { UserModel } from "./models/user";
 import { Quest } from "./quest";
 
-export abstract class Command {
-    abstract get info(): any;
-    public async onButtonInteract(client: Client, interaction: ButtonInteraction): Promise<boolean> {
-        return false;
+export namespace Command {
+    export abstract class Base {
+        abstract get info(): any;
+        public async onButtonInteract(client: Client, interaction: ButtonInteraction): Promise<boolean> {
+            return false;
+        }
+        async executeAutoComplete(client: Client, interaction: AutocompleteInteraction): Promise<void> {
+            interaction.respond([]);
+        }
+        abstract executeCommand(client: Client, interaction: CommandInteraction): Promise<void>;
     }
-    async executeAutoComplete(client: Client, interaction: AutocompleteInteraction): Promise<void> {
-        interaction.respond([]);
-    }
-    abstract executeCommand(client: Client, interaction: CommandInteraction): Promise<void>;
-}
-
-export namespace Cmd {
-    export const commands = new Map<string, Command>();
+    
+    export const commands = new Map<string, Base>();
 
     export async function register(client: Client) {
         const glob = new Bun.Glob("./src/commands/*.ts");
@@ -29,7 +29,7 @@ export namespace Cmd {
             const { default: CommandClass } = await import(
                 path.replace("./src/", "./")
             );
-            const instance: Command = new CommandClass();
+            const instance: Base = new CommandClass();
             const info = instance.info;
             commands.set(info.name, instance);
             client.application?.commands.create(info);

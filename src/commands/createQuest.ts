@@ -11,7 +11,7 @@ import {
     type CommandInteraction,
 } from "discord.js";
 
-export default class CreateQuestCommand extends Command {
+export default class CreateQuestCommand extends Command.Base {
     override get info(): any {
         return new SlashCommandBuilder()
             .setName("createquest")
