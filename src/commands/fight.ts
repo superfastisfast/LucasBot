@@ -22,7 +22,7 @@ interface PlayerDisplay {
 
 export default class FightCommand extends Command {
     // game?: FightGame;
-    games?: Array<FightGame> = [];
+    games: Map<number, FightGame> = new Map<number, FightGame>();
 
     override get info(): any {
         console.log("Fight called");
@@ -39,72 +39,82 @@ export default class FightCommand extends Command {
             .toJSON();
     }
 
+    isUserPartOfFight(userId: string): FightGame | undefined {
+        for (const [id, game] of this.games!) {
+            if (game.getDiscordUserById(userId) !== undefined) {
+                return game;
+            }
+        }
+        return undefined;
+    }
+
     public override async onButtonInteract(
         client: Client,
         interaction: ButtonInteraction,
     ): Promise<boolean> {
-        for (const game in this.games as FightGame) {
-            if (game.getDiscordUserById(interaction.user.id) === undefined) {
-                interaction.reply({
-                    content: "You are not part of this fight!",
-                    flags: "Ephemeral",
-                });
-                return true;
-            }
-        }
         await interaction.deferUpdate();
-        if (this.game!.isValidCombatMovement(interaction.user.id)) {
+        let currentGame: FightGame | undefined = this.isUserPartOfFight(
+            interaction.user.id,
+        );
+        if (currentGame === undefined) {
+            interaction.followUp({
+                content: "You are not part of any fight!",
+                flags: "Ephemeral",
+            });
+            return true;
+        }
+        if (currentGame.isValidCombatMovement(interaction.user.id)) {
             if (interaction.customId === "#moveLeft") {
-                this.game!.movePlayer("left");
+                currentGame.movePlayer("left");
                 interaction.editReply(
                     await this.getFightDisplayOptions("Moved left"),
                 );
             } else if (interaction.customId === "#moveRight") {
-                this.game!.movePlayer("right");
+                currentGame.movePlayer("right");
                 interaction.editReply(
                     await this.getFightDisplayOptions("Moved right"),
                 );
             } else if (interaction.customId === "#attack") {
-                const actionInfo: string = this.game!.playerAttack();
+                const actionInfo: string = currentGame.playerAttack();
                 interaction.editReply(
                     await this.getFightDisplayOptions(
                         "Attacked\n" + actionInfo,
                     ),
                 );
-                if (this.game!.getNextPlayer().currentHealth <= 0) {
-                    this.game!.resetGame();
+                if (currentGame.getNextPlayer().currentHealth <= 0) {
+                    currentGame.resetGame();
                     return true;
                 }
             } else if (interaction.customId === "#flee") {
-                if (this.game!.playerFlee()) {
+                if (currentGame.playerFlee()) {
                     interaction.editReply({
-                        content: `The fight is over! ${this.game!.getCurrentPlayer().dbUser!.username} escaped!`,
+                        content: `The fight is over! ${currentGame.getCurrentPlayer().dbUser!.username} escaped!`,
                         components: [],
                     });
-                    this.game!.resetGame();
+                    currentGame.resetGame();
                 } else {
                     interaction.editReply(
                         await this.getFightDisplayOptions(
-                            `${this.game!.getCurrentPlayer().dbUser!.username} Failed to flee!`,
+                            `${currentGame.getCurrentPlayer().dbUser!.username} Failed to flee!`,
                         ),
                     );
                 }
             } else if (interaction.customId === "#sleep") {
-                const manaAndHealthGainedMsg = this.game!.playerSleep();
+                const manaAndHealthGainedMsg = currentGame.playerSleep();
                 interaction.editReply(
                     await this.getFightDisplayOptions(manaAndHealthGainedMsg),
                 );
             }
-            this.game!.nextTurn();
+            currentGame.nextTurn();
             return true;
         } else {
             if (interaction.customId === "#acceptFight") {
-                const res = await this.game!.initGame(interaction.user.id);
+                const res = await currentGame.initGame(interaction.user.id);
                 if (res.success) {
                     await interaction.editReply(
                         await this.getFightDisplayOptions(res.reason),
                     );
-                    this.game!.nextTurn();
+                    currentGame.nextTurn();
                 } else {
                     interaction.reply({
                         content: res.reason,
@@ -118,7 +128,7 @@ export default class FightCommand extends Command {
                     content: `The fight was cancelled by ${interaction.user.username}.`,
                     components: [],
                 });
-                this.game!.resetGame();
+                currentGame.resetGame();
                 return true;
             } else if (interaction.customId === "#end") {
                 //TODO REMOVE TEST BUTTON
@@ -126,7 +136,7 @@ export default class FightCommand extends Command {
                     content: `The fight was ended by ${interaction.user.username}.`,
                     components: [],
                 });
-                this.game!.resetGame();
+                currentGame.resetGame();
                 return false;
             }
         }
@@ -172,11 +182,12 @@ export default class FightCommand extends Command {
 
     private async getFightDisplayOptions(
         action: string,
+        currentGame: FightGame,
     ): Promise<InteractionUpdateOptions> {
-        const currentPlayer = this.game!.getCurrentPlayer();
-        const nextPlayer = this.game!.getNextPlayer();
-        const player1 = this.game!.getPlayers()[0]!;
-        const player2 = this.game!.getPlayers()[1]!;
+        const currentPlayer = currentGame.getCurrentPlayer();
+        const nextPlayer = currentGame.getNextPlayer();
+        const player1 = currentGame.getPlayers()[0]!;
+        const player2 = currentGame.getPlayers()[1]!;
         const player1HealthBar = await this.createStatBar(
             player1.currentHealth,
             player1.getMaxHealthStats(),
@@ -212,8 +223,8 @@ export default class FightCommand extends Command {
             player2ManaBar,
         );
         const fieldImageAttachment = await getFieldImage(
-            this.game!.getPlayers(),
-            this.game!.arenaSize,
+            currentGame.getPlayers(),
+            currentGame.arenaSize,
         );
         const builder = new EmbedBuilder()
             .setTitle(
@@ -249,7 +260,7 @@ export default class FightCommand extends Command {
                 .setLabel("Attack")
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(allowActionsButtons),
-            nextPlayer.posX === this.game!.arenaSize - 1
+            nextPlayer.posX === currentGame.arenaSize - 1
                 ? new ButtonBuilder()
                       .setCustomId("#flee")
                       .setLabel("Flee")
@@ -319,23 +330,35 @@ export default class FightCommand extends Command {
             return;
         }
 
-        if (this.game?.isActive) {
+        const otherUser =
+            interaction.options.get("opponent")?.user || interaction.user;
+        if (this.isUserPartOfFight(interaction.user.id) !== undefined) {
             interaction.reply({
-                content: "A fight is already in progress!",
+                content: "You are already in a fight!",
                 flags: "Ephemeral",
             });
             return;
         }
-        const otherUser =
-            interaction.options.get("opponent")?.user || interaction.user;
-        this.game = new FightGame(interaction.user, otherUser);
+        if (this.isUserPartOfFight(otherUser.id) !== undefined) {
+            interaction.reply({
+                content: `${otherUser.username} is already in a fight!`,
+                flags: "Ephemeral",
+            });
+            return;
+        }
+        let newGame = new FightGame(interaction.user, otherUser);
+        this.games.set(newGame.id, newGame);
         let msg = this.InitiateFight(
-            interaction.user.username,
-            otherUser.username || "Unknown",
+            interaction.user,
+            otherUser || "Unknown",
+            newGame.id,
         );
         interaction.reply({
             embeds: msg.embeds,
             components: msg.components,
         });
+        newGame.initGame(interaction.user.id);
+
+        console.log("Games:", this.games.size);
     }
 }
