@@ -1,7 +1,6 @@
 import { Command } from "@/command";
 import {
     SlashCommandBuilder,
-    User,
     InteractionContextType,
     type Client,
     type CommandInteraction,

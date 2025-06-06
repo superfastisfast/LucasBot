@@ -1,5 +1,5 @@
 import { Command } from "@/command";
-import { giveGold } from "@/models/user";
+import { DataBase } from "@/models/user";
 import {
     SlashCommandBuilder,
     User,
@@ -49,7 +49,7 @@ export default class PingCommand extends Command.Base {
 
         try {
             const winner: User = random ? interaction.user : target;
-            giveGold(winner, amount);
+            DataBase.giveGold(winner, amount);
             interaction.reply(`${winner} wins ${amount}!`);
         } catch (err) {
             console.error(err);
