@@ -36,7 +36,7 @@ export interface UserDocument extends Document {
     level: number
     xp: number;
     lastXpMessageAt: Date;
-    balance: number;
+    gold: number;
     skillPoints: number;
     Weapon: string;
     strength: number;
@@ -107,7 +107,7 @@ export namespace DataBase {
     export async function giveGold(user: User | PartialUser | string, amount: number) {
         let dbUser = await getDBUserFromUser(user);
 
-        dbUser.balance = Math.max(-1000, dbUser.balance + amount);
+        await setGold(user, dbUser.gold + amount);
         await dbUser.save();
         return amount;
     }
@@ -115,7 +115,7 @@ export namespace DataBase {
     export async function setGold(user: User | PartialUser | string, amount: number) {
         let dbUser = await getDBUserFromUser(user);
 
-        dbUser.balance = Math.max(-1000, amount);
+        dbUser.gold = Math.max(-1000, amount);
         await dbUser.save();
         return amount;
     }
