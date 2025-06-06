@@ -5,26 +5,15 @@ import {
     type PartialGuildMember,
 } from "discord.js";
 import { UserModel } from "@/models/user";
+import { Service } from "@/service";
 
-export interface ILogger {
-    info(message: string): void;
-    error(error: unknown, message?: string): void;
-}
-
-export class TimeoutService {
-    constructor(
-        private readonly client: Client,
-        private readonly logger: ILogger = console,
-    ) {}
-
-    start(): void {
-        this.logger.info("Timeout Tracking Service starting.");
-        this.client.on(Events.GuildMemberUpdate, this.handleGuildMemberUpdate);
+export default class TimeoutService extends Service.Abstract {
+    override start(client: Client) {
+        client.on(Events.GuildMemberUpdate, this.handleGuildMemberUpdate);
     }
 
-    stop(): void {
-        this.client.off(Events.GuildMemberUpdate, this.handleGuildMemberUpdate);
-        this.logger.info("Timeout Tracking Service stopped.");
+    override stop(client: Client) {
+        client.off(Events.GuildMemberUpdate, this.handleGuildMemberUpdate);
     }
 
     private handleGuildMemberUpdate = async (
@@ -41,11 +30,11 @@ export class TimeoutService {
                     { $inc: { timeouts: 1 }, username: newMember.displayName },
                     { new: true, upsert: true, setDefaultsOnInsert: true },
                 );
-                this.logger.info(
+                console.info(
                     `User ${newMember.displayName} (${newMember.id}) timeout count updated to ${dbUser.timeouts}.`,
                 );
             } catch (err) {
-                this.logger.error(
+                console.error(
                     err,
                     `Failed to update timeout for user ${newMember.id}`,
                 );

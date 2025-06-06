@@ -3,7 +3,6 @@ import { SlashCommandBuilder, type Client, type CommandInteraction, type RestOrA
 
 export default class BenCommand extends Command {
     override get info(): any {
-        console.log("info called");
         return new SlashCommandBuilder()
             .setName("ben")
             .setDescription("Make Ben respond to the haters")
