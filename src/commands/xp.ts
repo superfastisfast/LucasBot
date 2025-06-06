@@ -6,7 +6,7 @@ import {
     type Client,
     type CommandInteraction,
 } from "discord.js";
-import { giveXP, setXP, UserModel } from "../models/user";
+import { DataBase, UserModel } from "../models/user";
 
 export default class XpCommand extends Command.Base {
     override get info(): any {
@@ -89,7 +89,7 @@ export default class XpCommand extends Command.Base {
                 const amount = interaction.options.get("amount")
                     ?.value as number;
                 try {
-                    giveXP(target.id, amount);
+                    DataBase.giveXP(target.id, amount);
                     interaction.reply({
                         content: `${interaction.user} added ${amount}xp to ${target}`,
                         flags: "Ephemeral",
@@ -110,7 +110,7 @@ export default class XpCommand extends Command.Base {
                 const amount = interaction.options.get("amount")
                     ?.value as number;
                 try {
-                    setXP(target.id, amount);
+                    DataBase.setXP(target.id, amount);
                     interaction.reply({
                         content: `${interaction.user} set ${target}'s xp to ${amount}`,
                         flags: "Ephemeral",

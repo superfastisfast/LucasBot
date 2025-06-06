@@ -1,4 +1,4 @@
-import { giveXP } from "@/models/user";
+import { DataBase } from "@/models/user";
 import { Service } from "@/service";
 import {
     Client,
@@ -30,7 +30,7 @@ export default class XpService extends Service.Base {
     private handleMessageCreate = async (message: Message) => {
         if (message.author.bot) return;
 
-        giveXP(message.author, 1);
+        DataBase.giveXP(message.author, 1);
     };
 
     private handleMessageDelete = async (message: Message | PartialMessage | Snowflake) => {
@@ -52,20 +52,20 @@ export default class XpService extends Service.Base {
         if (!author || author.bot) return;
 
         console.log('Deleted message author:', author.tag);
-        await giveXP(author, -1);
+        await DataBase.giveXP(author, -1);
     };
 
     private handleReactionAdd = async (
         reaction: MessageReaction | PartialMessageReaction,
         user: User | PartialUser
     ): Promise<void> => {
-        giveXP(user, 1);
+        DataBase.giveXP(user, 1);
     };
 
     private handleReactionRemove = async (
         reaction: MessageReaction | PartialMessageReaction,
         user: User | PartialUser
     ): Promise<void> => {
-        giveXP(user, -1);
+        DataBase.giveXP(user, -1);
     };
 }
