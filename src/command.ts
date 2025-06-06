@@ -5,7 +5,6 @@ import type {
     CommandInteraction,
 } from "discord.js";
 import { UserModel } from "./models/user";
-import { giveXP } from '@/models/user';
 import { Quest } from "./quest";
 
 export abstract class Command {
@@ -111,7 +110,6 @@ export namespace Cmd {
                 currentTime.getTime() - dbUser.lastXpMessageAt.getTime();
             const timeDifferenceMinutes = timeDifferenceMs / (1000 * 60);
             if (timeDifferenceMinutes >= 1) {
-                giveXP(dbUser.id, 1);
                 dbUser.lastXpMessageAt = currentTime;
                 await dbUser.save();
             }

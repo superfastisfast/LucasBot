@@ -12,11 +12,12 @@ const THUMBS_UP: EmojiIdentifierResolvable = "👍";
 const THUMBS_DOWN: EmojiIdentifierResolvable = "👎";
 
 export default class MessageResponderService extends Service.Abstract {
-    override start(client: Client) {
+    override async start(client: Client): Promise<void> {
         client.on(Events.MessageCreate, this.handleMessage);
+        
     }
 
-    override stop(client: Client) {
+    override async stop(client: Client): Promise<void> {
         client.off(Events.MessageCreate, this.handleMessage);
     }
 

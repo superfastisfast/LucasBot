@@ -3,6 +3,7 @@ import { Service } from "@/service";
 import {
     Client,
     GatewayIntentBits,
+    Partials,
     Events,
 } from "discord.js";
 import mongoose from "mongoose";
@@ -13,8 +14,10 @@ export const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildMessageReactions,
         GatewayIntentBits.MessageContent,
     ],
+    partials: [Partials.Message, Partials.Reaction, Partials.User],
 });
 
 
@@ -27,7 +30,7 @@ client.once(Events.ClientReady, async (readyClient) => {
 
     (async () => {
         await Service.load(client);
-        Service.start(client);
+        await Service.start(client);
         await Cmd.register(client);
         await Quest.loadQuests();
     })();
@@ -47,7 +50,7 @@ client.once(Events.ClientReady, async (readyClient) => {
         await Cmd.handleMessageCreate(message);
     });
 
-    Service.stop(client)
+    await Service.stop(client)
 });
 
 client.login(process.env.BOT_TOKEN);

@@ -2,8 +2,8 @@ import type { Client } from "discord.js";
 
 export namespace Service {
     export abstract class Abstract {
-        public abstract start(client: Client): void;
-        public abstract stop(client: Client): void;
+        public async start(client: Client): Promise<void> {}
+        public async stop(client: Client): Promise<void> {}
     }
 
     export const services: Abstract[] = [];
@@ -22,15 +22,15 @@ export namespace Service {
         }
     }
 
-    export function start(client: Client) {
+    export async function start(client: Client) {
         for (const service of services) {
-            service.start(client);
+            await service.start(client);
         }
     }
 
-    export function stop(client: Client) {
+    export async function stop(client: Client) {
         for (const service of services) {
-            service.stop(client);
+            await service.stop(client);
         }
     }
 }
