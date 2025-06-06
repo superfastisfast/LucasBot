@@ -50,20 +50,21 @@ export default class FightCommand extends Command {
             });
             return true;
         }
+        await interaction.deferUpdate();
         if (this.game!.isValidCombatMovement(interaction.user.id)) {
             if (interaction.customId === "#moveLeft") {
                 this.game!.movePlayer("left");
-                interaction.update(
+                interaction.editReply(
                     await this.getFightDisplayOptions("Moved left"),
                 );
             } else if (interaction.customId === "#moveRight") {
                 this.game!.movePlayer("right");
-                interaction.update(
+                interaction.editReply(
                     await this.getFightDisplayOptions("Moved right"),
                 );
             } else if (interaction.customId === "#attack") {
                 const actionInfo: string = this.game!.playerAttack();
-                interaction.update(
+                interaction.editReply(
                     await this.getFightDisplayOptions(
                         "Attacked\n" + actionInfo,
                     ),
@@ -74,13 +75,13 @@ export default class FightCommand extends Command {
                 }
             } else if (interaction.customId === "#flee") {
                 if (this.game!.playerFlee()) {
-                    interaction.update({
+                    interaction.editReply({
                         content: `The fight is over! ${this.game!.getCurrentPlayer().dbUser!.username} escaped!`,
                         components: [],
                     });
                     this.game!.resetGame();
                 } else {
-                    interaction.update(
+                    interaction.editReply(
                         await this.getFightDisplayOptions(
                             `${this.game!.getCurrentPlayer().dbUser!.username} Failed to flee!`,
                         ),
@@ -88,7 +89,7 @@ export default class FightCommand extends Command {
                 }
             } else if (interaction.customId === "#sleep") {
                 const manaAndHealthGainedMsg = this.game!.playerSleep();
-                interaction.update(
+                interaction.editReply(
                     await this.getFightDisplayOptions(manaAndHealthGainedMsg),
                 );
             }
@@ -98,7 +99,7 @@ export default class FightCommand extends Command {
             if (interaction.customId === "#acceptFight") {
                 const res = await this.game!.initGame(interaction.user.id);
                 if (res.success) {
-                    await interaction.update(
+                    await interaction.editReply(
                         await this.getFightDisplayOptions(res.reason),
                     );
                     this.game!.nextTurn();
@@ -111,7 +112,7 @@ export default class FightCommand extends Command {
                     return true;
                 }
             } else if (interaction.customId === "#declineFight") {
-                interaction.update({
+                interaction.editReply({
                     content: `The fight was cancelled by ${interaction.user.username}.`,
                     components: [],
                 });
@@ -119,7 +120,7 @@ export default class FightCommand extends Command {
                 return true;
             } else if (interaction.customId === "#end") {
                 //TODO REMOVE TEST BUTTON
-                interaction.update({
+                interaction.editReply({
                     content: `The fight was ended by ${interaction.user.username}.`,
                     components: [],
                 });
