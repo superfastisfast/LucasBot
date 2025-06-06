@@ -12,7 +12,7 @@ import {
     type Snowflake,
 } from "discord.js";
 
-export default class XpService extends Service.Abstract {
+export default class XpService extends Service.Base {
     override async start(client: Client): Promise<void> {
         client.on(Events.MessageCreate, this.handleMessageCreate);
         client.on(Events.MessageDelete, this.handleMessageDelete);

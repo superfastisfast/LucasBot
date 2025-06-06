@@ -21,8 +21,8 @@ interface PlayerDisplay {
     inline: boolean;
 }
 
-export default class FightCommand extends Command {
-    // game?: FightGame;
+//TODO list of active fights; Becaouse otherwise there is only one running.
+export default class FightCommand extends Command.Base {
     games: Map<number, FightGame> = new Map<number, FightGame>();
 
     override get info(): any {

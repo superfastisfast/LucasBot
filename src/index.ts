@@ -1,4 +1,4 @@
-import { Cmd, type Command } from "@/command";
+import { Command } from "@/command";
 import { Service } from "@/service";
 import {
     Client,
@@ -31,23 +31,23 @@ client.once(Events.ClientReady, async (readyClient) => {
     (async () => {
         await Service.load(client);
         await Service.start(client);
-        await Cmd.register(client);
+        await Command.register(client);
         await Quest.loadQuests();
     })();
     
 
     client.on(Events.InteractionCreate, async (interaction) => {
         if (interaction.isCommand()) {
-            await Cmd.handleInteraction(client, interaction);
+            await Command.handleInteraction(client, interaction);
         } else if (interaction.isAutocomplete()) {
-            await Cmd.handleAutocompleteInteraction(client, interaction);
+            await Command.handleAutocompleteInteraction(client, interaction);
         } else if (interaction.isButton()) {
-            await Cmd.handleButtonInteraction(client, interaction);
+            await Command.handleButtonInteraction(client, interaction);
         }
     });
 
     client.on(Events.MessageCreate, async (message) => {
-        await Cmd.handleMessageCreate(message);
+        await Command.handleMessageCreate(message);
     });
 
     await Service.stop(client)

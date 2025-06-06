@@ -1,7 +1,7 @@
 import { Command } from "@/command";
 import { SlashCommandBuilder, type Client, type CommandInteraction, type RestOrArray } from "discord.js";
 
-export default class BenCommand extends Command {
+export default class BenCommand extends Command.Base {
     override get info(): any {
         return new SlashCommandBuilder()
             .setName("ben")

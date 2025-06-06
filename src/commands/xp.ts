@@ -8,7 +8,7 @@ import {
 } from "discord.js";
 import { giveXP, setXP, UserModel } from "../models/user";
 
-export default class XpCommand extends Command {
+export default class XpCommand extends Command.Base {
     override get info(): any {
         return new SlashCommandBuilder()
             .setName("xp")

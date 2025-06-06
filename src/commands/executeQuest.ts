@@ -8,7 +8,7 @@ import {
     type CommandInteraction,
 } from "discord.js";
 
-export default class ExecuteQuestCommand extends Command {
+export default class ExecuteQuestCommand extends Command.Base {
     override get info(): any {
         return new SlashCommandBuilder()
             .setName("executequest")

@@ -1,12 +1,12 @@
 import type { Client } from "discord.js";
 
 export namespace Service {
-    export abstract class Abstract {
+    export abstract class Base {
         public async start(client: Client): Promise<void> {}
         public async stop(client: Client): Promise<void> {}
     }
 
-    export const services: Abstract[] = [];
+    export const services: Base[] = [];
 
     export async function load(client: Client) {
         const glob = new Bun.Glob("./src/services/*.ts");
@@ -16,7 +16,7 @@ export namespace Service {
             const { default: ServiceClass } = await import(
                 path.replace("./src/", "./")
             );
-            const instance: Abstract = new ServiceClass();
+            const instance: Base = new ServiceClass();
             services.push(instance);
             console.log(`\t${instance.constructor.name}`);
         }

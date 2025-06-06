@@ -7,7 +7,7 @@ import {
 import { UserModel } from "@/models/user";
 import { Service } from "@/service";
 
-export default class TimeoutService extends Service.Abstract {
+export default class TimeoutService extends Service.Base {
     override async  start(client: Client): Promise<void> {
         client.on(Events.GuildMemberUpdate, this.handleGuildMemberUpdate);
     }

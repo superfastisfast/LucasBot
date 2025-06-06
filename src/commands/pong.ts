@@ -1,7 +1,7 @@
 import { Command } from "@/command";
 import { SlashCommandBuilder, User, type Client, type CommandInteraction } from "discord.js";
 
-export default class PongCommand extends Command {
+export default class PongCommand extends Command.Base {
     override get info(): any {
         return new SlashCommandBuilder()
             .setName("pong")

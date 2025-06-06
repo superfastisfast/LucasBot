@@ -7,7 +7,7 @@ import {
     type CommandInteraction,
 } from "discord.js";
 
-export default class XpCommand extends Command {
+export default class XpCommand extends Command.Base {
     override get info(): any {
         return new SlashCommandBuilder()
             .setName("role")

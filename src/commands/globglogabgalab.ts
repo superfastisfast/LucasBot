@@ -76,7 +76,7 @@ const songs: Globglogabgelab[] = [
     { url: "aTtnRjRJstc", option: "Spiderman" },
 ]
 
-export default class GlobglogabgalabCommand extends Command {
+export default class GlobglogabgalabCommand extends Command.Base {
     override get info(): any {
         return new SlashCommandBuilder()
             .setName("globglogabgalab")
