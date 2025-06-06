@@ -1,4 +1,4 @@
-import { getUserFromId, giveGold } from "@/models/user";
+import { DataBase } from "@/models/user";
 import Fighter from "./fighter";
 import type { User as DiscordUser } from "discord.js";
 import { BLOCK_SIZE } from "./fieldGenerate";
@@ -13,13 +13,18 @@ export default class FightGame {
     arenaSize: number = 6;
     playerTurn: number = 1;
     discordUsers: DiscordUser[] = [];
-    reward: number = 0;
+    bet: number = 0;
 
     private static nextId: number = 0;
     id: number = 0;
 
-    constructor(discordUser1: DiscordUser, discordUser2: DiscordUser) {
+    constructor(
+        discordUser1: DiscordUser,
+        discordUser2: DiscordUser,
+        amount: number,
+    ) {
         this.id = FightGame.nextId++;
+        this.bet = amount;
         this.discordUsers = [discordUser1, discordUser2];
     }
 
@@ -27,14 +32,30 @@ export default class FightGame {
         if (id !== this.discordUsers[1]!.id)
             return { success: false, reason: "You are not the second player!" };
 
-        const dbCommandUser = await getUserFromId(this.discordUsers[0]!.id);
-        const dbOpponentUser = await getUserFromId(this.discordUsers[1]!.id);
+        const dbCommandUser = await DataBase.getDBUserFromUser(
+            this.discordUsers[0]!,
+        );
+        const dbOpponentUser = await DataBase.getDBUserFromUser(
+            this.discordUsers[1]!,
+        );
         if (!dbCommandUser || !dbOpponentUser) {
             return {
                 success: false,
                 reason: "One or both users could not be found in the database.",
             };
         }
+        if (
+            dbCommandUser.balance < this.bet ||
+            dbOpponentUser.balance < this.bet
+        ) {
+            return {
+                success: false,
+                reason: "One or both users could not addord the bet",
+            };
+        }
+        DataBase.giveGold(this.discordUsers[0]!, -this.bet);
+        DataBase.giveGold(this.discordUsers[1]!, -this.bet);
+
         this.players[0] = await Fighter.create(
             dbCommandUser,
             0,
@@ -128,12 +149,26 @@ export default class FightGame {
         this.getNextPlayer().calculateStats();
     }
 
-    gameOver() {
+    gameOver(wasCompleted: boolean = false) {
+        const winnerReward = this.bet * 2;
         if (this.players[0]!.currentHealth <= 0) {
-            console.log(`${}`)
-            giveGold(this.discordUsers[1])
+            console.log(
+                `${this.discordUsers[1]!.username} gained ${winnerReward} gold!!`,
+            );
+            DataBase.giveGold(this.discordUsers[1]!, winnerReward);
         } else if (this.players[1]!.currentHealth <= 0) {
+            console.log(
+                `${this.discordUsers[0]!.username} gained ${winnerReward} gold!!`,
+            );
+            DataBase.giveGold(this.discordUsers[0]!, winnerReward);
         } else {
+            console.log(` ${this.bet} gold was splited!!`);
+            DataBase.giveGold(this.discordUsers[1]!, this.bet);
+            DataBase.giveGold(this.discordUsers[0]!, this.bet);
+        }
+        if (wasCompleted) {
+            DataBase.giveXP(this.discordUsers[0]!, 10);
+            DataBase.giveXP(this.discordUsers[1]!, 10);
         }
     }
 }

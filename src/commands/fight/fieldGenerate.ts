@@ -1,10 +1,20 @@
-import { createCanvas, loadImage, type SKRSContext2D } from "@napi-rs/canvas";
+import {
+    createCanvas,
+    Image,
+    loadImage,
+    type SKRSContext2D,
+} from "@napi-rs/canvas";
 import { AttachmentBuilder, EmbedBuilder } from "discord.js";
 import type Fighter from "./fighter";
+import type FightGame from "./fightGame";
 
 export const BLOCK_SIZE = 64;
 
-async function addPlayerToConext(player: Fighter, context: SKRSContext2D) {
+async function addPlayerToConext(
+    player: Fighter,
+    context: SKRSContext2D,
+    BorderImage: Image | undefined,
+) {
     const playerAvatarUrl = player.imgeUrl;
     let playerAvatar;
     try {
@@ -16,6 +26,15 @@ async function addPlayerToConext(player: Fighter, context: SKRSContext2D) {
             BLOCK_SIZE,
             BLOCK_SIZE,
         );
+        if (BorderImage !== undefined) {
+            context.drawImage(
+                BorderImage,
+                player.posX * BLOCK_SIZE,
+                0,
+                BLOCK_SIZE,
+                BLOCK_SIZE,
+            );
+        }
     } catch (error) {
         console.error(
             `Failed to load player 1 avatar from ${playerAvatarUrl}:`,
@@ -23,7 +42,7 @@ async function addPlayerToConext(player: Fighter, context: SKRSContext2D) {
         );
         context.fillStyle = "red";
         context.fillRect(player.posX * BLOCK_SIZE, 0, BLOCK_SIZE, BLOCK_SIZE);
-        context.font = `${BLOCK_SIZE / 2}px sans-serif`;
+        context.font = `${BLOCK_SIZE / 8}px sans-serif`;
         context.fillStyle = "white";
         context.textAlign = "center";
         context.textBaseline = "middle";
@@ -35,13 +54,14 @@ async function addPlayerToConext(player: Fighter, context: SKRSContext2D) {
     }
 }
 
-export async function getFieldImage(players: Fighter[], arenaSize: number) {
+export async function getFieldImage(currentGame: FightGame) {
     const FIELD_HEIGHT = BLOCK_SIZE;
-    const FIELD_WIDTH = arenaSize * BLOCK_SIZE;
+    const FIELD_WIDTH = currentGame.arenaSize * BLOCK_SIZE;
 
     const canvas = createCanvas(FIELD_WIDTH, FIELD_HEIGHT);
     const context = canvas.getContext("2d");
     const squareBlockImagePath = "./assets/square.png";
+    const borderImagePath = "./assets/border.png";
 
     let defaultBlockImage;
     try {
@@ -54,7 +74,18 @@ export async function getFieldImage(players: Fighter[], arenaSize: number) {
         context.fillStyle = "#CCCCCC";
     }
 
-    for (let i = 0; i < arenaSize; i++) {
+    let BorderImage;
+    try {
+        BorderImage = await loadImage(borderImagePath);
+    } catch (error) {
+        console.error(
+            `Failed to load square block image from ${borderImagePath}:`,
+            error,
+        );
+        context.fillStyle = "#BBBBBB";
+    }
+
+    for (let i = 0; i < currentGame.arenaSize; i++) {
         const x = i * BLOCK_SIZE;
         if (defaultBlockImage) {
             context.drawImage(defaultBlockImage, x, 0, BLOCK_SIZE, BLOCK_SIZE);
@@ -62,8 +93,17 @@ export async function getFieldImage(players: Fighter[], arenaSize: number) {
             context.fillRect(x, 0, BLOCK_SIZE, BLOCK_SIZE);
         }
     }
-    await addPlayerToConext(players[0]!, context);
-    await addPlayerToConext(players[1]!, context);
+    const players: Fighter[] = currentGame.getPlayers();
+    await addPlayerToConext(
+        players[0]!,
+        context,
+        currentGame.playerTurn === 1 ? BorderImage! : undefined,
+    );
+    await addPlayerToConext(
+        players[1]!,
+        context,
+        currentGame.playerTurn === 0 ? BorderImage! : undefined,
+    );
     const buffer = await canvas.encode("png");
     const attachment = new AttachmentBuilder(buffer, {
         name: "game-field.png",

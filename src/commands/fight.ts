@@ -73,6 +73,16 @@ export default class FightCommand extends Command.Base {
             });
             return true;
         }
+        if (interaction.customId === currentGame.id + "#end") {
+            console.log("=============[8]=============");
+            //TODO REMOVE TEST BUTTON
+            interaction.editReply({
+                content: `The fight was ended by ${interaction.user.username}.`,
+                components: [],
+            });
+            currentGame.gameOver(false);
+            return false;
+        }
         console.log("=============[0]=============");
         if (currentGame.isValidCombatMovement(interaction.user.id)) {
             console.log("=============[1]=============");
@@ -105,7 +115,7 @@ export default class FightCommand extends Command.Base {
                     ),
                 );
                 if (currentGame.getNextPlayer().currentHealth <= 0) {
-                    currentGame.resetGame();
+                    currentGame.gameOver(true);
                     return true;
                 }
             } else if (interaction.customId === currentGame.id + "#flee") {
@@ -116,7 +126,7 @@ export default class FightCommand extends Command.Base {
                         content: `The fight is over! ${currentGame.getCurrentPlayer().dbUser!.username} escaped!`,
                         components: [],
                     });
-                    currentGame.resetGame();
+                    currentGame.gameOver(false);
                 } else {
                     interaction.editReply(
                         await this.getFightDisplayOptions(
@@ -136,6 +146,7 @@ export default class FightCommand extends Command.Base {
                     ),
                 );
             }
+
             currentGame.nextTurn();
             console.log("=============[-1]=============");
 
@@ -171,18 +182,8 @@ export default class FightCommand extends Command.Base {
                     content: `The fight was cancelled by ${interaction.user.username}.`,
                     components: [],
                 });
-                currentGame.resetGame();
+                currentGame.gameOver(false);
                 return true;
-            } else if (interaction.customId === currentGame.id + "#end") {
-                console.log("=============[8]=============");
-
-                //TODO REMOVE TEST BUTTON
-                interaction.editReply({
-                    content: `The fight was ended by ${interaction.user.username}.`,
-                    components: [],
-                });
-                currentGame.resetGame();
-                return false;
             }
         }
         console.log("=============[-2]=============");
@@ -241,7 +242,7 @@ export default class FightCommand extends Command.Base {
                 `🔋 Vitality: **${player.fighterStats.vitality}**\n` +
                 `🏃‍♂️ Stamina: **${player.fighterStats.stamina}**\n` +
                 `🗣️ Charisma: **${player.fighterStats.charisma}**\n` +
-                `📦 Items: ${itemsDisplay}`,
+                `📦 Items: \n${itemsDisplay}`,
             inline: true,
         };
     }
@@ -259,7 +260,7 @@ export default class FightCommand extends Command.Base {
         const filledBar = "█".repeat(filled);
         const emptyBar = " ".repeat(empty);
         // Using ANSI code block for better visual consistency of the bar
-        return `\`\`\`ansi\n[2;${filledColorCode}m${filledBar}[0m[2;37m${emptyBar}[0m\n\`\`\` ${current.toFixed(2)}/${max.toFixed(2)}`;
+        return `${current.toFixed(2)}/${max.toFixed(2)}\`\`\`ansi\n[2;${filledColorCode}m${filledBar}[0m[2;37m${emptyBar}[0m\n\`\`\` `;
     }
 
     private async getFightDisplayOptions(
@@ -304,18 +305,13 @@ export default class FightCommand extends Command.Base {
             player2HealthBar,
             player2ManaBar,
         );
-        const fieldImageAttachment = await getFieldImage(
-            currentGame.getPlayers(),
-            currentGame.arenaSize,
-        );
+        const fieldImageAttachment = await getFieldImage(currentGame);
         const builder = new EmbedBuilder()
-            .setTitle(
-                ":crossed_swords:" +
-                    player1.dbUser!.username +
-                    " -VS- " +
-                    player2.dbUser!.username +
-                    ":crossed_swords:",
-            )
+            .setColor(0x0099ff)
+            .setAuthor({
+                name: `It's ${nextPlayer.dbUser!.username}'s Turn!`,
+                iconURL: nextPlayer.imgeUrl,
+            })
             .setDescription(currentPlayer.dbUser?.username + ": " + action)
             .setImage("attachment://game-field.png")
             .addFields(player1DisplayStats, player2DisplayStats)
@@ -421,7 +417,11 @@ export default class FightCommand extends Command.Base {
             });
             return;
         }
-        let newGame = new FightGame(interaction.user, otherUser);
+        let newGame = new FightGame(
+            interaction.user,
+            otherUser,
+            parseInt(String(interaction.options.get("bet")?.value || 0)),
+        );
         this.games.set(newGame.id, newGame);
         let msg = this.InitiateFight(interaction.user, otherUser, newGame.id);
         interaction.reply({
