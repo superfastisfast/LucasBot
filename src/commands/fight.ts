@@ -20,9 +20,9 @@ interface PlayerDisplay {
     inline: boolean;
 }
 
-//TODO list of active fights; Becaouse otherwise there is only one running.
 export default class FightCommand extends Command {
-    game?: FightGame;
+    // game?: FightGame;
+    games?: Array<FightGame> = [];
 
     override get info(): any {
         console.log("Fight called");
@@ -43,12 +43,14 @@ export default class FightCommand extends Command {
         client: Client,
         interaction: ButtonInteraction,
     ): Promise<boolean> {
-        if (this.game?.getDiscordUserById(interaction.user.id) === undefined) {
-            interaction.reply({
-                content: "You are not part of this fight!",
-                flags: "Ephemeral",
-            });
-            return true;
+        for (const game in this.games as FightGame) {
+            if (game.getDiscordUserById(interaction.user.id) === undefined) {
+                interaction.reply({
+                    content: "You are not part of this fight!",
+                    flags: "Ephemeral",
+                });
+                return true;
+            }
         }
         await interaction.deferUpdate();
         if (this.game!.isValidCombatMovement(interaction.user.id)) {
