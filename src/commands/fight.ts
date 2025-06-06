@@ -6,6 +6,7 @@ import {
     ButtonStyle,
     EmbedBuilder,
     SlashCommandBuilder,
+    User,
     type Client,
     type CommandInteraction,
     type InteractionUpdateOptions,
@@ -63,29 +64,44 @@ export default class FightCommand extends Command {
             });
             return true;
         }
+        console.log("=============[0]=============");
         if (currentGame.isValidCombatMovement(interaction.user.id)) {
-            if (interaction.customId === "#moveLeft") {
+            console.log("=============[1]=============");
+            if (interaction.customId === currentGame.id + "#moveLeft") {
                 currentGame.movePlayer("left");
                 interaction.editReply(
-                    await this.getFightDisplayOptions("Moved left"),
+                    await this.getFightDisplayOptions(
+                        "Moved left",
+                        currentGame,
+                    ),
                 );
-            } else if (interaction.customId === "#moveRight") {
+            } else if (interaction.customId === currentGame.id + "#moveRight") {
+                console.log("=============[2]=============");
+
                 currentGame.movePlayer("right");
                 interaction.editReply(
-                    await this.getFightDisplayOptions("Moved right"),
+                    await this.getFightDisplayOptions(
+                        "Moved right",
+                        currentGame,
+                    ),
                 );
-            } else if (interaction.customId === "#attack") {
+            } else if (interaction.customId === currentGame.id + "#attack") {
+                console.log("=============[3]=============");
+
                 const actionInfo: string = currentGame.playerAttack();
                 interaction.editReply(
                     await this.getFightDisplayOptions(
                         "Attacked\n" + actionInfo,
+                        currentGame,
                     ),
                 );
                 if (currentGame.getNextPlayer().currentHealth <= 0) {
                     currentGame.resetGame();
                     return true;
                 }
-            } else if (interaction.customId === "#flee") {
+            } else if (interaction.customId === currentGame.id + "#flee") {
+                console.log("=============[4]=============");
+
                 if (currentGame.playerFlee()) {
                     interaction.editReply({
                         content: `The fight is over! ${currentGame.getCurrentPlayer().dbUser!.username} escaped!`,
@@ -96,23 +112,36 @@ export default class FightCommand extends Command {
                     interaction.editReply(
                         await this.getFightDisplayOptions(
                             `${currentGame.getCurrentPlayer().dbUser!.username} Failed to flee!`,
+                            currentGame,
                         ),
                     );
                 }
-            } else if (interaction.customId === "#sleep") {
+            } else if (interaction.customId === currentGame.id + "#sleep") {
+                console.log("=============[5]=============");
+
                 const manaAndHealthGainedMsg = currentGame.playerSleep();
                 interaction.editReply(
-                    await this.getFightDisplayOptions(manaAndHealthGainedMsg),
+                    await this.getFightDisplayOptions(
+                        manaAndHealthGainedMsg,
+                        currentGame,
+                    ),
                 );
             }
             currentGame.nextTurn();
+            console.log("=============[-1]=============");
+
             return true;
         } else {
-            if (interaction.customId === "#acceptFight") {
+            if (interaction.customId === currentGame.id + "#acceptFight") {
+                console.log("=============[6]=============");
+
                 const res = await currentGame.initGame(interaction.user.id);
                 if (res.success) {
                     await interaction.editReply(
-                        await this.getFightDisplayOptions(res.reason),
+                        await this.getFightDisplayOptions(
+                            res.reason,
+                            currentGame,
+                        ),
                     );
                     currentGame.nextTurn();
                 } else {
@@ -123,14 +152,21 @@ export default class FightCommand extends Command {
                     });
                     return true;
                 }
-            } else if (interaction.customId === "#declineFight") {
+            } else if (
+                interaction.customId ===
+                currentGame.id + "#declineFight"
+            ) {
+                console.log("=============[7]=============");
+
                 interaction.editReply({
                     content: `The fight was cancelled by ${interaction.user.username}.`,
                     components: [],
                 });
                 currentGame.resetGame();
                 return true;
-            } else if (interaction.customId === "#end") {
+            } else if (interaction.customId === currentGame.id + "#end") {
+                console.log("=============[8]=============");
+
                 //TODO REMOVE TEST BUTTON
                 interaction.editReply({
                     content: `The fight was ended by ${interaction.user.username}.`,
@@ -140,6 +176,8 @@ export default class FightCommand extends Command {
                 return false;
             }
         }
+        console.log("=============[-2]=============");
+
         return false;
     }
 
@@ -246,37 +284,37 @@ export default class FightCommand extends Command {
         const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
             nextPlayer.posX === 0
                 ? new ButtonBuilder()
-                      .setCustomId("#flee")
+                      .setCustomId(currentGame.id + "#flee")
                       .setLabel("Flee")
                       .setStyle(ButtonStyle.Danger)
                       .setDisabled(allowActionsButtons)
                 : new ButtonBuilder()
-                      .setCustomId("#moveLeft")
+                      .setCustomId(currentGame.id + "#moveLeft")
                       .setLabel("<<<")
                       .setStyle(ButtonStyle.Primary)
                       .setDisabled(allowActionsButtons),
             new ButtonBuilder()
-                .setCustomId("#attack")
+                .setCustomId(currentGame.id + "#attack")
                 .setLabel("Attack")
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(allowActionsButtons),
             nextPlayer.posX === currentGame.arenaSize - 1
                 ? new ButtonBuilder()
-                      .setCustomId("#flee")
+                      .setCustomId(currentGame.id + "#flee")
                       .setLabel("Flee")
                       .setStyle(ButtonStyle.Danger)
                       .setDisabled(allowActionsButtons)
                 : new ButtonBuilder()
-                      .setCustomId("#moveRight")
+                      .setCustomId(currentGame.id + "#moveRight")
                       .setLabel(">>>")
                       .setStyle(ButtonStyle.Primary)
                       .setDisabled(allowActionsButtons),
             new ButtonBuilder()
-                .setCustomId("#sleep")
+                .setCustomId(currentGame.id + "#sleep")
                 .setLabel("sleep")
                 .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
-                .setCustomId("#end")
+                .setCustomId(currentGame.id + "#end")
                 .setLabel("End Fight (TEST)")
                 .setStyle(ButtonStyle.Primary),
         );
@@ -288,27 +326,20 @@ export default class FightCommand extends Command {
         };
     }
 
-    private InitiateFight(
-        user1: string | undefined,
-        user2: string | undefined,
-    ) {
+    private InitiateFight(user1: User, user2: User, gameId: number) {
         const builder = new EmbedBuilder()
             .setTitle(
-                ":crossed_swords:" +
-                    user1 +
-                    " -VS- " +
-                    user2 +
-                    ":crossed_swords:",
+                `:crossed_swords: ${user1?.displayName} -VS- ${user2?.displayName} :crossed_swords:`,
             )
-            .setDescription(user2 + " do you accept the fight?")
+            .setDescription(`${user2} do you accept the fight?`)
             .setTimestamp();
         const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
-                .setCustomId("#acceptFight")
+                .setCustomId(gameId + "#acceptFight")
                 .setLabel("Accept Fight")
                 .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
-                .setCustomId("#declineFight")
+                .setCustomId(gameId + "#declineFight")
                 .setLabel("Decline Fight")
                 .setStyle(ButtonStyle.Danger),
         );
@@ -348,11 +379,7 @@ export default class FightCommand extends Command {
         }
         let newGame = new FightGame(interaction.user, otherUser);
         this.games.set(newGame.id, newGame);
-        let msg = this.InitiateFight(
-            interaction.user,
-            otherUser || "Unknown",
-            newGame.id,
-        );
+        let msg = this.InitiateFight(interaction.user, otherUser, newGame.id);
         interaction.reply({
             embeds: msg.embeds,
             components: msg.components,
