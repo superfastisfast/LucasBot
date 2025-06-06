@@ -39,6 +39,6 @@ export default class BenCommand extends Command {
         const video = videoMap[option] ?? "Invalid";
 
 
-        interaction.reply(`https://www.youtube.com/watch?v=${video}`);
+        interaction.reply(`${option} *[...](https://www.youtube.com/watch?v=${video})*`);
     }
 }
