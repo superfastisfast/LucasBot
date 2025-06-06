@@ -6,8 +6,8 @@ import {
     Message,
 } from "discord.js";
 
-const GOOD_USER_ID = "924027166096752650";
-const BAD_USER_ID = "402859016457420820";
+const GOOD_USER_ID = "402859016457420820";
+const BAD_USER_ID = "924027166096752650";
 const THUMBS_UP: EmojiIdentifierResolvable = "👍";
 const THUMBS_DOWN: EmojiIdentifierResolvable = "👎";
 
