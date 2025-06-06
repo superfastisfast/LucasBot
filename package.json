@@ -18,6 +18,8 @@
     "dependencies": {
         "@napi-rs/canvas": "^0.1.70",
         "discord.js": "^14.19.3",
-        "mongoose": "^8.15.1"
+        "mongoose": "^8.15.1",
+        "ts-node": "^10.9.2",
+        "tsconfig-paths": "^4.2.0"
     }
 }

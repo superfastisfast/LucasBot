@@ -32,8 +32,6 @@ export default class Fighter {
             self.items.push(weapon);
         }
         self.calculateStats();
-        self.currentHealth = self.getMaxHealthStats();
-        self.currentMana = self.getMaxManaStats();
 
         return self;
     }
@@ -74,6 +72,8 @@ export default class Fighter {
                 }
             }
         }
+        this.currentHealth = this.getMaxHealthStats();
+        this.currentMana = this.getMaxManaStats();
     }
 
     getMaxHealthStats(): number {
@@ -104,6 +104,12 @@ export default class Fighter {
             damage.toFixed(2) +
             " damage!"
         );
+    }
+    move(value: number, maxPosition: number) {
+        this.posX = Math.max(Math.min(maxPosition, this.posX + value), 0);
+    }
+    setPosition(value: number, maxPosition: number) {
+        this.posX = Math.max(Math.min(maxPosition, value), 0);
     }
 
     gainHealth(amount: number) {

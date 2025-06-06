@@ -1,7 +1,19 @@
 import { getUserFromId } from "@/models/user";
 import Fighter from "./fighter";
-import type { User as DiscordUser } from "discord.js";
-import { BLOCK_SIZE } from "./fieldGenerate";
+import type {
+    User as DiscordUser,
+    AttachmentBuilder,
+    InteractionUpdateOptions,
+    EmbedBuilder,
+    ActionRowBuilder,
+    ButtonBuilder,
+} from "discord.js";
+import {
+    BLOCK_SIZE,
+    getButtons,
+    getFieldImage,
+    getFightDisplayOptions,
+} from "./generateInfo";
 interface GameInitializationResult {
     success: boolean;
     reason: string;
@@ -14,6 +26,17 @@ export default class FightGame {
     playerTurn: number = 1;
     discordUsers: DiscordUser[] = [];
 
+    builderOnfoDirty: boolean = true;
+    builderInfo?: EmbedBuilder;
+    action?: string;
+
+    actionRowButtonsDirty: boolean = true;
+    actionRowButtons?: ActionRowBuilder<ButtonBuilder>;
+
+    fieldImageDirty: boolean = true;
+    fieldImages: Array<AttachmentBuilder> = new Array(5).fill(null);
+    fieldImageIndex: number = 0;
+
     private static nextId: number = 0;
     id: number = 0;
 
@@ -23,9 +46,6 @@ export default class FightGame {
     }
 
     async initGame(id: string): Promise<GameInitializationResult> {
-        if (id !== this.discordUsers[1]!.id)
-            return { success: false, reason: "You are not the second player!" };
-
         const dbCommandUser = await getUserFromId(this.discordUsers[0]!.id);
         const dbOpponentUser = await getUserFromId(this.discordUsers[1]!.id);
         if (!dbCommandUser || !dbOpponentUser) {
@@ -50,7 +70,21 @@ export default class FightGame {
                 size: BLOCK_SIZE,
             }),
         );
-        this.isActive = true;
+        this.fieldImages[0] = await getFieldImage(
+            this.players[0],
+            this.players[1],
+            this.arenaSize,
+        );
+        // this.builderInfo = getFightDisplayOptions(this);
+        // this.actionRowButtons = getButtons(this.getCurrentPlayer(), this);
+
+        console.log("playerTurn" + this.playerTurn);
+
+        //Need to do so inital visuals are correct
+        this.playerTurn = 1;
+        this.nextTurn();
+        this.playerTurn = 0;
+
         return {
             success: true,
             reason: " Accepted the fight",
@@ -64,6 +98,14 @@ export default class FightGame {
             return true;
         }
         return false;
+    }
+
+    getDisplayOptions(): InteractionUpdateOptions {
+        return {
+            embeds: [this.builderInfo!],
+            files: [this.fieldImages[this.fieldImageIndex]!],
+            components: [this.actionRowButtons!],
+        };
     }
 
     getPlayers(): Fighter[] {
@@ -82,16 +124,15 @@ export default class FightGame {
         return this.players[this.playerTurn === 0 ? 1 : 0]!;
     }
     movePlayer(direction: "left" | "right") {
+        this.fieldImageDirty = true;
         const currentPlayer = this.getCurrentPlayer();
-        currentPlayer.drainMana(1);
         if (direction === "left") {
-            currentPlayer.posX = Math.max(0, currentPlayer.posX - 1);
+            currentPlayer.move(-1, this.arenaSize - 1);
         } else if (direction === "right") {
-            currentPlayer.posX = Math.min(
-                this.arenaSize - 1,
-                currentPlayer.posX + 1,
-            );
+            // this.fieldImageIndex = this.playerTurn
+            currentPlayer.move(1, this.arenaSize - 1);
         }
+        currentPlayer.drainMana(1);
     }
     playerAttack(): string {
         const currentPlayer = this.getCurrentPlayer();
@@ -121,10 +162,51 @@ export default class FightGame {
         return `rested and regained ${healthToGain.toFixed(2)} health and ${manaToGain.toFixed(2)} mana.`;
     }
 
-    nextTurn() {
+    async nextTurn() {
         this.playerTurn = this.playerTurn === 0 ? 1 : 0;
-        this.getCurrentPlayer().calculateStats();
-        this.getNextPlayer().calculateStats();
+        console.log("new player turn: " + this.playerTurn);
+        let player1: Fighter = this.players[0]!;
+        let player2: Fighter = this.players[1]!;
+
+        player1.calculateStats();
+        player2.calculateStats();
+
+        if (this.fieldImageDirty) {
+            const p1Pos: number = player1.posX;
+            const p2Pos: number = player2.posX;
+            const movement: number[] = [1, 1, -2, -2];
+            for (let i = 0; i < 4; i++) {
+                if (i % 2 === 0) {
+                    player1.move(movement[i]!, this.arenaSize - 1);
+                } else {
+                    player2.move(movement[i]!, this.arenaSize - 1);
+                }
+                this.fieldImages[i + 1] = await getFieldImage(
+                    player1,
+                    player2,
+                    this.arenaSize,
+                );
+            }
+            player1.setPosition(p1Pos, this.arenaSize - 1);
+            player2.setPosition(p2Pos, this.arenaSize - 1);
+            this.fieldImageDirty = false;
+        }
+        if (this.builderOnfoDirty) {
+            this.builderInfo = getFightDisplayOptions(this);
+            // this.builderInfo = player1.getPlayerDisplay(
+            //     player2,
+            //     this.fieldImages[this.fieldImageIndex]!.attachment,
+            // );
+            // this.builderOnfoDirty = false;
+        }
+        if (this.actionRowButtonsDirty) {
+            this.actionRowButtons = getButtons(this.getNextPlayer(), this);
+            // this.actionRowButtons = player1.getActionRowButtons(
+            //     this.id,
+            //     this.playerTurn,
+            // );
+            // this.actionRowButtonsDirty = false;
+        }
     }
 
     resetGame() {
