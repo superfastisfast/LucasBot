@@ -44,10 +44,7 @@ export default class FightGame {
                 reason: "One or both users could not be found in the database.",
             };
         }
-        if (
-            dbCommandUser.balance < this.bet ||
-            dbOpponentUser.balance < this.bet
-        ) {
+        if (dbCommandUser.gold < this.bet || dbOpponentUser.gold < this.bet) {
             return {
                 success: false,
                 reason: "One or both users could not addord the bet",
