@@ -1,6 +1,9 @@
-import type { User } from "discord.js";
+import {
+    User,
+    type PartialUser
+} from "discord.js";
 import mongoose, { Document, Schema } from "mongoose";
-import { client } from "..";
+
 
 const userSchema = new Schema(
     {
@@ -48,27 +51,26 @@ export async function getUserFromId(id: string): Promise<UserDocument | null> {
     try {
         const user = await UserModel.findOne({ id: id });
         return user;
-        // return await client.users.fetch(id);
     } catch (error) {
         console.error(`Failed to fetch user with ID ${id}:`, error);
         return null;
     }
 }
 
-export async function getIdFromUser(user: User | string): Promise<string> {
+export async function getIdFromUser(user: User | PartialUser | string): Promise<string> {
     if (typeof user === "object" && user !== null && "id" in user) {
         return String(user.id);
     }
     return user;
 }
 
-export async function giveXP(user: User | string, xp: number) {
+export async function giveXP(user: User | PartialUser | string, xp: number) {
     const id = await getIdFromUser(user);
     let dbUser = await UserModel.findOne({ id: id });
     if (!dbUser) {
         return;
     }
-    console.log("xp: " + xp);
+
     if (xp > 0 && dbUser.timeouts > 0) {
         const maxTimeoutsForReduction = 20;
         const minTimeoutsForReduction = 1;
@@ -78,14 +80,13 @@ export async function giveXP(user: User | string, xp: number) {
         reductionFactor = Math.max(0, Math.min(1, reductionFactor));
         xp = xp * (1 - reductionFactor);
     }
-    console.log("new xp: " + xp);
 
     dbUser.xp = Math.max(-100, dbUser.xp + xp);
     await dbUser.save();
     return xp;
 }
 
-export async function setXP(user: User | string, xp: number) {
+export async function setXP(user: User | PartialUser | string, xp: number) {
     const id = await getIdFromUser(user);
     let dbUser = await UserModel.findOne({ id: id });
     if (!dbUser) {
@@ -108,7 +109,7 @@ export async function setXP(user: User | string, xp: number) {
     return xp;
 }
 
-export async function giveGold(user: User | string, amount: number) {
+export async function giveGold(user: User | PartialUser | string, amount: number) {
     const id = await getIdFromUser(user);
     let dbUser = await UserModel.findOne({ id: id });
     if (!dbUser) {
@@ -120,7 +121,7 @@ export async function giveGold(user: User | string, amount: number) {
     return amount;
 }
 
-export async function setGold(user: User | string, amount: number) {
+export async function setGold(user: User | PartialUser | string, amount: number) {
     const id = await getIdFromUser(user);
     let dbUser = await UserModel.findOne({ id: id });
     if (!dbUser) {

@@ -6,17 +6,18 @@ import {
     Message,
 } from "discord.js";
 
-const GOOD_USER_ID = "402859016457420820";
-const BAD_USER_ID = "924027166096752650";
+const GOOD_USER_ID = "924027166096752650";
+const BAD_USER_ID = "402859016457420820";
 const THUMBS_UP: EmojiIdentifierResolvable = "👍";
 const THUMBS_DOWN: EmojiIdentifierResolvable = "👎";
 
 export default class MessageResponderService extends Service.Abstract {
-    override start(client: Client) {
+    override async start(client: Client): Promise<void> {
         client.on(Events.MessageCreate, this.handleMessage);
+        
     }
 
-    override stop(client: Client) {
+    override async stop(client: Client): Promise<void> {
         client.off(Events.MessageCreate, this.handleMessage);
     }
 

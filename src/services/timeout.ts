@@ -8,11 +8,11 @@ import { UserModel } from "@/models/user";
 import { Service } from "@/service";
 
 export default class TimeoutService extends Service.Abstract {
-    override start(client: Client) {
+    override async  start(client: Client): Promise<void> {
         client.on(Events.GuildMemberUpdate, this.handleGuildMemberUpdate);
     }
 
-    override stop(client: Client) {
+    override async stop(client: Client): Promise<void> {
         client.off(Events.GuildMemberUpdate, this.handleGuildMemberUpdate);
     }
 
