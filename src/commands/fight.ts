@@ -21,7 +21,7 @@ interface PlayerDisplay {
 }
 
 //TODO list of active fights; Becaouse otherwise there is only one running.
-export default class FightCommand extends Command {
+export default class FightCommand extends Command.Base {
     game?: FightGame;
 
     override get info(): any {
