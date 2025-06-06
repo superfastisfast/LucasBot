@@ -75,6 +75,11 @@ export namespace DataBase {
         return xp;
     }
 
+    export async function getXP(user: User | PartialUser | string, xp: number) {
+        let dbUser = await getDBUserFromUser(user)
+
+        return dbUser.xp
+    }
 
     export async function setXP(user: User | PartialUser | string, xp: number) {
         let dbUser = await getDBUserFromUser(user);
@@ -103,6 +108,12 @@ export namespace DataBase {
         return amount;
     }
 
+    export async function getGold(user: User | PartialUser | string, gold: number) {
+        let dbUser = await getDBUserFromUser(user)
+
+        return dbUser.balance
+    }
+
     export async function setGold(user: User | PartialUser | string, amount: number) {
         let dbUser = await getDBUserFromUser(user);
 
@@ -122,7 +133,7 @@ async function level(user: User | PartialUser | string, newXp: number): Promise<
         let level: number = 0;
         await calculateLevel(newXp);
 
-        const currentLevel
+        const currentLevel;
 
         if (oldXp + newXp >= 100 && oldXp <= newXp) {}
 
