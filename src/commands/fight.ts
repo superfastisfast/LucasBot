@@ -357,7 +357,6 @@ export default class FightCommand extends Command {
             embeds: msg.embeds,
             components: msg.components,
         });
-        newGame.initGame(interaction.user.id);
 
         console.log("Games:", this.games.size);
     }
