@@ -3,7 +3,6 @@ import { SlashCommandBuilder, type Client, type CommandInteraction } from "disco
 
 export default class PingCommand extends Command {
     override get info(): any {
-        console.log("info called");
         return new SlashCommandBuilder().setName("ping").setDescription("test").toJSON();
     }
 

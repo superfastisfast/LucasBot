@@ -16,6 +16,7 @@ export abstract class Quest {
 
     public static async loadQuests() {
         const glob = new Bun.Glob("src/quests/*.ts");
+        console.log(`Registered quests:`);
 
         for (const path of glob.scanSync(".")) {
             const file = Bun.file(path);
@@ -28,7 +29,7 @@ export abstract class Quest {
             quest.fileName = path.split("/").pop()?.replace(".ts", "")!;
 
             Quest.quests.set(quest.fileName, quest);
-            console.log(`Registered quest: ${quest.fileName}`);
+            console.log(`\t${quest.fileName}`);
         }
     }
 

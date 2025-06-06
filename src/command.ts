@@ -4,23 +4,122 @@ import type {
     Client,
     CommandInteraction,
 } from "discord.js";
+import { UserModel } from "./models/user";
+import { giveXP } from '@/models/user';
+import { Quest } from "./quest";
 
 export abstract class Command {
     abstract get info(): any;
-    public async onButtonInteract(
-        client: Client,
-        interaction: ButtonInteraction,
-    ): Promise<boolean> {
+    public async onButtonInteract(client: Client, interaction: ButtonInteraction): Promise<boolean> {
         return false;
     }
-    async executeAutoComplete(
-        client: Client,
-        interaction: AutocompleteInteraction,
-    ): Promise<void> {
+    async executeAutoComplete(client: Client, interaction: AutocompleteInteraction): Promise<void> {
         interaction.respond([]);
     }
-    abstract executeCommand(
-        client: Client,
-        interaction: CommandInteraction,
-    ): Promise<void>;
+    abstract executeCommand(client: Client, interaction: CommandInteraction): Promise<void>;
+}
+
+export namespace Cmd {
+    export const commands = new Map<string, Command>();
+
+    export async function register(client: Client) {
+        const glob = new Bun.Glob("./src/commands/*.ts");
+        console.log(`Registered commands:`);
+
+        for (const path of glob.scanSync(".")) {
+            const { default: CommandClass } = await import(
+                path.replace("./src/", "./")
+            );
+            const instance: Command = new CommandClass();
+            const info = instance.info;
+            commands.set(info.name, instance);
+            client.application?.commands.create(info);
+            console.log(`\t${info.name}`);
+        }
+    }
+
+    export async function handleInteraction(client: Client, interaction: any) {
+        const command = commands.get(interaction.commandName);
+
+        if (!command) {
+            return interaction.reply("Command not found.");
+        }
+
+        try {
+            await command.executeCommand(client, interaction);
+        } catch (err) {
+            console.error(`Error running command ${interaction.commandName}:`, err);
+            interaction.reply("Error executing command.");
+        }
+    }
+
+    export async function handleAutocompleteInteraction(client: Client, interaction: any) {
+        const command = commands.get(interaction.commandName);
+        if (!command) {
+            interaction.respond([]);
+            return;
+        }
+        try {
+            await command.executeAutoComplete(client, interaction);
+        } catch (err) {
+            console.error(
+                `Error running autocomplete for command ${interaction.commandName}:`,
+                err,
+            );
+            interaction.respond([]);
+        }
+    }
+
+    export async function handleButtonInteraction(client: Client, interaction: any) {
+        for (const quest of await Quest.getQuests()) {
+            try {
+                if (await quest.onButtonInteract(client, interaction)) {
+                    break;
+                }
+            } catch (err) {
+                console.error(
+                    `Error running button interaction for quest ${quest.fileName}:`,
+                    err,
+                );
+            }
+        }
+        for (const command of await commands) {
+            try {
+                if (await command[1].onButtonInteract(client, interaction)) {
+                    break;
+                }
+            } catch (err) {
+                console.error(
+                    `Error running button interaction for quest ${command[0]}:`,
+                    err,
+                );
+            }
+        }
+    }
+
+    export async function handleMessageCreate(message: any) {
+        let dbUser = await UserModel.findOne({ id: message.author.id });
+
+        if (dbUser) {
+            if (dbUser.username !== message.author.username) {
+                dbUser.username = message.author.username;
+                await dbUser.save();
+            }
+            //Message rewards xp
+            const currentTime = new Date();
+            const timeDifferenceMs =
+                currentTime.getTime() - dbUser.lastXpMessageAt.getTime();
+            const timeDifferenceMinutes = timeDifferenceMs / (1000 * 60);
+            if (timeDifferenceMinutes >= 1) {
+                giveXP(dbUser.id, 1);
+                dbUser.lastXpMessageAt = currentTime;
+                await dbUser.save();
+            }
+        } else {
+            dbUser = await UserModel.create({
+                id: message.author.id,
+                username: message.author.username,
+            });
+        }
+    }
 }

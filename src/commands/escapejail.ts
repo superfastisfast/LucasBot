@@ -10,7 +10,6 @@ import {
 
 export default class EscapeJailCommand extends Command {
     override get info(): any {
-        console.log("escapejail called");
         return new SlashCommandBuilder()
             .setName("escapejail")
             .setDescription("Try to escape from jail")

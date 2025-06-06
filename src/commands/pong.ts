@@ -13,8 +13,6 @@ export default class PongCommand extends Command {
     override async executeCommand(client: Client, interaction: CommandInteraction<any>): Promise<void> {
         let member = interaction.options.get("user")?.member;
 
-        console.log(member);
-
         interaction.reply("Pong Works! " + member?.nickname || "nope");
     }
 }
