@@ -30,12 +30,16 @@ export default class XpService extends Service.Base {
     private handleMessageCreate = async (message: Message) => {
         if (message.author.bot) return;
 
-        DataBase.giveXP(message.author, 2);
+        this.rewardXp(message.author, 2);
     };
 
-    private handleMessageDelete = async (message: Message | PartialMessage | Snowflake) => {
-        if (typeof message === 'string') {
-            console.log('Only message ID received, cannot get author directly.');
+    private handleMessageDelete = async (
+        message: Message | PartialMessage | Snowflake,
+    ) => {
+        if (typeof message === "string") {
+            console.log(
+                "Only message ID received, cannot get author directly.",
+            );
             return;
         }
 
@@ -43,7 +47,7 @@ export default class XpService extends Service.Base {
             try {
                 await message.fetch();
             } catch {
-                console.log('Could not fetch deleted message details.');
+                console.log("Could not fetch deleted message details.");
                 return;
             }
         }
@@ -51,22 +55,34 @@ export default class XpService extends Service.Base {
         const author = message.author;
         if (!author || author.bot) return;
 
-        console.log('Deleted message author:', author.tag);
-        await DataBase.giveXP(author, -2);
+        console.log("Deleted message author:", author.tag);
+        await this.rewardXp(author, -2);
     };
 
     private handleReactionAdd = async (
         reaction: MessageReaction | PartialMessageReaction,
-        user: User | PartialUser
+        user: User | PartialUser,
     ): Promise<void> => {
-        DataBase.giveXP(reaction.message.author!, 1);
-        DataBase.giveXP(user, 1);
+        this.rewardXp(reaction.message.author!, 1);
+        this.rewardXp(user, 1);
     };
 
     private handleReactionRemove = async (
         reaction: MessageReaction | PartialMessageReaction,
-        user: User | PartialUser
+        user: User | PartialUser,
     ): Promise<void> => {
-        DataBase.giveXP(user, -1);
+        this.rewardXp(user, -1);
     };
+
+    private async rewardXp(user: User | PartialUser, xp: number) {
+        const dbUser = await DataBase.getDBUserFromUser(user);
+        const currentTime = new Date();
+        const timeDifferenceMs =
+            currentTime.getTime() - dbUser.lastXpMessageAt.getTime();
+        const timeDifferenceMinutes = timeDifferenceMs / (1000 * 3);
+        if (timeDifferenceMinutes >= 1) {
+            dbUser.lastXpMessageAt = currentTime;
+            DataBase.giveXP(user, xp);
+        }
+    }
 }

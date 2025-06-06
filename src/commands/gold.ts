@@ -77,7 +77,7 @@ export default class GoldCommand extends Command.Base {
                 for (const userModel of usersModel) {
                     if (userModel.id == target.id) {
                         interaction.reply(
-                            `${target} has ${userModel.gold || "no"} gold`,
+                            `${target} has ${userModel.inventory.gold || "no"} gold`,
                         );
                     }
                 }

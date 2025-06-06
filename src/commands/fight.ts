@@ -14,6 +14,7 @@ import {
 import FightGame from "./fight/fightGame";
 import { getFieldImage } from "./fight/fieldGenerate";
 import type Fighter from "./fight/fighter";
+import { Item } from "@/models/item";
 
 interface PlayerDisplay {
     name: string;
@@ -62,30 +63,25 @@ export default class FightCommand extends Command.Base {
         client: Client,
         interaction: ButtonInteraction,
     ): Promise<boolean> {
-        await interaction.deferUpdate();
         let currentGame: FightGame | undefined = this.isUserPartOfFight(
             interaction.user.id,
         );
         if (currentGame === undefined) {
-            interaction.followUp({
-                content: "You are not part of any fight!",
-                flags: "Ephemeral",
-            });
-            return true;
+            return false;
         }
+        await interaction.deferUpdate();
+
         if (interaction.customId === currentGame.id + "#end") {
-            console.log("=============[8]=============");
             //TODO REMOVE TEST BUTTON
             interaction.editReply({
                 content: `The fight was ended by ${interaction.user.username}.`,
                 components: [],
             });
             currentGame.gameOver(false);
+            this.games.delete(currentGame.id);
             return false;
         }
-        console.log("=============[0]=============");
         if (currentGame.isValidCombatMovement(interaction.user.id)) {
-            console.log("=============[1]=============");
             if (interaction.customId === currentGame.id + "#moveLeft") {
                 currentGame.movePlayer("left");
                 interaction.editReply(
@@ -95,8 +91,6 @@ export default class FightCommand extends Command.Base {
                     ),
                 );
             } else if (interaction.customId === currentGame.id + "#moveRight") {
-                console.log("=============[2]=============");
-
                 currentGame.movePlayer("right");
                 interaction.editReply(
                     await this.getFightDisplayOptions(
@@ -105,8 +99,6 @@ export default class FightCommand extends Command.Base {
                     ),
                 );
             } else if (interaction.customId === currentGame.id + "#attack") {
-                console.log("=============[3]=============");
-
                 const actionInfo: string = currentGame.playerAttack();
                 interaction.editReply(
                     await this.getFightDisplayOptions(
@@ -116,17 +108,17 @@ export default class FightCommand extends Command.Base {
                 );
                 if (currentGame.getNextPlayer().currentHealth <= 0) {
                     currentGame.gameOver(true);
+                    this.games.delete(currentGame.id);
                     return true;
                 }
             } else if (interaction.customId === currentGame.id + "#flee") {
-                console.log("=============[4]=============");
-
                 if (currentGame.playerFlee()) {
                     interaction.editReply({
                         content: `The fight is over! ${currentGame.getCurrentPlayer().dbUser!.username} escaped!`,
                         components: [],
                     });
                     currentGame.gameOver(false);
+                    this.games.delete(currentGame.id);
                 } else {
                     interaction.editReply(
                         await this.getFightDisplayOptions(
@@ -136,8 +128,6 @@ export default class FightCommand extends Command.Base {
                     );
                 }
             } else if (interaction.customId === currentGame.id + "#sleep") {
-                console.log("=============[5]=============");
-
                 const manaAndHealthGainedMsg = currentGame.playerSleep();
                 interaction.editReply(
                     await this.getFightDisplayOptions(
@@ -148,13 +138,10 @@ export default class FightCommand extends Command.Base {
             }
 
             currentGame.nextTurn();
-            console.log("=============[-1]=============");
 
             return true;
         } else {
             if (interaction.customId === currentGame.id + "#acceptFight") {
-                console.log("=============[6]=============");
-
                 const res = await currentGame.initGame(interaction.user.id);
                 if (res.success) {
                     await interaction.editReply(
@@ -176,17 +163,15 @@ export default class FightCommand extends Command.Base {
                 interaction.customId ===
                 currentGame.id + "#declineFight"
             ) {
-                console.log("=============[7]=============");
-
                 interaction.editReply({
                     content: `The fight was cancelled by ${interaction.user.username}.`,
                     components: [],
                 });
                 currentGame.gameOver(false);
+                this.games.delete(currentGame.id);
                 return true;
             }
         }
-        console.log("=============[-2]=============");
 
         return false;
     }
@@ -196,39 +181,7 @@ export default class FightCommand extends Command.Base {
         healthbar: string,
         manaBar: string,
     ): PlayerDisplay {
-        const formattedItems = player.items
-            .map((item) => {
-                let itemDetails = `**${item.name}**`;
-                const flatStatsParts: string[] = [];
-                for (const [
-                    statName,
-                    amplifier,
-                ] of item.flatStatModifiers.entries()) {
-                    flatStatsParts.push(`${statName}: +${amplifier}`);
-                }
-                if (flatStatsParts.length > 0) {
-                    itemDetails += `\n  - Flat: ${flatStatsParts.join(", ")}`;
-                }
-
-                const percentageStatsParts: string[] = [];
-                for (const [
-                    statName,
-                    amplifier,
-                ] of item.percentageStatModifiers.entries()) {
-                    percentageStatsParts.push(
-                        `${statName}: +${(amplifier * 100).toFixed(0)}%`,
-                    );
-                }
-                if (percentageStatsParts.length > 0) {
-                    itemDetails += `\n  - Percent: ${percentageStatsParts.join(", ")}`;
-                }
-
-                return itemDetails;
-            })
-            .join("\n\n");
-
-        const itemsDisplay =
-            formattedItems.length > 0 ? formattedItems : "None";
+        const itemsDisplay = Item.getStringCollection(player.items);
 
         return {
             name: `${player.dbUser!.username}'s Status`,
@@ -428,7 +381,5 @@ export default class FightCommand extends Command.Base {
             embeds: msg.embeds,
             components: msg.components,
         });
-
-        console.log("Games:", this.games.size);
     }
 }

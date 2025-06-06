@@ -44,7 +44,10 @@ export default class FightGame {
                 reason: "One or both users could not be found in the database.",
             };
         }
-        if (dbCommandUser.gold < this.bet || dbOpponentUser.gold < this.bet) {
+        if (
+            dbCommandUser.inventory.gold < this.bet ||
+            dbOpponentUser.inventory.gold < this.bet
+        ) {
             return {
                 success: false,
                 reason: "One or both users could not addord the bet",
@@ -130,7 +133,6 @@ export default class FightGame {
 
     playerSleep(): string {
         const currentPlayer = this.getCurrentPlayer();
-        console.log(`${currentPlayer.dbUser!.username} is trying to sleep...`);
         const healthToGain =
             Math.random() * (currentPlayer.fighterStats.vitality || 1);
         const manaToGain =
@@ -149,17 +151,10 @@ export default class FightGame {
     gameOver(wasCompleted: boolean = false) {
         const winnerReward = this.bet * 2;
         if (this.players[0]!.currentHealth <= 0) {
-            console.log(
-                `${this.discordUsers[1]!.username} gained ${winnerReward} gold!!`,
-            );
             DataBase.giveGold(this.discordUsers[1]!, winnerReward);
         } else if (this.players[1]!.currentHealth <= 0) {
-            console.log(
-                `${this.discordUsers[0]!.username} gained ${winnerReward} gold!!`,
-            );
             DataBase.giveGold(this.discordUsers[0]!, winnerReward);
         } else {
-            console.log(` ${this.bet} gold was splited!!`);
             DataBase.giveGold(this.discordUsers[1]!, this.bet);
             DataBase.giveGold(this.discordUsers[0]!, this.bet);
         }

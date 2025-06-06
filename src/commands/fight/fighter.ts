@@ -1,9 +1,5 @@
-import {
-    getHelmetFromName,
-    getWeaponFromName,
-    type ItemDocument,
-} from "@/models/item";
-import type { UserDocument } from "@/models/user";
+import { type ItemDocument } from "@/models/item";
+import { DataBase, type UserDocument } from "@/models/user";
 
 interface FighterStats {
     strength: number;
@@ -30,15 +26,8 @@ export default class Fighter {
         imgUrl: string,
     ): Promise<Fighter> {
         let self = new Fighter(dbUser, startPosition, imgUrl);
+        self.items = await DataBase.getUserItems(dbUser.id);
 
-        const weapon = await getWeaponFromName(self.dbUser!.Weapon);
-        if (weapon) {
-            self.items.push(weapon);
-        }
-        const Helmet = await getHelmetFromName(self.dbUser!.Helmet);
-        if (Helmet) {
-            self.items.push(Helmet);
-        }
         self.calculateStats();
         self.currentHealth = self.getMaxHealthStats();
         self.currentMana = self.getMaxManaStats();
@@ -58,19 +47,16 @@ export default class Fighter {
 
     calculateStats() {
         this.fighterStats = {
-            strength: this.dbUser!.strength,
-            agility: this.dbUser!.agility,
-            charisma: this.dbUser!.charisma,
-            magicka: this.dbUser!.magicka,
-            stamina: this.dbUser!.stamina,
-            defense: this.dbUser!.defense,
-            vitality: this.dbUser!.vitality,
+            strength: this.dbUser!.stats.strength,
+            agility: this.dbUser!.stats.agility,
+            charisma: this.dbUser!.stats.charisma,
+            magicka: this.dbUser!.stats.magicka,
+            stamina: this.dbUser!.stats.stamina,
+            defense: this.dbUser!.stats.defense,
+            vitality: this.dbUser!.stats.vitality,
         };
         if (this.items.length > 0) {
             for (const item of this.items) {
-                // console.log(
-                //     `Applying item ${item} to fighter ${this.dbUser!.username}`,
-                // );
                 for (const [key, value] of item.flatStatModifiers.entries()) {
                     this.fighterStats[key as keyof FighterStats] += value;
                 }

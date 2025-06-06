@@ -10,15 +10,24 @@ import { Quest } from "./quest";
 export namespace Command {
     export abstract class Base {
         abstract get info(): any;
-        public async onButtonInteract(client: Client, interaction: ButtonInteraction): Promise<boolean> {
+        public async onButtonInteract(
+            client: Client,
+            interaction: ButtonInteraction,
+        ): Promise<boolean> {
             return false;
         }
-        async executeAutoComplete(client: Client, interaction: AutocompleteInteraction): Promise<void> {
+        async executeAutoComplete(
+            client: Client,
+            interaction: AutocompleteInteraction,
+        ): Promise<void> {
             interaction.respond([]);
         }
-        abstract executeCommand(client: Client, interaction: CommandInteraction): Promise<void>;
+        abstract executeCommand(
+            client: Client,
+            interaction: CommandInteraction,
+        ): Promise<void>;
     }
-    
+
     export const commands = new Map<string, Base>();
 
     export async function register(client: Client) {
@@ -47,12 +56,18 @@ export namespace Command {
         try {
             await command.executeCommand(client, interaction);
         } catch (err) {
-            console.error(`Error running command ${interaction.commandName}:`, err);
+            console.error(
+                `Error running command ${interaction.commandName}:`,
+                err,
+            );
             interaction.reply("Error executing command.");
         }
     }
 
-    export async function handleAutocompleteInteraction(client: Client, interaction: any) {
+    export async function handleAutocompleteInteraction(
+        client: Client,
+        interaction: any,
+    ) {
         const command = commands.get(interaction.commandName);
         if (!command) {
             interaction.respond([]);
@@ -69,7 +84,10 @@ export namespace Command {
         }
     }
 
-    export async function handleButtonInteraction(client: Client, interaction: any) {
+    export async function handleButtonInteraction(
+        client: Client,
+        interaction: any,
+    ) {
         for (const quest of await Quest.getQuests()) {
             try {
                 if (await quest.onButtonInteract(client, interaction)) {
@@ -98,19 +116,9 @@ export namespace Command {
 
     export async function handleMessageCreate(message: any) {
         let dbUser = await UserModel.findOne({ id: message.author.id });
-
         if (dbUser) {
             if (dbUser.username !== message.author.username) {
                 dbUser.username = message.author.username;
-                await dbUser.save();
-            }
-            //Message rewards xp
-            const currentTime = new Date();
-            const timeDifferenceMs =
-                currentTime.getTime() - dbUser.lastXpMessageAt.getTime();
-            const timeDifferenceMinutes = timeDifferenceMs / (1000 * 60);
-            if (timeDifferenceMinutes >= 1) {
-                dbUser.lastXpMessageAt = currentTime;
                 await dbUser.save();
             }
         } else {
