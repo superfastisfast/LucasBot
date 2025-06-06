@@ -1,8 +1,10 @@
 import {
+    TextChannel,
     User,
     type PartialUser
 } from "discord.js";
 import mongoose, { Document, Schema } from "mongoose";
+import { client } from "..";
 
 
 const userSchema = new Schema(
@@ -10,9 +12,10 @@ const userSchema = new Schema(
         id: { type: String },
         username: { type: String },
         timeouts: { type: Number, default: 0.0 },
+        level: { type: Number, default: 0 },
         xp: { type: Number, default: 0.0 },
         lastXpMessageAt: { type: Schema.Types.Date, default: Date.now },
-        balance: { type: Number, default: 0.0 },
+        gold: { type: Number, default: 0.0 },
         skillPoints: { type: Number, default: 0.0 },
         Weapon: { type: String, default: "Fists" },
         strength: { type: Number, default: 3.0 },
@@ -30,6 +33,7 @@ export interface UserDocument extends Document {
     id: string;
     username: string;
     timeouts: number;
+    level: number
     xp: number;
     lastXpMessageAt: Date;
     balance: number;
@@ -53,6 +57,11 @@ export namespace DataBase {
             return String(user.id);
         }
         return user;
+    }
+
+    export async function getUser(user: User | PartialUser | string): Promise<User> {
+        const id = await getIDFromUser(user);
+        return client.users.fetch(id);
     }
 
     export async function getDBUserFromUser(user: User | PartialUser | string): Promise<UserDocument> {
@@ -112,30 +121,64 @@ export namespace DataBase {
     }
 }
 
-async function level(user: User | PartialUser | string, newXp: number): Promise<number> {
-    let dbUser = await DataBase.getDBUserFromUser(user);
-    const oldXp = dbUser.xp;
-
-    (async () => {
-        let dbUser = await DataBase.getDBUserFromUser(user);
-
-        let level: number = 0;
-        await calculateLevel(newXp);
-
-        const currentLevel
-
-        if (oldXp + newXp >= 100 && oldXp <= newXp) {}
-
-        return level;
-    })();
-    
-    return 0;
+/// This is depricated shit that only exits because of old code???!!?!???!?!?!
+export async function getUserFromId(id: string): Promise<User> { // Should fix
+    return await DataBase.getUser(id);
 }
 
-async function calculateLevel(xp: number): Promise<number> {
-    return Math.floor(xp / 10);
+
+
+
+
+
+export async function level(user: User | PartialUser | string, xp: number): Promise<void> {
+    if (user === client.user) return;
+    const dbUser = await DataBase.getDBUserFromUser(user);
+
+    if (!process.env.QUEST_CHANNEL_ID)
+        throw new Error("QUEST_CHANNEL_ID is not defined in .env");
+    const levelChannel = await client.channels.fetch(process.env.QUEST_CHANNEL_ID) as TextChannel;
+
+    const level = calculateLevel(xp);
+
+    if (level > dbUser.level) {
+        dbUser.level = level;
+        await dbUser.save();
+        await levelChannel.send(`${await DataBase.getUser(user)} is now level ${level}!`)
+    }
+
+    if (level < dbUser.level) {
+        dbUser.level = level;
+        await dbUser.save();
+        await levelChannel.send(`${await DataBase.getUser(user)} is now level ${level}!`)
+    }
 }
 
-async function requiredXPForNextLevel(level: number): Promise<number> {
+const xpThresholds: number[] = [
+//  XP           Level
+    0,        //     0
+    1,        //     1
+    50,       //     2
+    100,      //     3
+    250,      //     4
+    500,      //     5
+    1000,     //     6
+    1750,     //     7
+    2750,     //     8
+    4000,     //     9
+    5000,     //    10
+    7500,     //    11
+    9500,     //    12
+    10250,    //    13
+    15250,    //    14
+    20000     //    15
+];
+
+function calculateLevel(xp: number): number {
+    for (let i = xpThresholds.length - 1; i >= 0; i--) {
+        if (xp >= xpThresholds[i]!) {
+            return i;
+        }
+    }
     return 0;
 }

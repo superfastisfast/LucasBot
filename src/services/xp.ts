@@ -30,7 +30,7 @@ export default class XpService extends Service.Base {
     private handleMessageCreate = async (message: Message) => {
         if (message.author.bot) return;
 
-        DataBase.giveXP(message.author, 1);
+        DataBase.giveXP(message.author, 2);
     };
 
     private handleMessageDelete = async (message: Message | PartialMessage | Snowflake) => {
@@ -52,13 +52,14 @@ export default class XpService extends Service.Base {
         if (!author || author.bot) return;
 
         console.log('Deleted message author:', author.tag);
-        await DataBase.giveXP(author, -1);
+        await DataBase.giveXP(author, -2);
     };
 
     private handleReactionAdd = async (
         reaction: MessageReaction | PartialMessageReaction,
         user: User | PartialUser
     ): Promise<void> => {
+        DataBase.giveXP(reaction.message.author!, 1);
         DataBase.giveXP(user, 1);
     };
 
