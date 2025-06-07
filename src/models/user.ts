@@ -123,6 +123,42 @@ export namespace DataBase {
         return items;
     }
 
+    export async function applyItem(
+        user: User | PartialUser | string,
+        item: ItemDocument,
+    ) {
+        const dbUser = await DataBase.getDBUserFromUser(user);
+        const equipmentSlots: Array<keyof IInventory> = [
+            "weapon",
+            "helmet",
+            "chestplate",
+            "leggings",
+            "boots",
+            "shield",
+        ];
+        console.log(equipmentSlots);
+        console.log(item);
+        if (equipmentSlots.includes(item.tag as keyof IInventory)) {
+            const slotToUpdate = item.tag;
+
+            (dbUser.inventory as any)[slotToUpdate] = item.name;
+        } else {
+            console.log(
+                `failed to applied ${item.name} to ${dbUser.username}'s ${item.tag} slot.`,
+            );
+            return;
+        }
+
+        try {
+            await dbUser.save();
+            console.log(
+                `Successfully applied ${item.name} to ${dbUser.username}'s ${item.tag} slot.`,
+            );
+        } catch (error) {
+            console.error(`Error saving user inventory:`, error);
+        }
+    }
+
     export async function getIDFromUser(
         user: User | PartialUser | string,
     ): Promise<string> {
@@ -146,7 +182,7 @@ export namespace DataBase {
 
         try {
             const user = await UserModel.findOne({ id: id });
-            if (!user) {
+            if (user === null || user === undefined) {
                 const user: UserDocument = await UserModel.create({
                     id: new String(id) as string,
                     username: (await getUser(id)).username,

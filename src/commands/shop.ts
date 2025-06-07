@@ -1,6 +1,7 @@
 import { Command } from "@/command";
 import { Item, type ItemDocument } from "@/models/item";
 import { DataBase } from "@/models/user";
+import ShopService from "@/services/shopService";
 import {
     ActionRowBuilder,
     ButtonBuilder,
@@ -24,19 +25,18 @@ export default class ShopCommand extends Command.Base {
         client: Client,
         interaction: ButtonInteraction,
     ): Promise<boolean> {
-        if (interaction.customId === interaction.user.id + "#buy") {
-            interaction.reply({
-                content: `The fight was ended by ${interaction.user.username}.`,
-                components: [],
-            });
-            return true;
-        }
-        if (interaction.customId === interaction.user.id + "#sell") {
-            interaction.reply({
-                content: `The fight was ended by ${interaction.user.username}.`,
-                components: [],
-            });
-            return true;
+        const availableItems = await ShopService.getActiveShopItems();
+        for (const item of availableItems) {
+            if (interaction.customId === interaction.user.id + item.name) {
+                DataBase.giveGold(interaction.user.id, -item.cost);
+                DataBase.applyItem(interaction.user.id, item);
+                interaction.reply({
+                    content: `You bought and equipped ${item.name}.`,
+                    components: [],
+                    flags: "Ephemeral",
+                });
+                return true;
+            }
         }
         return true;
     }
@@ -45,22 +45,12 @@ export default class ShopCommand extends Command.Base {
         client: Client,
         interaction: CommandInteraction,
     ): Promise<void> {
-        //TODO: providing items from a service that stores items for a limited time, then updates.
-        let items: Array<ItemDocument | null> = [
-            await Item.getFromName("Club"),
-            await Item.getFromName("Leather Helmet"),
-            await Item.getFromName("Leather Chestplate"),
-        ];
-        const validItems = items.filter(
-            (item): item is ItemDocument => item !== null && item !== undefined,
-        );
+        const dbUser = DataBase.getDBUserFromUser(interaction.user.id);
+        const validItems = await ShopService.getActiveShopItems();
 
         const shopEmbed = new EmbedBuilder()
-            .setColor("#0099ff")
             .setTitle("SHOP")
-            .setDescription(
-                "Welcome to the shop! Click a button to view an item or make a purchase.",
-            )
+            .setDescription("\n")
             .setTimestamp();
         if (validItems.length > 0) {
             validItems.forEach((item) => {
@@ -79,14 +69,17 @@ export default class ShopCommand extends Command.Base {
         }
 
         const actionRow = new ActionRowBuilder<ButtonBuilder>();
-
         for (const item of validItems) {
+            const cannotAffordButtonEnabled: boolean =
+                (await dbUser).inventory.gold < item.cost ? true : false;
             const button = new ButtonBuilder()
                 .setCustomId(interaction.user.id + item.name)
                 .setLabel(`${item.name} (${item.cost} Gold)`)
-                .setStyle(ButtonStyle.Primary);
+                .setStyle(ButtonStyle.Primary)
+                .setDisabled(cannotAffordButtonEnabled);
             actionRow.addComponents(button);
         }
+
         interaction.reply({
             embeds: [shopEmbed],
             components: [actionRow],

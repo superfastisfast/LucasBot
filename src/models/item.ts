@@ -58,7 +58,7 @@ export namespace Item {
                     flatStatsParts.push(`${statName}: ${amplifier}`);
                 }
                 if (flatStatsParts.length > 0) {
-                    itemDetails += `\n  - Flat: \n${flatStatsParts.join(", ")}`;
+                    itemDetails += `\n${flatStatsParts.join(", ")}`;
                 }
 
                 const percentageStatsParts: string[] = [];
@@ -71,7 +71,7 @@ export namespace Item {
                     );
                 }
                 if (percentageStatsParts.length > 0) {
-                    itemDetails += `\n  - Percent: \n${percentageStatsParts.join(", ")}`;
+                    itemDetails += `\n${percentageStatsParts.join(", ")}`;
                 }
 
                 return itemDetails;
