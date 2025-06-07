@@ -3,6 +3,8 @@ import mongoose, { Schema } from "mongoose";
 const itemSchema = new Schema({
     name: { type: String },
     cost: { type: Number },
+    tag: { type: String },
+    rarity: { type: Number },
     flatStatModifiers: {
         type: Map,
         of: Number,
@@ -16,6 +18,8 @@ const itemSchema = new Schema({
 export interface ItemDocument {
     name: string;
     cost: number;
+    tag: string;
+    rarity: number;
     flatStatModifiers: Map<string, number>;
     percentageStatModifiers: Map<string, number>;
 }
@@ -37,6 +41,11 @@ export namespace Item {
         }
     }
 
+    // export function getAttributeFom(item: ItemDocument) {
+
+    //     return { item.flatStatModifiers, item.percentageStatModifiers };
+    // }
+
     export function getStringCollection(items: Array<ItemDocument>): string {
         const formattedItems = items
             .map((item) => {
@@ -46,7 +55,7 @@ export namespace Item {
                     statName,
                     amplifier,
                 ] of item.flatStatModifiers.entries()) {
-                    flatStatsParts.push(`${statName}: +${amplifier}`);
+                    flatStatsParts.push(`${statName}: ${amplifier}`);
                 }
                 if (flatStatsParts.length > 0) {
                     itemDetails += `\n  - Flat: \n${flatStatsParts.join(", ")}`;
@@ -58,7 +67,7 @@ export namespace Item {
                     amplifier,
                 ] of item.percentageStatModifiers.entries()) {
                     percentageStatsParts.push(
-                        `${statName}: +${(amplifier * 100).toFixed(0)}%`,
+                        `${statName}: ${(amplifier * 100).toFixed(0)}%`,
                     );
                 }
                 if (percentageStatsParts.length > 0) {

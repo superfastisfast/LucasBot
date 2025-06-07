@@ -146,17 +146,15 @@ export namespace DataBase {
 
         try {
             const user = await UserModel.findOne({ id: id });
-            return user!;
-        } catch (err) {
-            try {
-                const dbUser: UserDocument = await UserModel.create({
+            if (!user) {
+                const user: UserDocument = await UserModel.create({
                     id: new String(id) as string,
                     username: (await getUser(id)).username,
                 });
-                return dbUser;
-            } catch {
-                throw new Error(`Failed to fetch user with ID ${id}: ${err}`);
             }
+            return user!;
+        } catch (err) {
+            throw new Error(`Failed to fetch user with ID ${id}: ${err}`);
         }
     }
 
