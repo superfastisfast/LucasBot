@@ -29,14 +29,14 @@ export default class StatsCommand extends Command.Base {
         client: Client,
         interaction: ButtonInteraction,
     ): Promise<boolean> {
-        const userInfo = await DataBase.getUserStats(interaction.user.id);
-        for (const [attribute, value] of userInfo.attributesArray) {
+        const userInfo = await DataBase.getUserDisplayInfo(interaction.user.id);
+        for (const [icon, attribute, value] of userInfo.attributesArray) {
             if (interaction.customId === interaction.user.id + attribute) {
                 await interaction.deferUpdate();
                 const dbUser = await DataBase.getDBUserFromUser(
                     interaction.user,
                 );
-                await DataBase.upgradeSkillDB(dbUser, attribute!);
+                await DataBase.upgradeSkillDB(dbUser, attribute!.toLowerCase());
                 await DataBase.giveSkillpointsDB(
                     await DataBase.getDBUserFromUser(interaction.user),
                     -1,
@@ -46,7 +46,7 @@ export default class StatsCommand extends Command.Base {
                     true,
                 );
                 interaction.editReply({
-                    content: `You upgraded: **${attribute?.toUpperCase()}**`,
+                    content: `You upgraded: **${attribute!.toUpperCase()}**`,
                     embeds: replyMsg.embed,
                     components: replyMsg.components,
                 });
@@ -57,11 +57,11 @@ export default class StatsCommand extends Command.Base {
     }
 
     private async generateStatsResponse(user: User, isMainUser: boolean) {
-        const userInfo = await DataBase.getUserStats(user.id);
+        const userInfo = await DataBase.getUserDisplayInfo(user.id);
 
         let attributeString = "";
-        for (const [attribute, value] of userInfo.attributesArray) {
-            attributeString += `${value}\n`;
+        for (const [icon, attribute, value] of userInfo.attributesArray) {
+            attributeString += `${icon}${attribute}: **${value}**\n`;
         }
 
         const statFields = [];
@@ -105,7 +105,7 @@ export default class StatsCommand extends Command.Base {
                 value: "what do u wanna upgrade?",
                 inline: true,
             });
-            for (const [attribute, value] of userInfo.attributesArray) {
+            for (const [icon, attribute, value] of userInfo.attributesArray) {
                 if (buttonsInCurrentRow === 5) {
                     actionRows.push(currentActionRow);
                     currentActionRow = new ActionRowBuilder<ButtonBuilder>();
@@ -114,7 +114,7 @@ export default class StatsCommand extends Command.Base {
 
                 const button = new ButtonBuilder()
                     .setCustomId(user.id + attribute)
-                    .setLabel(`${attribute}`)
+                    .setLabel(`${icon}${attribute}`)
                     .setStyle(ButtonStyle.Primary);
 
                 currentActionRow.addComponents(button);

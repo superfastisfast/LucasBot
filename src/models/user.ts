@@ -20,8 +20,8 @@ const StatsSchema = new Schema(
     {
         strength: { type: Number, default: 3.0 },
         agility: { type: Number, default: 10.0 },
-        charisma: { type: Number, default: 0.0 },
-        magicka: { type: Number, default: 0.0 },
+        charisma: { type: Number, default: 1.0 },
+        magicka: { type: Number, default: 1.0 },
         stamina: { type: Number, default: 3.0 },
         defense: { type: Number, default: 3.0 },
         vitality: { type: Number, default: 1.0 },
@@ -52,8 +52,8 @@ const userSchema = new Schema(
             default: () => ({
                 strength: 3.0,
                 agility: 10.0,
-                charisma: 0.0,
-                magicka: 0.0,
+                charisma: 1.0,
+                magicka: 1.0,
                 stamina: 3.0,
                 defense: 3.0,
                 vitality: 1.0,
@@ -97,6 +97,10 @@ export interface UserDocument extends Document {
     updatedAt: Date;
 }
 
+type displayStatsFormat = [string, string, number];
+export type StatsModel = mongoose.InferSchemaType<typeof StatsSchema>;
+export const StatsModel = mongoose.model<IStats>("Stats", StatsSchema);
+
 export type UserModel = mongoose.InferSchemaType<typeof userSchema>;
 export const UserModel = mongoose.model<UserDocument>("User", userSchema);
 
@@ -123,18 +127,25 @@ export namespace DataBase {
         return items;
     }
 
-    export async function getUserStats(user: User | PartialUser | string) {
+    export function getDisplayStats(stats: StatsModel): displayStatsFormat[] {
+        const attributesArray: displayStatsFormat[] = [
+            ["⚔️", "Strength", stats.strength],
+            ["🛡️", "Defense", stats.defense],
+            ["🏃", "Agility", stats.agility],
+            ["✨", "Magicka", stats.magicka],
+            ["🔋", "Vitality", stats.vitality],
+            ["🏃‍♂️", "Stamina", stats.stamina],
+            ["🗣️", "Charisma", stats.charisma],
+        ];
+        return attributesArray;
+    }
+
+    export async function getUserDisplayInfo(
+        user: User | PartialUser | string,
+    ) {
         const itemsDisplay = Item.getStringCollection(await getUserItems(user));
         const dbUser: UserDocument = await getDBUserFromUser(user);
-        const attributesArray = [
-            [`strength`, `⚔️ Strength: **${dbUser.stats.strength}**`],
-            [`defense`, `🛡️ Defense: **${dbUser.stats.defense}**`],
-            [`agility`, `🏃 Agility: **${dbUser.stats.agility}**`],
-            [`magicka`, `✨ Magicka: **${dbUser.stats.magicka}**`],
-            [`vitality`, `🔋 Vitality: **${dbUser.stats.vitality}**`],
-            [`stamina`, `🏃‍♂️ Stamina: **${dbUser.stats.stamina}**`],
-            [`charisma`, `🗣️ Charisma: **${dbUser.stats.charisma}**`],
-        ];
+        const attributesArray = DataBase.getDisplayStats(dbUser.stats);
         return {
             gold: dbUser.inventory.gold,
             xp: dbUser.xp,
@@ -317,6 +328,7 @@ export async function level(
 
     if (level > dbUser.level) {
         await DataBase.giveSkillpointsDB(dbUser, 1);
+        await DataBase.giveGoldDB(dbUser, xp);
         dbUser.level = level;
         await dbUser.save();
         await levelChannel.send(

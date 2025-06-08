@@ -91,10 +91,7 @@ export default class CreateQuestCommand extends Command.Base {
             className: questClass,
         });
         if (existingQuest) {
-            await interaction.reply(
-                `A quest with the class name '${questClass}' already exists.`,
-            );
-            return;
+            await existingQuest.deleteOne();
         }
 
         const quest = await QuestModel.create({

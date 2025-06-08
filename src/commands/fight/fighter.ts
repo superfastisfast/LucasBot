@@ -1,15 +1,5 @@
 import { type ItemDocument } from "@/models/item";
-import { DataBase, type UserDocument } from "@/models/user";
-
-interface FighterStats {
-    strength: number;
-    agility: number;
-    charisma: number;
-    magicka: number;
-    stamina: number;
-    defense: number;
-    vitality: number;
-}
+import { DataBase, StatsModel, type UserDocument } from "@/models/user";
 
 export default class Fighter {
     dbUser?: UserDocument;
@@ -18,7 +8,7 @@ export default class Fighter {
     currentMana: number = 0;
     imgeUrl: string = "";
     items: Array<ItemDocument> = [];
-    fighterStats: FighterStats = 0 as any;
+    fighterStats: StatsModel = 0 as any;
 
     static async create(
         dbUser: UserDocument,
@@ -58,13 +48,13 @@ export default class Fighter {
         if (this.items.length > 0) {
             for (const item of this.items) {
                 for (const [key, value] of item.flatStatModifiers.entries()) {
-                    this.fighterStats[key as keyof FighterStats] += value;
+                    this.fighterStats[key as keyof StatsModel] += value;
                 }
                 for (const [
                     key,
                     value,
                 ] of item.percentageStatModifiers.entries()) {
-                    this.fighterStats[key as keyof FighterStats] *= 1 + value;
+                    this.fighterStats[key as keyof StatsModel] *= 1 + value;
                 }
             }
         }

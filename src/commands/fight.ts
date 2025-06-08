@@ -167,7 +167,6 @@ export default class FightCommand extends Command.Base {
                     content: `The fight was cancelled by ${interaction.user.username}.`,
                     components: [],
                 });
-                currentGame.gameOver(false);
                 this.games.delete(currentGame.id);
                 return true;
             }
