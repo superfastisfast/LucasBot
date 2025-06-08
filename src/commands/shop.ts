@@ -51,7 +51,7 @@ export default class ShopCommand extends Command.Base {
                 return true;
             }
         }
-        return true;
+        return false;
     }
 
     private generateShopDisplay(items: ItemDocument[], user: UserDocument) {

@@ -1,5 +1,5 @@
 import { Command } from "@/command";
-import { DataBase } from "@/models/user";
+import { DataBase, type UserDocument } from "@/models/user";
 import {
     ActionRowBuilder,
     ButtonBuilder,
@@ -7,6 +7,7 @@ import {
     ButtonStyle,
     EmbedBuilder,
     SlashCommandBuilder,
+    User,
     type Client,
     type CommandInteraction,
 } from "discord.js";
@@ -16,6 +17,11 @@ export default class StatsCommand extends Command.Base {
         return new SlashCommandBuilder()
             .setName("stats")
             .setDescription("display your stats")
+            .addUserOption((option) =>
+                option
+                    .setName("user")
+                    .setDescription("who do you wanna stalk?"),
+            )
             .toJSON();
     }
 
@@ -23,15 +29,39 @@ export default class StatsCommand extends Command.Base {
         client: Client,
         interaction: ButtonInteraction,
     ): Promise<boolean> {
-        return true;
+        const userInfo = await DataBase.getUserStats(interaction.user.id);
+        for (const [attribute, value] of userInfo.attributesArray) {
+            if (interaction.customId === interaction.user.id + attribute) {
+                await interaction.deferUpdate();
+                const dbUser = await DataBase.getDBUserFromUser(
+                    interaction.user,
+                );
+                await DataBase.upgradeSkillDB(dbUser, attribute!);
+                await DataBase.giveSkillpointsDB(
+                    await DataBase.getDBUserFromUser(interaction.user),
+                    -1,
+                );
+                const replyMsg = await this.generateStatsResponse(
+                    interaction.user,
+                    true,
+                );
+                interaction.editReply({
+                    content: `You upgraded: **${attribute?.toUpperCase()}**`,
+                    embeds: replyMsg.embed,
+                    components: replyMsg.components,
+                });
+            }
+        }
+
+        return false;
     }
 
-    private async generateStatsResponse(interaction: CommandInteraction) {
-        const userInfo = await DataBase.getUserStats(interaction.user.id);
+    private async generateStatsResponse(user: User, isMainUser: boolean) {
+        const userInfo = await DataBase.getUserStats(user.id);
 
         let attributeString = "";
-        for (const attribute of userInfo.attributesArray) {
-            attributeString += `${attribute.join(": ")} \n`;
+        for (const [attribute, value] of userInfo.attributesArray) {
+            attributeString += `${value}\n`;
         }
 
         const statFields = [];
@@ -62,14 +92,14 @@ export default class StatsCommand extends Command.Base {
         });
 
         const userStatsEmbed = new EmbedBuilder()
-            .setTitle(`${interaction.user.username}'s`)
+            .setTitle(`${user.username}'s`)
             .addFields(statFields);
 
         const actionRows: ActionRowBuilder<ButtonBuilder>[] = [];
         let currentActionRow = new ActionRowBuilder<ButtonBuilder>();
         let buttonsInCurrentRow = 0;
 
-        if (userInfo.skillPoints > 0) {
+        if (userInfo.skillPoints > 0 && isMainUser) {
             userStatsEmbed.addFields({
                 name: `**You got (${userInfo.skillPoints}) skillpoints to use**`,
                 value: "what do u wanna upgrade?",
@@ -83,7 +113,7 @@ export default class StatsCommand extends Command.Base {
                 }
 
                 const button = new ButtonBuilder()
-                    .setCustomId(interaction.user.id + attribute)
+                    .setCustomId(user.id + attribute)
                     .setLabel(`${attribute}`)
                     .setStyle(ButtonStyle.Primary);
 
@@ -104,7 +134,18 @@ export default class StatsCommand extends Command.Base {
         interaction: CommandInteraction,
     ): Promise<void> {
         await interaction.deferReply({ flags: "Ephemeral" });
-        const replyMsg = await this.generateStatsResponse(interaction);
+        let user = interaction.options.get("user")?.user;
+        user =
+            user &&
+            user !== null &&
+            user !== undefined &&
+            user.id !== interaction.user.id
+                ? user
+                : interaction.user;
+        const replyMsg = await this.generateStatsResponse(
+            user,
+            user === interaction.user,
+        );
         await interaction.editReply({
             embeds: replyMsg.embed,
             components: replyMsg.components,

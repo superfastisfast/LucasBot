@@ -127,13 +127,13 @@ export namespace DataBase {
         const itemsDisplay = Item.getStringCollection(await getUserItems(user));
         const dbUser: UserDocument = await getDBUserFromUser(user);
         const attributesArray = [
-            [`⚔️ Strength `, `**${dbUser.stats.strength}**`],
-            [`🛡️ Defense `, `**${dbUser.stats.defense}**`],
-            [`🏃 Agility `, `**${dbUser.stats.agility}**`],
-            [`✨ Magicka `, `**${dbUser.stats.magicka}**`],
-            [`🔋 Vitality `, `**${dbUser.stats.vitality}**`],
-            [`🏃‍♂️ Stamina `, `**${dbUser.stats.stamina}**`],
-            [`🗣️ Charisma `, `**${dbUser.stats.charisma}**`],
+            [`strength`, `⚔️ Strength: **${dbUser.stats.strength}**`],
+            [`defense`, `🛡️ Defense: **${dbUser.stats.defense}**`],
+            [`agility`, `🏃 Agility: **${dbUser.stats.agility}**`],
+            [`magicka`, `✨ Magicka: **${dbUser.stats.magicka}**`],
+            [`vitality`, `🔋 Vitality: **${dbUser.stats.vitality}**`],
+            [`stamina`, `🏃‍♂️ Stamina: **${dbUser.stats.stamina}**`],
+            [`charisma`, `🗣️ Charisma: **${dbUser.stats.charisma}**`],
         ];
         return {
             gold: dbUser.inventory.gold,
@@ -283,6 +283,14 @@ export namespace DataBase {
         dbUser.inventory.gold = Math.max(-1000, amount);
         await dbUser.save();
         return amount;
+    }
+
+    export async function upgradeSkillDB(
+        dbUser: UserDocument,
+        attribute: string,
+    ) {
+        (dbUser.stats as any)[attribute]++;
+        await dbUser.save();
     }
 }
 
