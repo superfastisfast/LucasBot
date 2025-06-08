@@ -123,6 +123,40 @@ export namespace DataBase {
         return items;
     }
 
+    export async function getUserStats(user: User | PartialUser | string) {
+        const itemsDisplay = Item.getStringCollection(await getUserItems(user));
+        const dbUser: UserDocument = await getDBUserFromUser(user);
+        const attributesArray = [
+            `⚔️ Strength: **${dbUser.stats.strength}**`,
+            `🛡️ Defense: **${dbUser.stats.defense}**`,
+            `🏃 Agility: **${dbUser.stats.agility}**`,
+            `✨ Magicka: **${dbUser.stats.magicka}**`,
+            `🔋 Vitality: **${dbUser.stats.vitality}**`,
+            `🏃‍♂️ Stamina: **${dbUser.stats.stamina}**`,
+            `🗣️ Charisma: **${dbUser.stats.charisma}**`,
+        ];
+        return {
+            gold: dbUser.inventory.gold,
+            xp: dbUser.xp,
+            level: dbUser.level,
+            skillPoints: dbUser.skillPoints,
+            attributesArray,
+            items: `📦 Items: \n${itemsDisplay}`,
+        };
+
+        // name: `${dbUser.username}'s Stats`,
+        // value:
+        //     `⚔️ Strength: **${dbUser.stats.strength}**\n` +
+        //     `🛡️ Defense: **${dbUser.stats.defense}**\n` +
+        //     `🏃 Agility: **${dbUser.stats.agility}** \n` +
+        //     `✨ Magicka: **${dbUser.stats.magicka}**\n` +
+        //     `🔋 Vitality: **${dbUser.stats.vitality}**\n` +
+        //     `🏃‍♂️ Stamina: **${dbUser.stats.stamina}**\n` +
+        //     `🗣️ Charisma: **${dbUser.stats.charisma}**\n` +
+        //     `📦 Items: \n${itemsDisplay}`,
+        // inline: true,
+    }
+
     export async function applyItem(
         user: User | PartialUser | string,
         item: ItemDocument,
