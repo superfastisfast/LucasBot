@@ -234,6 +234,15 @@ export namespace DataBase {
         await dbUser.save();
         return amount;
     }
+    export async function giveGoldDB(user: UserDocument, amount: number) {
+        await setGoldDB(user, user.inventory.gold + amount);
+        return amount;
+    }
+    export async function setGoldDB(user: UserDocument, amount: number) {
+        user.inventory.gold = Math.max(-1000, amount);
+        await user.save();
+        return amount;
+    }
 
     export async function setGold(
         user: User | PartialUser | string,

@@ -1,6 +1,6 @@
 import { Command } from "@/command";
 import { Item, type ItemDocument } from "@/models/item";
-import { DataBase } from "@/models/user";
+import { DataBase, type UserDocument } from "@/models/user";
 import ShopService from "@/services/shopService";
 import {
     ActionRowBuilder,
@@ -28,12 +28,25 @@ export default class ShopCommand extends Command.Base {
         const availableItems = await ShopService.getActiveShopItems();
         for (const item of availableItems) {
             if (interaction.customId === interaction.user.id + item.name) {
-                DataBase.giveGold(interaction.user.id, -item.cost);
-                DataBase.applyItem(interaction.user.id, item);
-                interaction.reply({
-                    content: `You bought and equipped ${item.name}.`,
-                    components: [],
-                    flags: "Ephemeral",
+                await interaction.deferUpdate();
+                const dbUser = await DataBase.getDBUserFromUser(
+                    interaction.user.id,
+                );
+                let responseMsg = `**You need more money!**`;
+                if (dbUser.inventory.gold >= item.cost) {
+                    responseMsg = `**You bought and equipped ${item.name}.**`;
+                    DataBase.giveGoldDB(dbUser, -item.cost);
+                    DataBase.applyItem(interaction.user.id, item);
+                }
+
+                const shopDisplay = this.generateShopDisplay(
+                    availableItems,
+                    dbUser,
+                );
+                interaction.editReply({
+                    content: responseMsg,
+                    embeds: shopDisplay.embed,
+                    components: shopDisplay.components,
                 });
                 return true;
             }
@@ -41,23 +54,17 @@ export default class ShopCommand extends Command.Base {
         return true;
     }
 
-    override async executeCommand(
-        client: Client,
-        interaction: CommandInteraction,
-    ): Promise<void> {
-        const dbUser = DataBase.getDBUserFromUser(interaction.user.id);
-        const validItems = await ShopService.getActiveShopItems();
-
+    private generateShopDisplay(items: ItemDocument[], user: UserDocument) {
         const shopEmbed = new EmbedBuilder()
-            .setTitle("SHOP")
+            .setTitle(`SHOP | Your Gold: ${user.inventory.gold}`)
             .setDescription("\n")
             .setTimestamp();
-        if (validItems.length > 0) {
-            validItems.forEach((item) => {
+        if (items.length > 0) {
+            items.forEach((item) => {
                 shopEmbed.addFields({
                     name: "",
-                    value: `${Item.getStringCollection([item])}`,
-                    inline: true,
+                    value: `${Item.getStringCollection([item])} \n\n`,
+                    inline: false,
                 });
             });
         } else {
@@ -67,22 +74,32 @@ export default class ShopCommand extends Command.Base {
                 inline: false,
             });
         }
-
         const actionRow = new ActionRowBuilder<ButtonBuilder>();
-        for (const item of validItems) {
+        for (const item of items) {
             const cannotAffordButtonEnabled: boolean =
-                (await dbUser).inventory.gold < item.cost ? true : false;
+                user.inventory.gold < item.cost ? true : false;
             const button = new ButtonBuilder()
-                .setCustomId(interaction.user.id + item.name)
+                .setCustomId(user.id + item.name)
                 .setLabel(`${item.name} (${item.cost} Gold)`)
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(cannotAffordButtonEnabled);
             actionRow.addComponents(button);
         }
+        return { embed: [shopEmbed], components: [actionRow] };
+    }
+
+    override async executeCommand(
+        client: Client,
+        interaction: CommandInteraction,
+    ): Promise<void> {
+        const dbUser = await DataBase.getDBUserFromUser(interaction.user.id);
+        const validItems = await ShopService.getActiveShopItems();
+
+        const shopInfo = this.generateShopDisplay(validItems, dbUser);
 
         interaction.reply({
-            embeds: [shopEmbed],
-            components: [actionRow],
+            embeds: shopInfo.embed,
+            components: shopInfo.components,
             flags: "Ephemeral",
         });
     }
