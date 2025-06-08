@@ -76,7 +76,7 @@ export namespace Item {
 
                 return itemDetails;
             })
-            .join("\n\n");
+            .join("\n");
 
         const itemsDisplay =
             formattedItems.length > 0 ? formattedItems : "None";

@@ -127,13 +127,13 @@ export namespace DataBase {
         const itemsDisplay = Item.getStringCollection(await getUserItems(user));
         const dbUser: UserDocument = await getDBUserFromUser(user);
         const attributesArray = [
-            `⚔️ Strength: **${dbUser.stats.strength}**`,
-            `🛡️ Defense: **${dbUser.stats.defense}**`,
-            `🏃 Agility: **${dbUser.stats.agility}**`,
-            `✨ Magicka: **${dbUser.stats.magicka}**`,
-            `🔋 Vitality: **${dbUser.stats.vitality}**`,
-            `🏃‍♂️ Stamina: **${dbUser.stats.stamina}**`,
-            `🗣️ Charisma: **${dbUser.stats.charisma}**`,
+            [`⚔️ Strength `, `**${dbUser.stats.strength}**`],
+            [`🛡️ Defense `, `**${dbUser.stats.defense}**`],
+            [`🏃 Agility `, `**${dbUser.stats.agility}**`],
+            [`✨ Magicka `, `**${dbUser.stats.magicka}**`],
+            [`🔋 Vitality `, `**${dbUser.stats.vitality}**`],
+            [`🏃‍♂️ Stamina `, `**${dbUser.stats.stamina}**`],
+            [`🗣️ Charisma `, `**${dbUser.stats.charisma}**`],
         ];
         return {
             gold: dbUser.inventory.gold,
