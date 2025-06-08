@@ -143,18 +143,6 @@ export namespace DataBase {
             attributesArray,
             items: `📦 Items: \n${itemsDisplay}`,
         };
-
-        // name: `${dbUser.username}'s Stats`,
-        // value:
-        //     `⚔️ Strength: **${dbUser.stats.strength}**\n` +
-        //     `🛡️ Defense: **${dbUser.stats.defense}**\n` +
-        //     `🏃 Agility: **${dbUser.stats.agility}** \n` +
-        //     `✨ Magicka: **${dbUser.stats.magicka}**\n` +
-        //     `🔋 Vitality: **${dbUser.stats.vitality}**\n` +
-        //     `🏃‍♂️ Stamina: **${dbUser.stats.stamina}**\n` +
-        //     `🗣️ Charisma: **${dbUser.stats.charisma}**\n` +
-        //     `📦 Items: \n${itemsDisplay}`,
-        // inline: true,
     }
 
     export async function applyItem(
@@ -226,6 +214,14 @@ export namespace DataBase {
         } catch (err) {
             throw new Error(`Failed to fetch user with ID ${id}: ${err}`);
         }
+    }
+
+    export async function giveSkillpointsDB(
+        dbUser: UserDocument,
+        amount: number,
+    ) {
+        dbUser.skillPoints += amount;
+        await dbUser.save();
     }
 
     export async function giveXP(
@@ -312,14 +308,7 @@ export async function level(
     const level = calculateLevel(xp);
 
     if (level > dbUser.level) {
-        dbUser.level = level;
-        await dbUser.save();
-        await levelChannel.send(
-            `${await DataBase.getUser(user)} is now level ${level}!`,
-        );
-    }
-
-    if (level < dbUser.level) {
+        await DataBase.giveSkillpointsDB(dbUser, 1);
         dbUser.level = level;
         await dbUser.save();
         await levelChannel.send(

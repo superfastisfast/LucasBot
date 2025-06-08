@@ -31,7 +31,7 @@ export default class StatsCommand extends Command.Base {
             name: "**Stats:**",
             value: `💰 Gold: ${userInfo.gold || 0}
             🌟 XP: ${userInfo.xp || 0}
-            ⬆️ Level: ${userInfo.level || 1}
+            ⬆️ Level: ${userInfo.level || 0}
             💡 Skill Points: ${userInfo.skillPoints || 0}`,
             inline: false,
         });
