@@ -12,7 +12,7 @@ import {
 } from "discord.js";
 
 export default class DragonCampaignQuest extends Quest {
-    maxPlayers: number = 10;
+    maxPlayers: number = 1;
     players: Array<User> = [];
     dragonStats: StatsModel = {
         strength: 0,
@@ -36,6 +36,28 @@ export default class DragonCampaignQuest extends Quest {
     STAT_KEYS: Array<keyof StatsModel> = Object.keys(this.dragonStats) as Array<
         keyof StatsModel
     >;
+    private reset() {
+        this.players = [];
+        this.rewards = [];
+        this.dragonStats = {
+            strength: 0,
+            agility: 0,
+            charisma: 0,
+            magicka: 0,
+            stamina: 0,
+            defense: 0,
+            vitality: 0,
+        };
+        this.playersTotalStats = {
+            strength: 0,
+            agility: 0,
+            charisma: 0,
+            magicka: 0,
+            stamina: 0,
+            defense: 0,
+            vitality: 0,
+        };
+    }
 
     public override async onButtonInteract(
         client: Client,
@@ -62,9 +84,34 @@ export default class DragonCampaignQuest extends Quest {
                 components: questMsg.components,
             });
             if (this.players.length >= this.maxPlayers) {
+                let msgRewards = "";
+                for (const val of this.rewards) {
+                    console.log("Val: " + val);
+                    if (val > 0.99) {
+                        msgRewards += "+ Skillpoint, ";
+                    } else if (val > 0.75) {
+                        msgRewards += "+ gold, ";
+                    } else if (val > 0.5) {
+                        msgRewards += "+ xp, ";
+                    } else if (val > 0) {
+                        msgRewards += "+ Nice message, ";
+                    } else if (val < -0.95) {
+                        msgRewards += "- skillpoint, ";
+                    } else if (val < -0.8) {
+                        msgRewards += "- xp, ";
+                    } else if (val < -0.6) {
+                        msgRewards += "- gold, ";
+                    } else if (val < -0.3) {
+                        msgRewards += "- angry message, ";
+                    } else {
+                        msgRewards += "- dragon taunt, ";
+                    }
+                    msgRewards += "\n";
+                }
                 await interaction.followUp({
-                    content: "Reward: \n" + this.rewards.join("\n"),
+                    content: "Reward: \n" + msgRewards,
                 });
+                this.reset();
             }
             return true;
         }
@@ -159,7 +206,7 @@ export default class DragonCampaignQuest extends Quest {
         )) as TextChannel;
 
         for (const statName of this.STAT_KEYS) {
-            this.dragonStats[statName] = Math.random() * 100;
+            this.dragonStats[statName] = Math.random() * 10;
         }
         const questMsg = await this.generateCampaignMessage();
 
