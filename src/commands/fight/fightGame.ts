@@ -50,7 +50,7 @@ export default class FightGame {
         ) {
             return {
                 success: false,
-                reason: "One or both users could not addord the bet",
+                reason: "One or both users could not afford the bet",
             };
         }
         DataBase.giveGold(this.discordUsers[0]!, -this.bet);
