@@ -11,7 +11,7 @@ RUN bun install --production
 
 COPY . /app
 
-RUN bun run dev
+# RUN bun run dev
 
 EXPOSE 3000
 
