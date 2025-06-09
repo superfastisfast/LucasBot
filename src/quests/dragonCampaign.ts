@@ -92,6 +92,7 @@ export default class DragonCampaignQuest extends Quest.Base {
         client: Client,
         interaction: ButtonInteraction,
     ): Promise<boolean> {
+        if (this.isQuestActive() == false) return false;
         if (interaction.customId === `${this.fileName}#joinTheCampaign`) {
             if (this.players.length >= this.maxPlayers) {
                 await interaction.reply({
@@ -240,16 +241,6 @@ export default class DragonCampaignQuest extends Quest.Base {
         let msg = await questChannel.send({
             embeds: questMsg.embed,
             components: questMsg.components,
-        });
-    }
-
-    public override async endQuest(client: Client): Promise<void> {
-        let questChannel: TextChannel = (await client.channels.fetch(
-            process.env.QUEST_CHANNEL_ID || "undefined",
-        )) as TextChannel;
-
-        await questChannel.send({
-            content: "Quest ENd",
         });
     }
 }

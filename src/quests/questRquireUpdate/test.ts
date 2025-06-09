@@ -61,13 +61,4 @@ export default class TestQuest extends Quest.Base {
             components: [actionRow],
         });
     }
-    public override async endQuest(client: Client): Promise<void> {
-        let questChannel: TextChannel = (await client.channels.fetch(
-            process.env.QUEST_CHANNEL_ID || "undefined",
-        )) as TextChannel;
-
-        await questChannel.send({
-            content: "Quest ENd",
-        });
-    }
 }

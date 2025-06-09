@@ -10,11 +10,10 @@ export namespace Quest {
             return false;
         }
         public abstract startQuest(client: Client): Promise<void>;
-        public abstract endQuest(client: Client): Promise<void>;
         public fileName = "";
         //TODO: when quest end?
         public endDate?: Date;
-        public hasEnded(): boolean {
+        public isQuestActive(): boolean {
             return !(
                 this.endDate && this.endDate.getTime() > new Date().getTime()
             );
