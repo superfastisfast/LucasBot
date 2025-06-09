@@ -32,13 +32,20 @@ export default class DragonCampaignQuest extends Quest {
         defense: 0,
         vitality: 0,
     };
-    rewards: Array<number> = [];
+    //SKILLPOINT, GOLD, XP, MESSAGE Villages, Message Dragon
+    rewards: Map<string, number> = new Map<string, number>();
     STAT_KEYS: Array<keyof StatsModel> = Object.keys(this.dragonStats) as Array<
         keyof StatsModel
     >;
     private reset() {
         this.players = [];
-        this.rewards = [];
+        this.rewards = new Map<string, number>([
+            ["Skillpoints", 0],
+            ["Gold", 0],
+            ["XP", 0],
+            // ["Message Villages", 0],
+            // ["Message Dragon", 0],
+        ]);
         this.dragonStats = {
             strength: 0,
             agility: 0,
@@ -57,6 +64,28 @@ export default class DragonCampaignQuest extends Quest {
             defense: 0,
             vitality: 0,
         };
+    }
+
+    private addToReward(reward: string, val: number) {
+        this.rewards.set(reward, this.rewards.get(reward)! + val);
+    }
+
+    private saveRewardType(val: number) {
+        console.log("Val: " + val);
+        if (val > 20) {
+            this.addToReward("Skillpoints", 1);
+        } else if (val > 0.5) {
+            this.addToReward("Gold", val * 10);
+        } else if (val > 0) {
+            this.addToReward("XP", val * 10);
+        }
+        // } else if (val < -2) {
+        //     this.addToReward("Skillpoints", -1);
+        // } else if (val < -0.6) {
+        //     this.addToReward("XP", val * 10);
+        // } else {
+        //     this.addToReward("Gold", val * 10);
+        // }
     }
 
     public override async onButtonInteract(
@@ -84,32 +113,26 @@ export default class DragonCampaignQuest extends Quest {
                 components: questMsg.components,
             });
             if (this.players.length >= this.maxPlayers) {
-                let msgRewards = "";
-                for (const val of this.rewards) {
-                    console.log("Val: " + val);
-                    if (val > 0.99) {
-                        msgRewards += "+ Skillpoint, ";
-                    } else if (val > 0.75) {
-                        msgRewards += "+ gold, ";
-                    } else if (val > 0.5) {
-                        msgRewards += "+ xp, ";
-                    } else if (val > 0) {
-                        msgRewards += "+ Nice message, ";
-                    } else if (val < -0.95) {
-                        msgRewards += "- skillpoint, ";
-                    } else if (val < -0.8) {
-                        msgRewards += "- xp, ";
-                    } else if (val < -0.6) {
-                        msgRewards += "- gold, ";
-                    } else if (val < -0.3) {
-                        msgRewards += "- angry message, ";
-                    } else {
-                        msgRewards += "- dragon taunt, ";
+                let msgRewards = "```fix\n" + `Rewards: \n`;
+                for (const reward of this.rewards) {
+                    msgRewards += `${reward[0].padEnd(15, " ")}: ${reward[1].toFixed(2)}\n`;
+                    if (reward[0] == "Skillpoints") {
+                        for (const user of this.players) {
+                            await DataBase.giveSkillpoints(user, reward[1]);
+                        }
+                    } else if (reward[0] == "XP") {
+                        for (const user of this.players) {
+                            await DataBase.giveXP(user, reward[1]);
+                        }
+                    } else if (reward[0] == "Gold") {
+                        for (const user of this.players) {
+                            await DataBase.giveGold(user, reward[1]);
+                        }
                     }
-                    msgRewards += "\n";
                 }
+                msgRewards += "```";
                 await interaction.followUp({
-                    content: "Reward: \n" + msgRewards,
+                    content: msgRewards,
                 });
                 this.reset();
             }
@@ -173,9 +196,11 @@ export default class DragonCampaignQuest extends Quest {
                     playersRandom * playersDisplayStats[index]![2];
                 resultField += `${dragonDisplayStats[index]![0]}${(dragonDisplayStats[index]![1] + ":").padEnd(maxDragonStatValueLength, " ")}${dragonVal.toFixed(2)} |VS| ${playerVal.toFixed(2)}`;
                 if (dragonVal < playerVal) {
-                    this.rewards.push((playerVal / dragonVal) * Math.random());
+                    this.saveRewardType(
+                        (playerVal / dragonVal) * Math.random(),
+                    );
                 } else {
-                    this.rewards.push(
+                    this.saveRewardType(
                         -1 * (dragonVal / playerVal) * Math.random(),
                     );
                 }
@@ -204,6 +229,8 @@ export default class DragonCampaignQuest extends Quest {
         let questChannel: TextChannel = (await client.channels.fetch(
             process.env.QUEST_CHANNEL_ID || "undefined",
         )) as TextChannel;
+
+        this.reset();
 
         for (const statName of this.STAT_KEYS) {
             this.dragonStats[statName] = Math.random() * 10;

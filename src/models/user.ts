@@ -227,6 +227,13 @@ export namespace DataBase {
         }
     }
 
+    export async function giveSkillpoints(
+        user: User | PartialUser | string,
+        amount: number,
+    ) {
+        await giveSkillpointsDB(await getDBUserFromUser(user), amount);
+    }
+
     export async function giveSkillpointsDB(
         dbUser: UserDocument,
         amount: number,

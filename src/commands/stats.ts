@@ -67,8 +67,8 @@ export default class StatsCommand extends Command.Base {
         const statFields = [];
         statFields.push({
             name: "**Stats:**",
-            value: `💰 Gold: ${userInfo.gold || 0}
-            🌟 XP: ${userInfo.xp || 0}
+            value: `💰 Gold: ${userInfo.gold.toFixed(2) || 0}
+            🌟 XP: ${userInfo.xp.toFixed(2) || 0}
             ⬆️ Level: ${userInfo.level || 0}
             💡 Skill Points: ${userInfo.skillPoints || 0}`,
             inline: false,
