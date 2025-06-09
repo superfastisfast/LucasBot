@@ -7,10 +7,6 @@ COPY package.json bun.lock /app/
 RUN apk update && \
     apk add --no-cache openssh-client git
 
-RUN mkdir -p -m 0600 ~/.ssh && \
-    ssh-keyscan -H github.com >> ~/.ssh/known_hosts 
-
-
 RUN bun install --production 
 
 COPY . /app
