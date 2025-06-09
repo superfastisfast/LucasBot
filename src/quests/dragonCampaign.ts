@@ -177,7 +177,7 @@ export default class DragonCampaignQuest extends Quest.Base {
             .setThumbnail(questData.imageUrl)
             .addFields({
                 name: `**Players: **(${this.players.length}/${this.maxPlayers})`,
-                value: this.players.map((player) => player.username).join(", "),
+                value: this.players.map((player) => player).join(", "),
             })
             .addFields({
                 name: "**Dragon |VS| Players **",
