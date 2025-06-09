@@ -110,12 +110,12 @@ export namespace DataBase {
     ): Promise<ItemDocument[]> {
         const dbUser: UserDocument = await getDBUserFromUser(user);
         const itemNames: string[] = [
-            dbUser.inventory.helmet,
-            dbUser.inventory.chestplate,
-            dbUser.inventory.weapon,
-            dbUser.inventory.leggings,
-            dbUser.inventory.boots,
-            dbUser.inventory.shield,
+            dbUser?.inventory.helmet,
+            dbUser?.inventory.chestplate,
+            dbUser?.inventory.weapon,
+            dbUser?.inventory.leggings,
+            dbUser?.inventory.boots,
+            dbUser?.inventory.shield,
         ];
         let items: Array<ItemDocument> = [];
         for (const itemName of itemNames) {

@@ -15,13 +15,11 @@ RUN bun install --production
 
 COPY . /app
 
-RUN --mount=type=ssh \
-    git pull git@github.com:LuEklund/LucasBot.git 
 
 
-RUN bun run /src/index.ts
+RUN bun run dev
 
-# EXPOSE 3000
+EXPOSE 3000
 
 # ENV NODE_ENV=production
 # ENV PORT=3000
