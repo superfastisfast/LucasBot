@@ -318,20 +318,22 @@ export default class FightCommand extends Command.Base {
         };
     }
 
-    private InitiateFight(user1: User, user2: User, gameId: number) {
+    private InitiateFight(user1: User, user2: User, game: FightGame) {
         const builder = new EmbedBuilder()
             .setTitle(
                 `:crossed_swords: ${user1?.displayName} -VS- ${user2?.displayName} :crossed_swords:`,
             )
-            .setDescription(`${user2} do you accept the fight?`)
+            .setDescription(
+                `:moneybag:**Bet: ${game.bet}**\n${user2} do you accept the fight?`,
+            )
             .setTimestamp();
         const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
-                .setCustomId(gameId + "#acceptFight")
+                .setCustomId(game.id + "#acceptFight")
                 .setLabel("Accept Fight")
                 .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
-                .setCustomId(gameId + "#declineFight")
+                .setCustomId(game.id + "#declineFight")
                 .setLabel("Decline Fight")
                 .setStyle(ButtonStyle.Danger),
         );
@@ -375,7 +377,7 @@ export default class FightCommand extends Command.Base {
             parseInt(String(interaction.options.get("bet")?.value || 0)),
         );
         this.games.set(newGame.id, newGame);
-        let msg = this.InitiateFight(interaction.user, otherUser, newGame.id);
+        let msg = this.InitiateFight(interaction.user, otherUser, newGame);
         interaction.reply({
             embeds: msg.embeds,
             components: msg.components,

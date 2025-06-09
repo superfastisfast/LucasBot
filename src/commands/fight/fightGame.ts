@@ -121,7 +121,7 @@ export default class FightGame {
         currentPlayer.drainMana(1);
         const actionInfo: string = currentPlayer.attack(opponent);
         if (opponent.currentHealth <= 0) {
-            return `${opponent.dbUser!.username} has been defeated!`;
+            return `** ${opponent.dbUser!.username} has been defeated!** \n${currentPlayer.dbUser!.username} got rewarded: :moneybag:**${this.bet * 2}** `;
         }
         return actionInfo;
     }

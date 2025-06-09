@@ -215,7 +215,7 @@ export namespace DataBase {
 
         try {
             const user = await UserModel.findOne({ id: id });
-            if (user === null || user === undefined) {
+            if (!user || user === null || user === undefined) {
                 const user: UserDocument = await UserModel.create({
                     id: new String(id) as string,
                     username: (await getUser(id)).username,
