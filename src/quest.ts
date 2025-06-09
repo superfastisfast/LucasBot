@@ -1,20 +1,38 @@
 import type { ButtonInteraction, Client } from "discord.js";
 import { QuestModel, type QuestDocument } from "./models/quest";
 
-export abstract class Quest {
-    public async onButtonInteract(
-        client: Client,
-        interaction: ButtonInteraction,
-    ): Promise<boolean> {
-        return false;
+export namespace Quest {
+    export abstract class Base {
+        public async onButtonInteract(
+            client: Client,
+            interaction: ButtonInteraction,
+        ): Promise<boolean> {
+            return false;
+        }
+        public abstract startQuest(client: Client): Promise<void>;
+        public abstract endQuest(client: Client): Promise<void>;
+        public fileName = "";
+        //TODO: when quest end?
+        public endDate?: Date;
+        public hasEnded(): boolean {
+            return !(
+                this.endDate && this.endDate.getTime() > new Date().getTime()
+            );
+        }
+        public generateEndDate(offSetTimeMilliseconds: number) {
+            const currentTimestamp = new Date().getTime();
+            const newTimestamp = currentTimestamp + offSetTimeMilliseconds;
+            this.endDate = new Date(newTimestamp);
+        }
+
+        public async getQuestData(): Promise<QuestDocument> {
+            return (await QuestModel.findOne({ className: this.fileName }))!;
+        }
     }
-    public abstract startQuest(client: Client): Promise<void>;
 
-    private static quests: Map<string, Quest> = new Map();
+    export const quests: Map<string, Quest.Base> = new Map();
 
-    public fileName = "";
-
-    public static async loadQuests() {
+    export async function loadQuests() {
         const glob = new Bun.Glob("src/quests/*.ts");
         console.log(`Registered quests:`);
 
@@ -24,7 +42,7 @@ export abstract class Quest {
             const { default: QuestClass } = await import(
                 path.replace("src/quests/", "./quests/")
             );
-            const quest: Quest = new QuestClass();
+            const quest: Quest.Base = new QuestClass();
 
             quest.fileName = path.split("/").pop()?.replace(".ts", "")!;
 
@@ -33,14 +51,29 @@ export abstract class Quest {
         }
     }
 
-    public async getQuestData(): Promise<QuestDocument> {
-        return (await QuestModel.findOne({ className: this.fileName }))!;
+    export async function handleButtonInteraction(
+        client: Client,
+        interaction: any,
+    ) {
+        for (const quest of await Quest.getQuests()) {
+            try {
+                if (await quest.onButtonInteract(client, interaction)) {
+                    break;
+                }
+            } catch (err) {
+                console.error(
+                    `Error running button interaction for quest ${quest.fileName}:`,
+                    err,
+                );
+            }
+        }
     }
 
-    public static getQuest(name: string): Quest | undefined {
+    export function getQuest(name: string): Quest.Base | undefined {
         return Quest.quests.get(name);
     }
-    public static getQuests(): Quest[] {
+
+    export function getQuests(): Quest.Base[] {
         return Array.from(Quest.quests.values());
     }
 }

@@ -1,11 +1,6 @@
 import { Command } from "@/command";
 import { Service } from "@/service";
-import {
-    Client,
-    GatewayIntentBits,
-    Partials,
-    Events,
-} from "discord.js";
+import { Client, GatewayIntentBits, Partials, Events } from "discord.js";
 import mongoose from "mongoose";
 import { Quest } from "./quest";
 
@@ -20,6 +15,18 @@ export const client = new Client({
     partials: [Partials.Message, Partials.Reaction, Partials.User],
 });
 
+function sendHello() {
+    // const quest = quests[Math.floor(Math.random() * quests.length)];
+    // if (quest?.hasEnded()) {
+    //     quest?.startQuest(client);
+    // }
+    // const quests: Quest[] = Quest.getQuests();
+    // for (const quest of quests) {
+    //     if (quest.hasEnded()) {
+    //         quest.endQuest(client);
+    //     }
+    // }
+}
 
 client.once(Events.ClientReady, async (readyClient) => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
@@ -34,7 +41,8 @@ client.once(Events.ClientReady, async (readyClient) => {
         await Command.register(client);
         await Quest.loadQuests();
     })();
-    
+
+    setInterval(sendHello, 1000 * 5);
 
     client.on(Events.InteractionCreate, async (interaction) => {
         if (interaction.isCommand()) {
@@ -43,6 +51,7 @@ client.once(Events.ClientReady, async (readyClient) => {
             await Command.handleAutocompleteInteraction(client, interaction);
         } else if (interaction.isButton()) {
             await Command.handleButtonInteraction(client, interaction);
+            await Quest.handleButtonInteraction(client, interaction);
         }
     });
 
@@ -50,7 +59,7 @@ client.once(Events.ClientReady, async (readyClient) => {
         await Command.handleMessageCreate(message);
     });
 
-    await Service.stop(client)
+    await Service.stop(client);
 });
 
 client.login(process.env.BOT_TOKEN);

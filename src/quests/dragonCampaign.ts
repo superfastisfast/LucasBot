@@ -11,7 +11,7 @@ import {
     type TextChannel,
 } from "discord.js";
 
-export default class DragonCampaignQuest extends Quest {
+export default class DragonCampaignQuest extends Quest.Base {
     maxPlayers: number = 1;
     players: Array<User> = [];
     dragonStats: StatsModel = {
@@ -240,6 +240,16 @@ export default class DragonCampaignQuest extends Quest {
         let msg = await questChannel.send({
             embeds: questMsg.embed,
             components: questMsg.components,
+        });
+    }
+
+    public override async endQuest(client: Client): Promise<void> {
+        let questChannel: TextChannel = (await client.channels.fetch(
+            process.env.QUEST_CHANNEL_ID || "undefined",
+        )) as TextChannel;
+
+        await questChannel.send({
+            content: "Quest ENd",
         });
     }
 }

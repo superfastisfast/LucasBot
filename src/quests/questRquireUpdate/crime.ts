@@ -10,7 +10,7 @@ import {
     type TextChannel,
 } from "discord.js";
 
-export default class CrimeQuest extends Quest {
+export default class CrimeQuest extends Quest.Base {
     private lastUser: string | undefined = undefined;
 
     public override onButtonInteract = async (
@@ -48,6 +48,7 @@ export default class CrimeQuest extends Quest {
             const questChannel: TextChannel = (await client.channels.fetch(
                 process.env.QUEST_CHANNEL_ID,
             )) as TextChannel;
+            this.generateEndDate(1000 * 5);
 
             const users = Array.from(client.users.cache.keys());
             const offender = users[Math.floor(Math.random() * users.length)];
@@ -88,4 +89,13 @@ export default class CrimeQuest extends Quest {
 
             questChannel.send({ embeds: [builder], components: [actionRow] });
         });
+    public override async endQuest(client: Client): Promise<void> {
+        let questChannel: TextChannel = (await client.channels.fetch(
+            process.env.QUEST_CHANNEL_ID || "undefined",
+        )) as TextChannel;
+
+        await questChannel.send({
+            content: "Quest ENd",
+        });
+    }
 }

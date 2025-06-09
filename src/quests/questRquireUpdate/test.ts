@@ -9,9 +9,9 @@ import {
     type TextChannel,
 } from "discord.js";
 
-export default class TestQuest extends Quest {
+export default class TestQuest extends Quest.Base {
     public override async onButtonInteract(
-        client:  Client,
+        client: Client,
         interaction: ButtonInteraction,
     ): Promise<boolean> {
         if (interaction.customId === `${this.fileName}#help`) {
@@ -26,6 +26,7 @@ export default class TestQuest extends Quest {
 
     public override async startQuest(client: Client): Promise<void> {
         const questData = await this.getQuestData();
+        this.generateEndDate(1000 * 5);
         console.log("questData", questData);
 
         let questChannel: TextChannel = (await client.channels.fetch(
@@ -58,6 +59,15 @@ export default class TestQuest extends Quest {
         let msg = await questChannel.send({
             embeds: [builder],
             components: [actionRow],
+        });
+    }
+    public override async endQuest(client: Client): Promise<void> {
+        let questChannel: TextChannel = (await client.channels.fetch(
+            process.env.QUEST_CHANNEL_ID || "undefined",
+        )) as TextChannel;
+
+        await questChannel.send({
+            content: "Quest ENd",
         });
     }
 }

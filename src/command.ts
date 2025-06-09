@@ -88,18 +88,6 @@ export namespace Command {
         client: Client,
         interaction: any,
     ) {
-        for (const quest of await Quest.getQuests()) {
-            try {
-                if (await quest.onButtonInteract(client, interaction)) {
-                    break;
-                }
-            } catch (err) {
-                console.error(
-                    `Error running button interaction for quest ${quest.fileName}:`,
-                    err,
-                );
-            }
-        }
         for (const command of await commands) {
             try {
                 if (await command[1].onButtonInteract(client, interaction)) {
