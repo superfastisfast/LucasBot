@@ -156,7 +156,7 @@ export namespace DataBase {
         };
     }
 
-    export async function applyItem(
+    export async function userEquipItem(
         user: User | PartialUser | string,
         item: ItemDocument,
     ) {

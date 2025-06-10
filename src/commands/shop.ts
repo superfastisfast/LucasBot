@@ -36,7 +36,7 @@ export default class ShopCommand extends Command.Base {
                 if (dbUser.inventory.gold >= item.cost) {
                     responseMsg = `**You bought and equipped ${item.name}.**`;
                     DataBase.giveGoldDB(dbUser, -item.cost);
-                    DataBase.applyItem(interaction.user.id, item);
+                    DataBase.userEquipItem(interaction.user.id, item);
                 }
 
                 const shopDisplay = this.generateShopDisplay(

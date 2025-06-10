@@ -1,3 +1,4 @@
+import { Item } from "@/models/item";
 import { DataBase } from "@/models/user";
 import { Quest } from "@/quest";
 import {
@@ -10,31 +11,45 @@ import {
     type TextChannel,
 } from "discord.js";
 
-export default class SubscribedQuest extends Quest.Base {
-    interactedPlayerIds: Array<string> = [];
+export default class MysteriousPackage extends Quest.Base {
+    interactedPlayerId: string = "";
     public override async onButtonInteract(
         client: Client,
         interaction: ButtonInteraction,
     ): Promise<boolean> {
-        if (
-            !interaction.user ||
-            this.interactedPlayerIds.includes(interaction.user.id)
-        )
-            return false;
-        if (interaction.customId === `#${this.generateUniqueButtonID()}_yes`) {
-            const xpRecived = await DataBase.giveXP(interaction.user.id, 10);
-            let message = await interaction.reply(
-                "**" +
-                    interaction.member?.user.username +
+        if (this.interactedPlayerId !== "") return false;
+        if (interaction.customId === `#${this.generateUniqueButtonID()}_open`) {
+            const item = await Item.getRandom();
+            if (item) {
+                await DataBase.userEquipItem(interaction.user, item);
+                await interaction.reply(
                     "**" +
-                    " Good 😊 \nYou gained " +
-                    xpRecived?.toFixed(2) +
-                    "xp! \nNow tell a friend?",
-            );
-            this.interactedPlayerIds.push(interaction.user.id);
+                        interaction.member?.user.username +
+                        "**\n" +
+                        `Opened a Mysterious Package and was forcefully equipped with` +
+                        "\n" +
+                        Item.getStringCollection([item]),
+                );
+            }
+            this.interactedPlayerId = interaction.user.id;
             return true;
         } else if (
-            interaction.customId === `#${this.generateUniqueButtonID()}_no`
+            interaction.customId ===
+            `#${this.generateUniqueButtonID()}_findOwner`
+        ) {
+            await interaction.reply({
+                content:
+                    "**" +
+                    interaction.member?.user.username +
+                    "**\n" +
+                    `You found the owner of the package, and recived 50 gold`,
+                flags: "Ephemeral",
+            });
+            DataBase.giveGold(interaction.user, 50);
+            this.interactedPlayerId = interaction.user.id;
+            return true;
+        } else if (
+            interaction.customId === `#${this.generateUniqueButtonID()}_sell`
         ) {
             await DataBase.giveXP(interaction.user.id, -10);
             let message = await interaction.reply(
@@ -43,7 +58,7 @@ export default class SubscribedQuest extends Quest.Base {
                     "**" +
                     " How could you? 😭 \nYou lost 10xp!",
             );
-            this.interactedPlayerIds.push(interaction.user.id);
+            this.interactedPlayerId = interaction.user.id;
             return true;
         }
 
@@ -53,7 +68,7 @@ export default class SubscribedQuest extends Quest.Base {
     public override async startQuest(client: Client): Promise<void> {
         const questData = await this.getQuestData();
         this.generateEndDate(1000 * 60 * 10);
-        this.interactedPlayerIds = [];
+        this.interactedPlayerId = "";
         if (!process.env.QUEST_CHANNEL_ID)
             throw new Error("QUEST_CHANNEL_ID is not defined in .env");
         let questChannel: TextChannel = (await client.channels.fetch(
@@ -78,12 +93,16 @@ export default class SubscribedQuest extends Quest.Base {
 
         const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
-                .setCustomId(`#${this.generateUniqueButtonID()}_yes`)
-                .setLabel("YES")
+                .setCustomId(`#${this.generateUniqueButtonID()}_open`)
+                .setLabel("Open it immediately")
                 .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
-                .setCustomId(`#${this.generateUniqueButtonID()}_no`)
-                .setLabel("NO")
+                .setCustomId(`#${this.generateUniqueButtonID()}_findOwner`)
+                .setLabel("Find & Give To Owner")
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId(`#${this.generateUniqueButtonID()}_sell`)
+                .setLabel("Sell it to the nearest vendor")
                 .setStyle(ButtonStyle.Primary),
         );
 
