@@ -11,10 +11,8 @@ export namespace Quest {
         }
         public abstract startQuest(client: Client): Promise<void>;
         public fileName = "";
-        //TODO: when quest end?
         public endDate?: Date;
         public isQuestActive(): boolean {
-            // if valid date and endate is valid then is active
             return (
                 this.endDate !== undefined &&
                 this.endDate.getTime() > new Date().getTime()
@@ -28,6 +26,9 @@ export namespace Quest {
 
         public async getQuestData(): Promise<QuestDocument> {
             return (await QuestModel.findOne({ className: this.fileName }))!;
+        }
+        public generateUniqueButtonID(): string {
+            return `${this.fileName}_${this.endDate}`;
         }
     }
 
@@ -49,6 +50,13 @@ export namespace Quest {
 
             Quest.quests.set(quest.fileName, quest);
             console.log(`\t${quest.fileName}`);
+        }
+    }
+    export function generateRadomQuest(client: Client) {
+        const quests: Quest.Base[] = Quest.getQuests();
+        const quest = quests[Math.floor(Math.random() * quests.length)];
+        if (quest && quest.isQuestActive() === false) {
+            quest.startQuest(client);
         }
     }
 

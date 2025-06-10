@@ -91,7 +91,10 @@ export default class DragonCampaignQuest extends Quest.Base {
         client: Client,
         interaction: ButtonInteraction,
     ): Promise<boolean> {
-        if (interaction.customId === `${this.fileName}#joinTheCampaign`) {
+        if (
+            interaction.customId ===
+            `#${this.generateUniqueButtonID()}_joinTheCampaign`
+        ) {
             if (this.players.length >= this.maxPlayers) {
                 await interaction.reply({
                     content: "Lobby is full!",
@@ -182,8 +185,15 @@ export default class DragonCampaignQuest extends Quest.Base {
                 name: "**Dragon |VS| Players **",
                 value: statField,
             })
-            .setFooter({ text: "Quest Footer" })
-            .setTimestamp();
+            .setFooter({
+                text:
+                    "Quest Ends: " +
+                    this.endDate?.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                    }),
+            });
 
         let enableButton: boolean = false;
         if (this.players.length >= this.maxPlayers) {
@@ -217,7 +227,9 @@ export default class DragonCampaignQuest extends Quest.Base {
         }
         const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
-                .setCustomId(`${this.fileName}#joinTheCampaign`)
+                .setCustomId(
+                    `#${this.generateUniqueButtonID()}_joinTheCampaign`,
+                )
                 .setLabel("Join The Campaign")
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(enableButton),
@@ -232,7 +244,7 @@ export default class DragonCampaignQuest extends Quest.Base {
         )) as TextChannel;
 
         this.reset();
-        this.generateEndDate(1000 * 5);
+        this.generateEndDate(1000 * 60 * 30);
 
         for (const statName of this.STAT_KEYS) {
             this.dragonStats[statName] = Math.random() * 10;

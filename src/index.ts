@@ -15,19 +15,6 @@ export const client = new Client({
     partials: [Partials.Message, Partials.Reaction, Partials.User],
 });
 
-function sendHello() {
-    // const quest = quests[Math.floor(Math.random() * quests.length)];
-    // if (quest?.hasEnded()) {
-    //     quest?.startQuest(client);
-    // }
-    // const quests: Quest[] = Quest.getQuests();
-    // for (const quest of quests) {
-    //     if (quest.hasEnded()) {
-    //         quest.endQuest(client);
-    //     }
-    // }
-}
-
 client.once(Events.ClientReady, async (readyClient) => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 
@@ -41,8 +28,12 @@ client.once(Events.ClientReady, async (readyClient) => {
         await Command.register(client);
         await Quest.loadQuests();
     })();
-
-    setInterval(sendHello, 1000 * 5);
+    setInterval(
+        () => {
+            Quest.generateRadomQuest(client);
+        },
+        1000 * 60 * 30,
+    );
 
     client.on(Events.InteractionCreate, async (interaction) => {
         if (interaction.isCommand()) {
