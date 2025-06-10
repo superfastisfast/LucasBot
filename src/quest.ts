@@ -54,9 +54,14 @@ export namespace Quest {
     }
     export function generateRadomQuest(client: Client) {
         const quests: Quest.Base[] = Quest.getQuests();
-        const quest = quests[Math.floor(Math.random() * quests.length)];
-        if (quest && quest.isQuestActive() === false) {
-            quest.startQuest(client);
+        const firstIndex = Math.floor(Math.random() * quests.length);
+        for (let index = 0; index < quests.length; index++) {
+            let quest = quests[(firstIndex + index) % quests.length];
+            console.log("index: " + index);
+            if (quest && quest.isQuestActive() === false) {
+                quest.startQuest(client);
+                return;
+            }
         }
     }
 

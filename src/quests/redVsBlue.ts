@@ -15,7 +15,7 @@ export default class SubscribedQuest extends Quest.Base {
     // 0 = red, 1 = blue
     players: Array<Array<User>> = [];
     bet: number = 5;
-    maxPlayers: number = 6;
+    maxPlayers: number = 2;
     public override async onButtonInteract(
         client: Client,
         interaction: ButtonInteraction,

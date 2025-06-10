@@ -12,7 +12,7 @@ import {
 } from "discord.js";
 
 export default class DragonCampaignQuest extends Quest.Base {
-    maxPlayers: number = 1;
+    maxPlayers: number = 2;
     players: Array<User> = [];
     dragonStats: StatsModel = {
         strength: 0,
@@ -247,7 +247,7 @@ export default class DragonCampaignQuest extends Quest.Base {
         this.generateEndDate(1000 * 60 * 30);
 
         for (const statName of this.STAT_KEYS) {
-            this.dragonStats[statName] = Math.random() * 10;
+            this.dragonStats[statName] = Math.random() * this.maxPlayers * 10;
         }
         const questMsg = await this.generateCampaignMessage();
 

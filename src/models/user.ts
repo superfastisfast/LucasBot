@@ -1,4 +1,11 @@
-import { Guild, GuildMember, Role, TextChannel, User, type PartialUser } from "discord.js";
+import {
+    Guild,
+    GuildMember,
+    Role,
+    TextChannel,
+    User,
+    type PartialUser,
+} from "discord.js";
 import mongoose, { Document, Schema } from "mongoose";
 import { client } from "..";
 import { Item, type ItemDocument } from "./item";
@@ -59,6 +66,7 @@ const userSchema = new Schema(
                 vitality: 1.0,
             }),
         },
+        portalsEntered: { type: Number, default: 0.0 },
     },
     { timestamps: true },
 );
@@ -93,6 +101,7 @@ export interface UserDocument extends Document {
     skillPoints: number;
     inventory: IInventory;
     stats: IStats;
+    portalsEntered: number;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -315,30 +324,42 @@ export namespace DataBase {
         anyUser: User | PartialUser | string,
         roleNameOrId: string,
     ): Promise<void> {
-    try {
-        const user = DataBase.getUser(anyUser);
+        try {
+            const user = DataBase.getUser(anyUser);
 
-        const member: GuildMember | null = await guild.members.fetch((await user).id);
+            const member: GuildMember | null = await guild.members.fetch(
+                (await user).id,
+            );
 
-        if (!member) 
-            throw new Error(`User ${user} is not a member of the guild ${guild.name}`);
+            if (!member)
+                throw new Error(
+                    `User ${user} is not a member of the guild ${guild.name}`,
+                );
 
-        const roleToGive: Role | undefined = guild.roles.cache.find(
-            role => role.name.toLowerCase() === roleNameOrId.toLowerCase() || role.id === roleNameOrId
-        );
+            const roleToGive: Role | undefined = guild.roles.cache.find(
+                (role) =>
+                    role.name.toLowerCase() === roleNameOrId.toLowerCase() ||
+                    role.id === roleNameOrId,
+            );
 
-        if (!roleToGive) 
-            throw new Error(`Role "${roleNameOrId}" not found in guild ${guild.name}`);
+            if (!roleToGive)
+                throw new Error(
+                    `Role "${roleNameOrId}" not found in guild ${guild.name}`,
+                );
 
-        if (guild.members.me && roleToGive.position >= guild.members.me.roles.highest.position)
-            throw new Error(`I cannot assign the role "${roleToGive.name}" because it is equal to or higher than my highest role`);
+            if (
+                guild.members.me &&
+                roleToGive.position >= guild.members.me.roles.highest.position
+            )
+                throw new Error(
+                    `I cannot assign the role "${roleToGive.name}" because it is equal to or higher than my highest role`,
+                );
 
-        await member.roles.add(roleToGive);
-
-    } catch (error) {
-        throw new Error(`Error assigning role: ${error}`);
+            await member.roles.add(roleToGive);
+        } catch (error) {
+            throw new Error(`Error assigning role: ${error}`);
+        }
     }
-}
 }
 
 export async function level(
@@ -373,9 +394,9 @@ export async function level(
     const members = await guild.members.fetch();
 
     const rank = rankFromLevel(level) || "";
-    if (rank === "") { 
-        console.log("Skipped Level")
-        return; 
+    if (rank === "") {
+        console.log("Skipped Level");
+        return;
     }
     DataBase.giveRank(guild, user, rank);
 }
