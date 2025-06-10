@@ -33,6 +33,7 @@ client.once(Events.ClientReady, async (readyClient) => {
             Quest.generateRadomQuest(client);
         },
         1000 * 60 * 30,
+        // 1000,
     );
 
     client.on(Events.InteractionCreate, async (interaction) => {

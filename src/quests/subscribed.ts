@@ -1,4 +1,4 @@
-import { DataBase, UserModel } from "@/models/user";
+import { DataBase } from "@/models/user";
 import { Quest } from "@/quest";
 import {
     ActionRowBuilder,
@@ -11,11 +11,17 @@ import {
 } from "discord.js";
 
 export default class SubscribedQuest extends Quest.Base {
+    interactedPlayerIds: Array<string> = [];
     public override async onButtonInteract(
         client: Client,
         interaction: ButtonInteraction,
     ): Promise<boolean> {
-        if (interaction.customId === `${this.fileName}#yes`) {
+        if (
+            !interaction.user ||
+            this.interactedPlayerIds.includes(interaction.user.id)
+        )
+            return false;
+        if (interaction.customId === `#${this.generateUniqueButtonID()}_yes`) {
             const xpRecived = await DataBase.giveXP(interaction.user.id, 10);
             let message = await interaction.reply(
                 "**" +
@@ -25,16 +31,19 @@ export default class SubscribedQuest extends Quest.Base {
                     xpRecived?.toFixed(2) +
                     "xp! \nNow tell a friend?",
             );
-
+            this.interactedPlayerIds.push(interaction.user.id);
             return true;
-        } else if (interaction.customId === `${this.fileName}#no`) {
+        } else if (
+            interaction.customId === `#${this.generateUniqueButtonID()}_no`
+        ) {
+            await DataBase.giveXP(interaction.user.id, -10);
             let message = await interaction.reply(
                 "**" +
                     interaction.member?.user.username +
                     "**" +
                     " How could you? 😭 \nYou lost 10xp!",
             );
-            await DataBase.giveXP(interaction.user.id, -10);
+            this.interactedPlayerIds.push(interaction.user.id);
             return true;
         }
 
@@ -43,10 +52,8 @@ export default class SubscribedQuest extends Quest.Base {
 
     public override async startQuest(client: Client): Promise<void> {
         const questData = await this.getQuestData();
-        this.generateEndDate(1000 * 5);
-
-        questData.data;
-
+        this.generateEndDate(1000 * 60 * 10);
+        this.interactedPlayerIds = [];
         if (!process.env.QUEST_CHANNEL_ID)
             throw new Error("QUEST_CHANNEL_ID is not defined in .env");
         let questChannel: TextChannel = (await client.channels.fetch(
@@ -63,16 +70,23 @@ export default class SubscribedQuest extends Quest.Base {
                 name: "QuestName",
                 value: this.fileName,
             })
-            .setFooter({ text: "Quest Footer" })
-            .setTimestamp();
+            .setFooter({
+                text:
+                    "Quest Ends: " +
+                    this.endDate?.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                    }),
+            });
 
         const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
-                .setCustomId(`${this.fileName}#yes`)
+                .setCustomId(`#${this.generateUniqueButtonID()}_yes`)
                 .setLabel("YES")
                 .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
-                .setCustomId(`${this.fileName}#no`)
+                .setCustomId(`#${this.generateUniqueButtonID()}_no`)
                 .setLabel("NO")
                 .setStyle(ButtonStyle.Primary),
         );

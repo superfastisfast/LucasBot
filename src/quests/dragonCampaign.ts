@@ -115,7 +115,7 @@ export default class DragonCampaignQuest extends Quest.Base {
                 components: questMsg.components,
             });
             if (this.players.length >= this.maxPlayers) {
-                let msgRewards = "```fix\n" + `Rewards: \n`;
+                let msgRewards = "```fix\n";
                 for (const reward of this.rewards) {
                     reward[1] = Math.max(0, reward[1]);
                     msgRewards += `${reward[0].padEnd(15, " ")}: ${reward[1].toFixed(2)}\n`;
@@ -135,7 +135,7 @@ export default class DragonCampaignQuest extends Quest.Base {
                 }
                 msgRewards += "```";
                 await interaction.followUp({
-                    content: msgRewards,
+                    content: `${this.players.map((player) => player).join(", ")}\n Rewards:\n${msgRewards}`,
                 });
                 this.reset();
             }
