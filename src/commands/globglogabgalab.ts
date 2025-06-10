@@ -1,10 +1,58 @@
 import { Command } from "@/command";
 import { AutocompleteInteraction, SlashCommandBuilder, type Client, type CommandInteraction } from "discord.js";
 
+const globglogabgelabScript = `||
+I'm the Globglogabgalab.
+
+And I love books.
+And this basement is
+
+a true treasure trove.
+
+I am the Glob-glo-gab-galab
+The shwabble-dabble-wabble-gabble
+flibba blabba blab
+I'm full of shwibbly glib-a-kind
+I am the yeast of thoughts and minds
+
+
+Shwabble dabble glibble
+glabble schribble shwap glab
+Dibble dabble shribble
+shrabble glibbi-glap shwap
+Shwabble dabble glibble
+glabble shwibble shwap-dap
+Dibble dabble shribble
+shrabble glibbi-shwap glab
+
+Oooh, ha ha ha, mmm, splendid!
+Simply delicious~!
+Ooooohm, ha ha ha ha!
+
+
+I am the Glob-glo-gab-galab
+The shwabble-dabble-wabble-gabble
+flibba blabba blab
+I'm full of shwibbly glib-a-kind
+I am the yeast of thoughts and minds
+
+
+Shwabble dabble glibble
+glabble schribble shwap glab
+Dibble dabble shribble
+shrabble glibbi-glap shwap
+Shwabble dabble glibble
+glabble shwibble shwap-dap
+Dibble dabble shribble
+shrabble glibbi-shwap glab
+
+Ahhh...||`
+
 interface Globglogabgelab {
     url: string;
     option: string;
     desc?: string;
+    use_youtube_url_prefix?: boolean,
 }
 
 const songs: Globglogabgelab[] = [
@@ -74,6 +122,7 @@ const songs: Globglogabgelab[] = [
     { url: "oxqCKsUiIWg", option: "Instrumental" },
     { url: "h6EuSlzO4m0", option: "Ends it all" },
     { url: "aTtnRjRJstc", option: "Spiderman" },
+    { url: "", option: "Script", desc: globglogabgelabScript, use_youtube_url_prefix: false }
 ]
 
 export default class GlobglogabgalabCommand extends Command.Base {
@@ -136,9 +185,12 @@ export default class GlobglogabgalabCommand extends Command.Base {
         const song = interaction.options.get("song", false)?.value as number;
         const index = song ?? Math.floor(Math.random() * (songs.length));
 
+        if (!songs[index]?.use_youtube_url_prefix) {
+            interaction.reply(`**${songs[index]?.option}** video *[here](https://www.youtube.com/watch?v=${songs[index]?.url})* ${songs[index]?.desc || "..."}`)
+        } else {
+            interaction.reply(`**${songs[index]?.option}** ${songs[index]?.url} ${songs[index]?.desc || "..."}`)
+        }
 
-        interaction.reply(`**${songs[index]?.option}** video *[here](https://www.youtube.com/watch?v=${songs[index]?.url})* ${songs[index]?.desc || "..."}`)
-        
         // Check for "Christmas"
         const today = new Date(2025, 5, 24); // Month is 0-based: 5 = June
         const isChristmas = (today.getDate() === 25 || today.getDate() === 24) && today.getMonth() === 11;
