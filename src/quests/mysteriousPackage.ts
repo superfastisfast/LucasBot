@@ -51,13 +51,15 @@ export default class MysteriousPackage extends Quest.Base {
         } else if (
             interaction.customId === `#${this.generateUniqueButtonID()}_sell`
         ) {
-            await DataBase.giveXP(interaction.user.id, -10);
-            let message = await interaction.reply(
-                "**" +
-                    interaction.member?.user.username +
+            await interaction.reply({
+                content:
                     "**" +
-                    " How could you? 😭 \nYou lost 10xp!",
-            );
+                    interaction.member?.user.username +
+                    "**\n" +
+                    `You fsold the package, and recived 50 gold`,
+                flags: "Ephemeral",
+            });
+            DataBase.giveGold(interaction.user, 50);
             this.interactedPlayerId = interaction.user.id;
             return true;
         }
