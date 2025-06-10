@@ -90,6 +90,7 @@ export namespace Command {
     ) {
         for (const command of await commands) {
             try {
+                //TODO if inactive command dont check interaction
                 if (await command[1].onButtonInteract(client, interaction)) {
                     break;
                 }

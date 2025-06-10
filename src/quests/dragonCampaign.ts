@@ -75,24 +75,22 @@ export default class DragonCampaignQuest extends Quest.Base {
         if (val > 20) {
             this.addToReward("Skillpoints", 1);
         } else if (val > 0.5) {
-            this.addToReward("Gold", val * 10);
+            this.addToReward("Gold", val * 5);
         } else if (val > 0) {
+            this.addToReward("XP", val * 5);
+        } else if (val < -2) {
+            this.addToReward("Skillpoints", -1);
+        } else if (val < -0.6) {
             this.addToReward("XP", val * 10);
+        } else {
+            this.addToReward("Gold", val * 10);
         }
-        // } else if (val < -2) {
-        //     this.addToReward("Skillpoints", -1);
-        // } else if (val < -0.6) {
-        //     this.addToReward("XP", val * 10);
-        // } else {
-        //     this.addToReward("Gold", val * 10);
-        // }
     }
 
     public override async onButtonInteract(
         client: Client,
         interaction: ButtonInteraction,
     ): Promise<boolean> {
-        if (this.isQuestActive() == false) return false;
         if (interaction.customId === `${this.fileName}#joinTheCampaign`) {
             if (this.players.length >= this.maxPlayers) {
                 await interaction.reply({
@@ -116,6 +114,7 @@ export default class DragonCampaignQuest extends Quest.Base {
             if (this.players.length >= this.maxPlayers) {
                 let msgRewards = "```fix\n" + `Rewards: \n`;
                 for (const reward of this.rewards) {
+                    reward[1] = Math.max(0, reward[1]);
                     msgRewards += `${reward[0].padEnd(15, " ")}: ${reward[1].toFixed(2)}\n`;
                     if (reward[0] == "Skillpoints") {
                         for (const user of this.players) {
@@ -207,6 +206,7 @@ export default class DragonCampaignQuest extends Quest.Base {
                 }
                 resultField += `\t${dragonVal < playerVal ? "Won" : "Lost"}\n`;
             }
+
             resultField += "```";
 
             builder.addFields({
@@ -232,6 +232,7 @@ export default class DragonCampaignQuest extends Quest.Base {
         )) as TextChannel;
 
         this.reset();
+        this.generateEndDate(1000 * 5);
 
         for (const statName of this.STAT_KEYS) {
             this.dragonStats[statName] = Math.random() * 10;

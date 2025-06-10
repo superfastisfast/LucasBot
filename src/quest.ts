@@ -14,8 +14,10 @@ export namespace Quest {
         //TODO: when quest end?
         public endDate?: Date;
         public isQuestActive(): boolean {
-            return !(
-                this.endDate && this.endDate.getTime() > new Date().getTime()
+            // if valid date and endate is valid then is active
+            return (
+                this.endDate !== undefined &&
+                this.endDate.getTime() > new Date().getTime()
             );
         }
         public generateEndDate(offSetTimeMilliseconds: number) {
@@ -56,16 +58,19 @@ export namespace Quest {
     ) {
         for (const quest of await Quest.getQuests()) {
             try {
+                if (quest.isQuestActive() === false) continue;
                 if (await quest.onButtonInteract(client, interaction)) {
-                    break;
+                    return true;
                 }
             } catch (err) {
                 console.error(
                     `Error running button interaction for quest ${quest.fileName}:`,
                     err,
                 );
+                return false;
             }
         }
+        return false;
     }
 
     export function getQuest(name: string): Quest.Base | undefined {

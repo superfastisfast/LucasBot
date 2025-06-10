@@ -212,16 +212,15 @@ export namespace DataBase {
         user: User | PartialUser | string,
     ): Promise<UserDocument> {
         const id = await getIDFromUser(user);
-
         try {
-            const user = await UserModel.findOne({ id: id });
+            let user = await UserModel.findOne({ id: id });
             if (!user || user === null || user === undefined) {
-                const user: UserDocument = await UserModel.create({
+                user = await UserModel.create({
                     id: new String(id) as string,
                     username: (await getUser(id)).username,
                 });
             }
-            return user!;
+            return user;
         } catch (err) {
             throw new Error(`Failed to fetch user with ID ${id}: ${err}`);
         }
