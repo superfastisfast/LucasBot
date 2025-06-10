@@ -1,4 +1,4 @@
-import { TextChannel, User, type PartialUser } from "discord.js";
+import { Guild, GuildMember, Role, TextChannel, User, type PartialUser } from "discord.js";
 import mongoose, { Document, Schema } from "mongoose";
 import { client } from "..";
 import { Item, type ItemDocument } from "./item";
@@ -309,12 +309,36 @@ export namespace DataBase {
         (dbUser.stats as any)[attribute]++;
         await dbUser.save();
     }
-}
 
-/// This is depricated shit that only exits because of old code???!!?!???!?!?!
-export async function getUserFromId(id: string): Promise<User> {
-    // Should fix
-    return await DataBase.getUser(id);
+    export async function giveRank(
+        guild: Guild,
+        anyUser: User | PartialUser | string,
+        roleNameOrId: string,
+    ): Promise<void> {
+    try {
+        const user = DataBase.getUser(anyUser);
+
+        const member: GuildMember | null = await guild.members.fetch((await user).id);
+
+        if (!member) 
+            throw new Error(`User ${user} is not a member of the guild ${guild.name}`);
+
+        const roleToGive: Role | undefined = guild.roles.cache.find(
+            role => role.name.toLowerCase() === roleNameOrId.toLowerCase() || role.id === roleNameOrId
+        );
+
+        if (!roleToGive) 
+            throw new Error(`Role "${roleNameOrId}" not found in guild ${guild.name}`);
+
+        if (guild.members.me && roleToGive.position >= guild.members.me.roles.highest.position)
+            throw new Error(`I cannot assign the role "${roleToGive.name}" because it is equal to or higher than my highest role`);
+
+        await member.roles.add(roleToGive);
+
+    } catch (error) {
+        throw new Error(`Error assigning role: ${error}`);
+    }
+}
 }
 
 export async function level(
@@ -341,6 +365,19 @@ export async function level(
             `${await DataBase.getUser(user)} is now level ${level}!`,
         );
     }
+
+    const dcUser = DataBase.getUser(user);
+
+    const guildId = levelChannel.guild.id;
+    const guild: Guild | undefined = await client.guilds.fetch(guildId);
+    const members = await guild.members.fetch();
+
+    const rank = rankFromLevel(level) || "";
+    if (rank === "") { 
+        console.log("Skipped Level")
+        return; 
+    }
+    DataBase.giveRank(guild, user, rank);
 }
 
 const xpThresholds: number[] = [
@@ -370,4 +407,13 @@ function calculateLevel(xp: number): number {
         }
     }
     return 0;
+}
+
+function rankFromLevel(level: number): string | undefined {
+    // Check if the level is a positive number and a multiple of 5
+    if (level > 0 && level % 5 === 0) {
+        return `Level ${level}`; // Return the rank string for levels like 5, 10, 15, etc.
+    }
+    // For all other levels (0, or not a multiple of 5), return undefined
+    return undefined;
 }
