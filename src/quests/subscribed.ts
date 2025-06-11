@@ -52,6 +52,7 @@ export default class SubscribedQuest extends Quest.Base {
     public override async startQuest(client: Client): Promise<void> {
         const questData = await this.getQuestData();
         this.generateEndDate(1000 * 60 * 10);
+        this.generateFooter();
         this.interactedPlayerIds = [];
         if (!process.env.QUEST_CHANNEL_ID)
             throw new Error("QUEST_CHANNEL_ID is not defined in .env");
@@ -65,7 +66,7 @@ export default class SubscribedQuest extends Quest.Base {
             .setColor("#0099ff")
             .setImage(questData.imageUrl)
             .setURL("https://www.youtube.com/@LucasDevelop")
-            .setFooter(this.generateFooter());
+            .setFooter(this.footerText);
 
         const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()

@@ -71,7 +71,7 @@ export default class SubscribedQuest extends Quest.Base {
                 name: "Players",
                 value: `Red: ${this.players[0]?.join(", ")} \nBlue: ${this.players[1]?.join(", ")}`,
             })
-            .setFooter(this.generateFooter());
+            .setFooter(this.footerText);
         const totplayer = this.getTotalPlayers();
         if (this.maxPlayers <= totplayer) {
             const winningTeamNumber: number = Math.random() > 0.5 ? 0 : 1;

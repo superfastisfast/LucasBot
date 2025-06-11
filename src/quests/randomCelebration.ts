@@ -27,7 +27,7 @@ export default class RandomCelebraion extends Quest.Base {
             .setColor("#0099ff")
             .setImage(questData.imageUrl)
             .setURL("https://www.youtube.com/@LucasDevelop")
-            .setFooter(this.generateFooter());
+            .setFooter(this.footerText);
 
         const guildId = questChannel.guild.id;
         const guild: Guild | undefined = await client.guilds.fetch(guildId);

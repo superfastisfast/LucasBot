@@ -11,6 +11,7 @@ export namespace Quest {
         }
         public abstract startQuest(client: Client): Promise<void>;
         public fileName = "";
+        public footerText: EmbedFooterOptions = { text: "" };
         public endDate: Date = new Date();
         public isQuestActive(): boolean {
             return (
@@ -24,8 +25,8 @@ export namespace Quest {
             this.endDate = new Date(newTimestamp);
         }
 
-        public generateFooter(): EmbedFooterOptions {
-            return {
+        public generateFooter() {
+            this.footerText = {
                 text:
                     "Quest Started: " +
                     new Date().toLocaleTimeString([], {

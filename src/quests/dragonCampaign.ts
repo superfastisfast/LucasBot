@@ -185,7 +185,7 @@ export default class DragonCampaignQuest extends Quest.Base {
                 name: "**Dragon |VS| Players **",
                 value: statField,
             })
-            .setFooter(this.generateFooter());
+            .setFooter(this.footerText);
 
         let enableButton: boolean = false;
         if (this.players.length >= this.maxPlayers) {
