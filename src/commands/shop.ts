@@ -2,6 +2,7 @@ import { Command } from "@/command";
 import { Item, type ItemDocument } from "@/models/item";
 import { DataBase, type UserDocument } from "@/models/user";
 import ShopService from "@/services/shopService";
+import { AppUser } from "@/user";
 import {
     ActionRowBuilder,
     ButtonBuilder,
@@ -29,19 +30,17 @@ export default class ShopCommand extends Command.Base {
         for (const item of availableItems) {
             if (interaction.customId === interaction.user.id + item.name) {
                 await interaction.deferUpdate();
-                const dbUser = await DataBase.getDBUserFromUser(
-                    interaction.user.id,
-                );
+                const user = await AppUser.createFromID(interaction.user.id);
                 let responseMsg = `**You need more money!**`;
-                if (dbUser.inventory.gold >= item.cost) {
+                if (user.database.inventory.gold >= item.cost) {
                     responseMsg = `**You bought and equipped ${item.name}.**`;
-                    DataBase.giveGoldDB(dbUser, -item.cost);
+                    DataBase.giveGoldDB(user.database, -item.cost);
                     DataBase.userEquipItem(interaction.user.id, item);
                 }
 
                 const shopDisplay = this.generateShopDisplay(
+                    user,
                     availableItems,
-                    dbUser,
                 );
                 interaction.editReply({
                     content: responseMsg,
@@ -54,9 +53,9 @@ export default class ShopCommand extends Command.Base {
         return false;
     }
 
-    private generateShopDisplay(items: ItemDocument[], user: UserDocument) {
+    private generateShopDisplay(user: AppUser, items: ItemDocument[]) {
         const shopEmbed = new EmbedBuilder()
-            .setTitle(`SHOP | Your Gold: ${user.inventory.gold}`)
+            .setTitle(`SHOP | Your Gold: ${user.database.inventory.gold}`)
             .setDescription("\n")
             .setTimestamp();
         if (items.length > 0) {
@@ -77,9 +76,9 @@ export default class ShopCommand extends Command.Base {
         const actionRow = new ActionRowBuilder<ButtonBuilder>();
         for (const item of items) {
             const cannotAffordButtonEnabled: boolean =
-                user.inventory.gold < item.cost ? true : false;
+                user.database.inventory.gold < item.cost ? true : false;
             const button = new ButtonBuilder()
-                .setCustomId(user.id + item.name)
+                .setCustomId(user.discord.id + item.name)
                 .setLabel(`${item.name} (${item.cost} Gold)`)
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(cannotAffordButtonEnabled);
@@ -92,10 +91,10 @@ export default class ShopCommand extends Command.Base {
         client: Client,
         interaction: CommandInteraction,
     ): Promise<void> {
-        const dbUser = await DataBase.getDBUserFromUser(interaction.user.id);
+        const user = await AppUser.createFromID(interaction.user.id);
         const validItems = await ShopService.getActiveShopItems();
 
-        const shopInfo = this.generateShopDisplay(validItems, dbUser);
+        const shopInfo = this.generateShopDisplay(user, validItems);
 
         interaction.reply({
             embeds: shopInfo.embed,

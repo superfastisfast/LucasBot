@@ -1,4 +1,5 @@
 import { Command } from "@/command";
+import { AppUser } from "@/user";
 import {
     SlashCommandBuilder,
     InteractionContextType,
@@ -55,18 +56,16 @@ export default class XpCommand extends Command.Base {
         interaction: CommandInteraction<any>,
     ): Promise<void> {
         const sub = interaction.options.getSubcommand();
-        const target =
-            interaction.options.get("target")?.user || interaction.user;
+        const target = await AppUser.createFromID((interaction.options.get("target")?.user || interaction.user).id);
         const role = interaction.options.get("role")?.role || "everyone";
 
-        const member = await interaction.guild.members.fetch(target.id);
+        const member = await target.getGuildMember(interaction.guild);
 
-        if (!role || !member) {
+        if (!role || !member)
             interaction.reply({
                 content: "Invalid user or role.",
                 ephemeral: true,
             });
-        }
 
         switch (sub) {
             case "give": {
@@ -76,39 +75,23 @@ export default class XpCommand extends Command.Base {
                 )
                     break;
 
-                try {
-                    member.roles.add(role);
-                    interaction.reply({
-                        content: `${interaction.user} gave role ${role.toString()} to ${target}`,
-                        flags: "Ephemeral",
-                    });
-                } catch (err) {
-                    console.error(err);
-                    interaction.reply({
-                        content: `${interaction.user} failed to add role ${role.toString()} from user ${target}`,
-                        flags: "Ephemeral",
-                    });
-                }
+                member.roles.add(role);
+                interaction.reply({
+                    content: `${interaction.user} gave role ${role.toString()} to ${target.discord}`,
+                    flags: "Ephemeral",
+                });
 
                 break;
             }
             case "remove": {
                 if (!interaction.memberPermissions?.has("Administrator")) break;
 
-                try {
-                    member.roles.remove(role);
-                    interaction.reply({
-                        content: `${interaction.user} removed role ${role.toString()} from ${target}`,
-                        flags: "Ephemeral",
-                    });
-                } catch (err) {
-                    console.error(err);
-                    interaction.reply({
-                        content: `${interaction.user} failed to remove role ${role.toString()} from user ${target}`,
-                        flags: "Ephemeral",
-                    });
-                }
-
+                member.roles.remove(role);
+                interaction.reply({
+                    content: `${interaction.user} removed role ${role.toString()} from ${target.discord}`,
+                    flags: "Ephemeral",
+                });
+                
                 break;
             }
             default:
