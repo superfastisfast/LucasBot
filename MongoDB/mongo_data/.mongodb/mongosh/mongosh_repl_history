@@ -1,0 +1,7 @@
+db.users.find().limit(10)
+db.users.find().limit(1)
+db.quests.find().limit(1)
+db.quests.find().limit(10)
+show collections
+use mydiscordapp
+show dbs

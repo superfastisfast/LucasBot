@@ -1,5 +1,6 @@
 import { DataBase, StatsModel, type IStats } from "@/models/user";
 import { Quest } from "@/quest";
+import { AppUser } from "@/user";
 import {
     ActionRowBuilder,
     ButtonBuilder,
@@ -12,6 +13,13 @@ import {
 } from "discord.js";
 
 export default class DragonCampaignQuest extends Quest.Base {
+    questData: Quest.Data = {
+        title: "Dragon campaign",
+        imageUrl:
+            "https://cdn.discordapp.com/attachments/1379101132743250082/1381274300987867216/CoolDragon.jpg?ex=6846eb70&is=684599f0&hm=a901607a7f42b3970f60320d16dee2c04ce655201aa8df64ef123829d5e0bc47&",
+        description:
+            "The ancient beast now haunts the skies of Lucamon,\ncasting shadows over villages and scorching the land with fire.\n\n  🛡️ Up to 10 brave adventurers may answer the call.\n 💎 Great rewards await those who succeed — but beware: you will take damage if unprepared.\n\n ⚔️ Combine your party’s Strength, Magic, Agility, and Defense to stand a chance. Your teamwork determines the outcome: \n 💀 Worst-case: All perish. No reward.\n  🌟 Best-case: No one is harmed. \n\nSurvivors gain legendary treasure.  Dare to fight the beast — or watch Lucamon fall.",
+    };
     maxPlayers: number = 2;
     players: Array<User> = [];
     dragonStats: StatsModel = {
@@ -121,15 +129,18 @@ export default class DragonCampaignQuest extends Quest.Base {
                     msgRewards += `${reward[0].padEnd(15, " ")}: ${reward[1].toFixed(2)}\n`;
                     if (reward[0] == "Skillpoints") {
                         for (const user of this.players) {
-                            await DataBase.giveSkillpoints(user, reward[1]);
+                            const appUser = await AppUser.createFromID(user.id);
+                            appUser.addSkillPoints(reward[1]);
                         }
                     } else if (reward[0] == "XP") {
                         for (const user of this.players) {
-                            await DataBase.giveXP(user, reward[1]);
+                            const appUser = await AppUser.createFromID(user.id);
+                            appUser.addXP(reward[1]);
                         }
                     } else if (reward[0] == "Gold") {
                         for (const user of this.players) {
-                            await DataBase.giveGold(user, reward[1]);
+                            const appUser = await AppUser.createFromID(user.id);
+                            appUser.addGold(reward[1]);
                         }
                     }
                 }
@@ -146,8 +157,6 @@ export default class DragonCampaignQuest extends Quest.Base {
     }
 
     private async generateCampaignMessage() {
-        const questData = await this.getQuestData();
-
         const dragonDisplayStats = DataBase.getDisplayStats(this.dragonStats!);
         const playersDisplayStats = DataBase.getDisplayStats(
             this.playersTotalStats!,
@@ -173,10 +182,10 @@ export default class DragonCampaignQuest extends Quest.Base {
         statField += "```";
 
         const builder = new EmbedBuilder()
-            .setTitle(questData.title)
-            .setDescription(questData.description.replace(/\\n/g, "\n"))
+            .setTitle(this.questData.title)
+            .setDescription(this.questData.description.replace(/\\n/g, "\n"))
             .setColor("#0099ff")
-            .setThumbnail(questData.imageUrl)
+            .setThumbnail(this.questData.imageUrl)
             .addFields({
                 name: `**Players: **(${this.players.length}/${this.maxPlayers})`,
                 value: this.players.map((player) => player).join(", "),
@@ -191,20 +200,19 @@ export default class DragonCampaignQuest extends Quest.Base {
         if (this.players.length >= this.maxPlayers) {
             let resultField = "```fix\n";
             for (const index in dragonDisplayStats) {
-                const dragonRandom = Math.random();
-                const playersRandom = Math.random();
-                const dragonVal = dragonRandom * dragonDisplayStats[index]![2];
-                const playerVal =
-                    playersRandom * playersDisplayStats[index]![2];
+                const dragonVal = AppUser.rollRandomDice(
+                    dragonDisplayStats[index]![2] / 2,
+                    dragonDisplayStats[index]![2],
+                );
+                const playerVal = AppUser.rollRandomDice(
+                    playersDisplayStats[index]![2] / 2,
+                    playersDisplayStats[index]![2],
+                );
                 resultField += `${dragonDisplayStats[index]![0]}${(dragonDisplayStats[index]![1] + ":").padEnd(maxDragonStatValueLength, " ")}${dragonVal.toFixed(2)} |VS| ${playerVal.toFixed(2)}`;
                 if (dragonVal < playerVal) {
-                    this.saveRewardType(
-                        (playerVal / dragonVal) * Math.random(),
-                    );
+                    this.saveRewardType(playerVal / dragonVal);
                 } else {
-                    this.saveRewardType(
-                        -1 * (dragonVal / playerVal) * Math.random(),
-                    );
+                    this.saveRewardType(-1 * (dragonVal / playerVal));
                 }
                 resultField += `\t${dragonVal < playerVal ? "Won" : "Lost"}\n`;
             }
@@ -237,6 +245,7 @@ export default class DragonCampaignQuest extends Quest.Base {
 
         this.reset();
         this.generateEndDate(1000 * 60 * 30);
+        this.generateFooter();
 
         for (const statName of this.STAT_KEYS) {
             this.dragonStats[statName] = Math.random() * this.maxPlayers * 10;

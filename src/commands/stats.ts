@@ -1,5 +1,4 @@
 import { Command } from "@/command";
-import { DataBase, type UserDocument } from "@/models/user";
 import { AppUser } from "@/user";
 import {
     ActionRowBuilder,
@@ -36,10 +35,13 @@ export default class StatsCommand extends Command.Base {
         for (const [icon, attribute, value] of userInfo.attributesArray) {
             if (interaction.customId === interaction.user.id + attribute) {
                 await interaction.deferUpdate();
-                
+
                 await user.upgradeSkill(attribute!.toLowerCase());
                 await user.addSkillPoints(-1);
-                const replyMsg = await this.generateStatsResponse(user);
+                const replyMsg = await this.generateStatsResponse(
+                    interaction.user,
+                    true,
+                );
                 interaction.editReply({
                     content: `You upgraded: **${attribute!.toUpperCase()}**`,
                     embeds: replyMsg.embed,
@@ -51,8 +53,9 @@ export default class StatsCommand extends Command.Base {
         return false;
     }
 
-    private async generateStatsResponse(user: AppUser) {
-        const userInfo = await user.getDisplayInfo();
+    private async generateStatsResponse(user: User, isMainUser: boolean) {
+        const appUser = await AppUser.createFromID(user.id);
+        const userInfo = await appUser.getDisplayInfo();
 
         let attributeString = "";
         for (const [icon, attribute, value] of userInfo.attributesArray) {
@@ -87,14 +90,14 @@ export default class StatsCommand extends Command.Base {
         });
 
         const userStatsEmbed = new EmbedBuilder()
-            .setTitle(`${user.discord.username}'s`)
+            .setTitle(`${appUser.discord.username}'s`)
             .addFields(statFields);
 
         const actionRows: ActionRowBuilder<ButtonBuilder>[] = [];
         let currentActionRow = new ActionRowBuilder<ButtonBuilder>();
         let buttonsInCurrentRow = 0;
 
-        if (userInfo.skillPoints > 0) {
+        if (userInfo.skillPoints > 0 && isMainUser) {
             userStatsEmbed.addFields({
                 name: `**You got (${userInfo.skillPoints}) skillpoints to use**`,
                 value: "what do u wanna upgrade?",
@@ -108,7 +111,7 @@ export default class StatsCommand extends Command.Base {
                 }
 
                 const button = new ButtonBuilder()
-                    .setCustomId(user.discord.id + attribute)
+                    .setCustomId(appUser.discord.id + attribute)
                     .setLabel(`${icon}${attribute}`)
                     .setStyle(ButtonStyle.Primary);
 

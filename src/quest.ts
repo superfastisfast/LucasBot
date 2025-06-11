@@ -1,7 +1,12 @@
 import type { ButtonInteraction, Client, EmbedFooterOptions } from "discord.js";
-import { QuestModel, type QuestDocument } from "./models/quest";
 
 export namespace Quest {
+    export interface Data {
+        title: string;
+        imageUrl: string;
+        description: string;
+    }
+
     export abstract class Base {
         public async onButtonInteract(
             client: Client,
@@ -11,6 +16,7 @@ export namespace Quest {
         }
         public abstract startQuest(client: Client): Promise<void>;
         public fileName = "";
+        public abstract questData: Data;
         public footerText: EmbedFooterOptions = { text: "" };
         public endDate: Date = new Date();
         public isQuestActive(): boolean {
@@ -45,8 +51,8 @@ export namespace Quest {
             };
         }
 
-        public async getQuestData(): Promise<QuestDocument> {
-            return (await QuestModel.findOne({ className: this.fileName }))!;
+        public getQuestData(): Quest.Data {
+            return this.questData;
         }
         public generateUniqueButtonID(): string {
             return `${this.fileName}_${this.endDate}`;

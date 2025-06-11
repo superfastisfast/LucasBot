@@ -12,9 +12,16 @@ import {
 } from "discord.js";
 
 export default class RandomCelebraion extends Quest.Base {
+    goldReward: number = 1;
+    questData: Quest.Data = {
+        title: "Random Celebration",
+        imageUrl:
+            "https://cdn.discordapp.com/attachments/1379101132743250082/1381989461734461572/party.png?ex=6849857b&is=684833fb&hm=fc43bbf72ac8d6f738251d7b2171851e0db2f7b00eb06ae5f46e9320fb4f77f6&",
+        description: `Happy Random celebration! Everyone gains ${this.goldReward} gold :D`,
+    };
     public override async startQuest(client: Client): Promise<void> {
-        const questData = await this.getQuestData();
         this.generateEndDate(0);
+        this.generateFooter();
         if (!process.env.QUEST_CHANNEL_ID)
             throw new Error("QUEST_CHANNEL_ID is not defined in .env");
         let questChannel: TextChannel = (await client.channels.fetch(
@@ -22,10 +29,10 @@ export default class RandomCelebraion extends Quest.Base {
         )) as TextChannel;
 
         const builder = new EmbedBuilder()
-            .setTitle(questData.title)
-            .setDescription(questData.description.replace(/\\n/g, "\n"))
+            .setTitle(this.questData.title)
+            .setDescription(this.questData.description)
             .setColor("#0099ff")
-            .setImage(questData.imageUrl)
+            .setImage(this.questData.imageUrl)
             .setURL("https://www.youtube.com/@LucasDevelop")
             .setFooter(this.footerText);
 
@@ -34,7 +41,7 @@ export default class RandomCelebraion extends Quest.Base {
         const members = await guild.members.fetch();
 
         for (const user of members) {
-            DataBase.giveGold(user[1].user, 1);
+            DataBase.giveGold(user[1].user, this.goldReward);
         }
 
         let msg = await questChannel.send({

@@ -12,9 +12,15 @@ import {
 } from "discord.js";
 
 export default class SubscribedQuest extends Quest.Base {
+    bet: number = 5;
+    questData: Quest.Data = {
+        title: "Red vs Blue",
+        imageUrl:
+            "https://cdn.discordapp.com/attachments/1379101132743250082/1382038199978688603/RedVsBlue.png?ex=6849b2df&is=6848615f&hm=bf4a2d2384a06f05254a556bc21afa61d7dc3ef327b0cb224dec387fb0650341&",
+        description: `Pick a color cost ${this.bet} gold to participate. winners split the pool`,
+    };
     // 0 = red, 1 = blue
     players: Array<Array<User>> = [];
-    bet: number = 5;
     maxPlayers: number = 2;
     public override async onButtonInteract(
         client: Client,
@@ -60,12 +66,11 @@ export default class SubscribedQuest extends Quest.Base {
     }
 
     private async generateQuestBody() {
-        const questData = await this.getQuestData();
         const builder = new EmbedBuilder()
-            .setTitle(questData.title)
-            .setDescription(questData.description.replace(/\\n/g, "\n"))
+            .setTitle(this.questData.title)
+            .setDescription(this.questData.description.replace(/\\n/g, "\n"))
             .setColor("#0099ff")
-            .setImage(questData.imageUrl)
+            .setImage(this.questData.imageUrl)
             .setURL("https://www.youtube.com/@LucasDevelop")
             .addFields({
                 name: "Players",
@@ -105,6 +110,7 @@ export default class SubscribedQuest extends Quest.Base {
 
     public override async startQuest(client: Client): Promise<void> {
         this.generateEndDate(1000 * 60 * 10);
+        this.generateFooter();
         this.players = [];
         this.players.push(new Array<User>());
         this.players.push(new Array<User>());

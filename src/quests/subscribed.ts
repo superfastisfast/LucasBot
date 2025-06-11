@@ -1,5 +1,6 @@
 import { DataBase } from "@/models/user";
 import { Quest } from "@/quest";
+import { AppUser } from "@/user";
 import {
     ActionRowBuilder,
     ButtonBuilder,
@@ -11,6 +12,13 @@ import {
 } from "discord.js";
 
 export default class SubscribedQuest extends Quest.Base {
+    questData: Quest.Data = {
+        title: "subscribed",
+        imageUrl:
+            "https://cdn.discordapp.com/attachments/1379101132743250082/1379101169892327434/subscribe-7403560_1280.png?ex=683f038d&is=683db20d&hm=6e7deb8d64bc3a019f13547c0c16191322469c463211f937dd0486783c1c9529&",
+        description: "are you subscribed to Lucas",
+    };
+    xpAmount = 10;
     interactedPlayerIds: Array<string> = [];
     public override async onButtonInteract(
         client: Client,
@@ -22,16 +30,17 @@ export default class SubscribedQuest extends Quest.Base {
         )
             return false;
         if (interaction.customId === `#${this.generateUniqueButtonID()}_yes`) {
-            const xpRecived = await DataBase.giveXP(interaction.user.id, 10);
             let message = await interaction.reply(
                 "**" +
                     interaction.member?.user.username +
                     "**" +
                     " Good 😊 \nYou gained " +
-                    xpRecived?.toFixed(2) +
+                    this.xpAmount +
                     "xp! Now tell a friend?",
             );
             this.interactedPlayerIds.push(interaction.user.id);
+            const user = await AppUser.createFromID(interaction.user.id);
+            user.addXP(this.xpAmount);
             return true;
         } else if (
             interaction.customId === `#${this.generateUniqueButtonID()}_no`
@@ -50,7 +59,6 @@ export default class SubscribedQuest extends Quest.Base {
     }
 
     public override async startQuest(client: Client): Promise<void> {
-        const questData = await this.getQuestData();
         this.generateEndDate(1000 * 60 * 10);
         this.generateFooter();
         this.interactedPlayerIds = [];
@@ -61,10 +69,10 @@ export default class SubscribedQuest extends Quest.Base {
         )) as TextChannel;
 
         const builder = new EmbedBuilder()
-            .setTitle(questData.title)
-            .setDescription(questData.description.replace(/\\n/g, "\n"))
+            .setTitle(this.questData.title)
+            .setDescription(this.questData.description.replace(/\\n/g, "\n"))
             .setColor("#0099ff")
-            .setImage(questData.imageUrl)
+            .setImage(this.questData.imageUrl)
             .setURL("https://www.youtube.com/@LucasDevelop")
             .setFooter(this.footerText);
 

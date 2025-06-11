@@ -1,5 +1,18 @@
-import { User, Guild, GuildMember, Role, PermissionsBitField, DiscordAPIError, TextChannel } from "discord.js";
-import { StatsModel, UserModel, type IInventory, type UserDocument } from './models/user';
+import {
+    User,
+    Guild,
+    GuildMember,
+    Role,
+    PermissionsBitField,
+    DiscordAPIError,
+    TextChannel,
+} from "discord.js";
+import {
+    StatsModel,
+    UserModel,
+    type IInventory,
+    type UserDocument,
+} from "./models/user";
 import { client } from ".";
 import { Item, type ItemDocument } from "./models/item";
 
@@ -19,16 +32,24 @@ export class AppUser {
             return new AppUser(discordUser, databaseUser);
         } catch (error: any) {
             if (error.code === 10013)
-                throw new Error(`Attempted to fetch unknown user ID: ${userId}: ${error}`);
-            
+                throw new Error(
+                    `Attempted to fetch unknown user ID: ${userId}: ${error}`,
+                );
+
             throw new Error(`Failed to fetch user ${userId}: ${error}`);
         }
     }
 
-    private static async getDataBaseUser(discordUser: User): Promise<UserDocument> {
+    private static async getDataBaseUser(
+        discordUser: User,
+    ): Promise<UserDocument> {
         try {
             let databaseUser = await UserModel.findOne({ id: discordUser.id });
-            if (!databaseUser || databaseUser === null || databaseUser === undefined) {
+            if (
+                !databaseUser ||
+                databaseUser === null ||
+                databaseUser === undefined
+            ) {
                 databaseUser = await UserModel.create({
                     id: discordUser.id as string,
                     username: discordUser.username,
@@ -36,7 +57,9 @@ export class AppUser {
             }
             return databaseUser;
         } catch (error) {
-            throw new Error(`Failed to fetch database user with ID ${discordUser.id}: ${error}`);
+            throw new Error(
+                `Failed to fetch database user with ID ${discordUser.id}: ${error}`,
+            );
         }
     }
 
@@ -44,7 +67,9 @@ export class AppUser {
         const member = await guild.members.fetch(this.discord.id);
 
         if (!member)
-            throw new Error(`User with ID "${this.discord.id}" is not a member of the guild "${guild.name}"`);
+            throw new Error(
+                `User with ID "${this.discord.id}" is not a member of the guild "${guild.name}"`,
+            );
 
         return member;
     }
@@ -53,37 +78,47 @@ export class AppUser {
         try {
             const botMember: GuildMember | null = guild.members.me;
             if (!botMember)
-                throw new Error(`Bot cannot manage member roles in another guild ${guild.name}`);
+                throw new Error(
+                    `Bot cannot manage member roles in another guild ${guild.name}`,
+                );
 
-            if (!botMember.permissions.has(PermissionsBitField.Flags.ManageRoles))
-                throw new Error(`Bot is missing 'Manage Roles' permission in guild "${guild.name}".`);
+            if (
+                !botMember.permissions.has(
+                    PermissionsBitField.Flags.ManageRoles,
+                )
+            )
+                throw new Error(
+                    `Bot is missing 'Manage Roles' permission in guild "${guild.name}".`,
+                );
 
             const role: Role | undefined = guild.roles.cache.find(
                 (role) =>
-                    role.name.toLowerCase() === new String(name).toLowerCase()  ||
-                    role.id === name,
+                    role.name.toLowerCase() ===
+                        new String(name).toLowerCase() || role.id === name,
             );
             if (!role)
-                throw new Error(`Role '${name}' not found in guild '${guild.name}'`);
+                throw new Error(
+                    `Role '${name}' not found in guild '${guild.name}'`,
+                );
 
             if (role.position >= botMember.roles.highest.position)
-                throw new Error(`Cannot assign role '${role.name}' because it is equal to or higher than my highest role`);
+                throw new Error(
+                    `Cannot assign role '${role.name}' because it is equal to or higher than my highest role`,
+                );
 
             // Prevent assigning @everyone
-            if (role.id === guild.id)
-                return
+            if (role.id === guild.id) return;
 
-            if (state)
-                (await this.getGuildMember(guild)).roles.add(role);
-            else
-                (await this.getGuildMember(guild)).roles.remove(role);
+            if (state) (await this.getGuildMember(guild)).roles.add(role);
+            else (await this.getGuildMember(guild)).roles.remove(role);
         } catch (error: any) {
             let errorMessage = `Error assigning role "${name}" in guild "${guild.name}" to user "${this.discord.username}": `;
 
             if (error instanceof DiscordAPIError) {
                 errorMessage += `Discord API Error ${error.code}: ${error.message}`;
                 if (error.status === 403) {
-                    errorMessage += " (Missing permissions or hierarchy issue from Discord's side)";
+                    errorMessage +=
+                        " (Missing permissions or hierarchy issue from Discord's side)";
                 }
             } else if (error instanceof Error) {
                 errorMessage += error.message;
@@ -97,7 +132,7 @@ export class AppUser {
 
     /////////////////////////////////////////////////////////
     ///                      HELPER                        //
-    ///////////////////////////////////////////////////////// 
+    /////////////////////////////////////////////////////////
     async setXP(amount: number): Promise<void> {
         if (amount > 0 && this.database.timeouts > 0) {
             const maxTimeoutsForReduction = 20;
@@ -130,7 +165,7 @@ export class AppUser {
         this.database.skillPoints = amount;
         await this.database.save();
     }
-    
+
     async addSkillPoints(amount: number): Promise<void> {
         await this.setSkillPoints(this.database.skillPoints + amount);
     }
@@ -142,7 +177,7 @@ export class AppUser {
 
     /////////////////////////////////////////////////////////
     ///                      OTHER                         //
-    ///////////////////////////////////////////////////////// 
+    /////////////////////////////////////////////////////////
     async equipItem(item: ItemDocument) {
         const equipmentSlots: Array<keyof IInventory> = [
             "weapon",
@@ -155,7 +190,9 @@ export class AppUser {
         if (equipmentSlots.includes(item.tag as keyof IInventory))
             (this.database.inventory as any)[item.tag] = item.name;
         else
-            throw new Error(`failed to applied ${item.name} to ${this.discord.username}'s ${item.tag} slot`);
+            throw new Error(
+                `failed to applied ${item.name} to ${this.discord.username}'s ${item.tag} slot`,
+            );
 
         try {
             await this.database.save();
@@ -181,6 +218,10 @@ export class AppUser {
             }
         }
         return items;
+    }
+
+    static rollRandomDice(minVal: number, val: number): number {
+        return Math.max(minVal, val * Math.random());
     }
 
     static getDisplayStats(stats: StatsModel): [string, string, number][] {
@@ -223,9 +264,7 @@ export class AppUser {
             await this.addGold(xp);
             this.database.level = level;
             await this.database.save();
-            await levelChannel.send(
-                `${this.discord} is now level ${level}!`,
-            );
+            await levelChannel.send(`${this.discord} is now level ${level}!`);
         }
 
         const guildId = levelChannel.guild.id;
@@ -233,12 +272,10 @@ export class AppUser {
         const members = await guild.members.fetch();
 
         const rank = rankFromLevel(level) || "";
-        if (rank === "")
-            return;
-        
+        if (rank === "") return;
+
         this.setRole(guild, rank, true);
     }
-
 }
 
 const xpThresholds: number[] = [
@@ -263,14 +300,12 @@ const xpThresholds: number[] = [
 
 function calculateLevel(xp: number): number {
     for (let i = xpThresholds.length - 1; i >= 0; i--) {
-        if (xp >= xpThresholds[i]!)
-            return i;
+        if (xp >= xpThresholds[i]!) return i;
     }
     return 0;
 }
 
 function rankFromLevel(level: number): string | undefined {
-    if (level > 0 && level % 5 === 0)
-        return `Level ${level}`;
+    if (level > 0 && level % 5 === 0) return `Level ${level}`;
     return undefined;
 }

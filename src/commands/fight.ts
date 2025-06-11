@@ -26,8 +26,6 @@ export default class FightCommand extends Command.Base {
     games: Map<number, FightGame> = new Map<number, FightGame>();
 
     override get info(): any {
-        console.log("Fight called");
-
         return new SlashCommandBuilder()
             .setName("fight")
             .setDescription("fight a player")

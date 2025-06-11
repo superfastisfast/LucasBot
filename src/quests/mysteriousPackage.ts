@@ -1,6 +1,7 @@
 import { Item } from "@/models/item";
 import { DataBase } from "@/models/user";
 import { Quest } from "@/quest";
+import { AppUser } from "@/user";
 import {
     ActionRowBuilder,
     ButtonBuilder,
@@ -12,6 +13,12 @@ import {
 } from "discord.js";
 
 export default class MysteriousPackage extends Quest.Base {
+    questData: Quest.Data = {
+        title: "Mysterious Package",
+        imageUrl:
+            "https://cdn.discordapp.com/attachments/1379101132743250082/1382015780383887360/MysteryBox.png?ex=68499dfe&is=68484c7e&hm=a0acba79ae199869576e87d66f3e834c31d389f707d6083a7199a1dd70100e60&",
+        description: "There is a small, unmarked package. What do you do?",
+    };
     interactedPlayerId: string = "";
     public override async onButtonInteract(
         client: Client,
@@ -20,16 +27,20 @@ export default class MysteriousPackage extends Quest.Base {
         if (this.interactedPlayerId !== "") return false;
         if (interaction.customId === `#${this.generateUniqueButtonID()}_open`) {
             const item = await Item.getRandom();
+            const itemInfo = item
+                ? Item.getStringCollection([item])
+                : "No Item";
+            await interaction.reply(
+                "**" +
+                    interaction.member?.user.username +
+                    "**\n" +
+                    `Opened a Mysterious Package and was forcefully equipped with` +
+                    "\n" +
+                    itemInfo,
+            );
             if (item) {
-                await DataBase.userEquipItem(interaction.user, item);
-                await interaction.reply(
-                    "**" +
-                        interaction.member?.user.username +
-                        "**\n" +
-                        `Opened a Mysterious Package and was forcefully equipped with` +
-                        "\n" +
-                        Item.getStringCollection([item]),
-                );
+                const user = await AppUser.createFromID(interaction.user.id);
+                await user.equipItem(item);
             }
             this.interactedPlayerId = interaction.user.id;
             return true;
@@ -68,8 +79,8 @@ export default class MysteriousPackage extends Quest.Base {
     }
 
     public override async startQuest(client: Client): Promise<void> {
-        const questData = await this.getQuestData();
         this.generateEndDate(1000 * 60 * 10);
+        this.generateFooter();
         this.interactedPlayerId = "";
         if (!process.env.QUEST_CHANNEL_ID)
             throw new Error("QUEST_CHANNEL_ID is not defined in .env");
@@ -78,10 +89,10 @@ export default class MysteriousPackage extends Quest.Base {
         )) as TextChannel;
 
         const builder = new EmbedBuilder()
-            .setTitle(questData.title)
-            .setDescription(questData.description.replace(/\\n/g, "\n"))
+            .setTitle(this.questData.title)
+            .setDescription(this.questData.description.replace(/\\n/g, "\n"))
             .setColor("#0099ff")
-            .setImage(questData.imageUrl)
+            .setImage(this.questData.imageUrl)
             .setURL("https://www.youtube.com/@LucasDevelop")
             .setFooter(this.footerText);
 

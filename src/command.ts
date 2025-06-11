@@ -5,7 +5,6 @@ import type {
     CommandInteraction,
 } from "discord.js";
 import { UserModel } from "./models/user";
-import { Quest } from "./quest";
 
 export namespace Command {
     export abstract class Base {
@@ -60,6 +59,7 @@ export namespace Command {
                 `Error running command ${interaction.commandName}:`,
                 err,
             );
+            // interaction.reply("Error executing command.");
         }
     }
 
