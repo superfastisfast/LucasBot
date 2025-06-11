@@ -204,7 +204,7 @@ export class AppUser {
             xp: this.database.xp,
             level: this.database.level,
             skillPoints: this.database.skillPoints,
-            attributesArray,
+            attributesArray: attributesArray,
             items: `📦 Items: \n${itemsDisplay}`,
         };
     }

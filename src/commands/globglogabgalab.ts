@@ -190,12 +190,5 @@ export default class GlobglogabgalabCommand extends Command.Base {
         } else {
             interaction.reply(`**${songs[index]?.option}** ${songs[index]?.url} ${songs[index]?.desc || "..."}`)
         }
-
-        // Check for "Christmas"
-        const today = new Date(2025, 5, 24); // Month is 0-based: 5 = June
-        const isChristmas = (today.getDate() === 25 || today.getDate() === 24) && today.getMonth() === 11;
-        if (isChristmas) 
-            interaction.reply("🎄 Merry Christmas! video *[here](https://www.youtube.com/watch?v=52Li3SLj1gE)*");
-
     }
 }
