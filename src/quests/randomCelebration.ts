@@ -27,15 +27,7 @@ export default class RandomCelebraion extends Quest.Base {
             .setColor("#0099ff")
             .setImage(questData.imageUrl)
             .setURL("https://www.youtube.com/@LucasDevelop")
-            .setFooter({
-                text:
-                    "Quest Ends: " +
-                    this.endDate?.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: false,
-                    }),
-            });
+            .setFooter(this.generateFooter());
 
         const guildId = questChannel.guild.id;
         const guild: Guild | undefined = await client.guilds.fetch(guildId);

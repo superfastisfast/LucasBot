@@ -60,7 +60,6 @@ export namespace Command {
                 `Error running command ${interaction.commandName}:`,
                 err,
             );
-            interaction.reply("Error executing command.");
         }
     }
 

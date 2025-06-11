@@ -56,7 +56,7 @@ export default class MysteriousPackage extends Quest.Base {
                     "**" +
                     interaction.member?.user.username +
                     "**\n" +
-                    `You fsold the package, and recived 50 gold`,
+                    `You sold the package, and recived 50 gold`,
                 flags: "Ephemeral",
             });
             DataBase.giveGold(interaction.user, 50);
@@ -83,15 +83,7 @@ export default class MysteriousPackage extends Quest.Base {
             .setColor("#0099ff")
             .setImage(questData.imageUrl)
             .setURL("https://www.youtube.com/@LucasDevelop")
-            .setFooter({
-                text:
-                    "Quest Ends: " +
-                    this.endDate?.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: false,
-                    }),
-            });
+            .setFooter(this.generateFooter());
 
         const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()

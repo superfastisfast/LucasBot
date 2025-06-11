@@ -1,4 +1,4 @@
-import type { ButtonInteraction, Client } from "discord.js";
+import type { ButtonInteraction, Client, EmbedFooterOptions } from "discord.js";
 import { QuestModel, type QuestDocument } from "./models/quest";
 
 export namespace Quest {
@@ -11,7 +11,7 @@ export namespace Quest {
         }
         public abstract startQuest(client: Client): Promise<void>;
         public fileName = "";
-        public endDate?: Date;
+        public endDate: Date = new Date();
         public isQuestActive(): boolean {
             return (
                 this.endDate !== undefined &&
@@ -22,6 +22,26 @@ export namespace Quest {
             const currentTimestamp = new Date().getTime();
             const newTimestamp = currentTimestamp + offSetTimeMilliseconds;
             this.endDate = new Date(newTimestamp);
+        }
+
+        public generateFooter(): EmbedFooterOptions {
+            return {
+                text:
+                    "Quest Started: " +
+                    new Date().toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                        timeZoneName: "shortOffset",
+                    }) +
+                    "\nQuest Ends: " +
+                    this.endDate?.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                        timeZoneName: "shortOffset",
+                    }),
+            };
         }
 
         public async getQuestData(): Promise<QuestDocument> {

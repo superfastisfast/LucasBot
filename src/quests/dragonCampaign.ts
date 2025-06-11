@@ -185,15 +185,7 @@ export default class DragonCampaignQuest extends Quest.Base {
                 name: "**Dragon |VS| Players **",
                 value: statField,
             })
-            .setFooter({
-                text:
-                    "Quest Ends: " +
-                    this.endDate?.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: false,
-                    }),
-            });
+            .setFooter(this.generateFooter());
 
         let enableButton: boolean = false;
         if (this.players.length >= this.maxPlayers) {

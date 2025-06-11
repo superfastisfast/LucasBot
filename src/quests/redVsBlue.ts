@@ -71,15 +71,7 @@ export default class SubscribedQuest extends Quest.Base {
                 name: "Players",
                 value: `Red: ${this.players[0]?.join(", ")} \nBlue: ${this.players[1]?.join(", ")}`,
             })
-            .setFooter({
-                text:
-                    "Quest Ends: " +
-                    this.endDate?.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: false,
-                    }),
-            });
+            .setFooter(this.generateFooter());
         const totplayer = this.getTotalPlayers();
         if (this.maxPlayers <= totplayer) {
             const winningTeamNumber: number = Math.random() > 0.5 ? 0 : 1;

@@ -29,7 +29,6 @@ client.once(Events.ClientReady, async (readyClient) => {
         await Quest.loadQuests();
     })();
 
-    Quest.generateRadomQuest(client);
     setInterval(
         () => {
             Quest.generateRadomQuest(client);

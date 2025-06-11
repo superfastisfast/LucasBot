@@ -29,19 +29,18 @@ export default class SubscribedQuest extends Quest.Base {
                     "**" +
                     " Good 😊 \nYou gained " +
                     xpRecived?.toFixed(2) +
-                    "xp! \nNow tell a friend?",
+                    "xp! Now tell a friend?",
             );
             this.interactedPlayerIds.push(interaction.user.id);
             return true;
         } else if (
             interaction.customId === `#${this.generateUniqueButtonID()}_no`
         ) {
-            await DataBase.giveXP(interaction.user.id, -10);
             let message = await interaction.reply(
                 "**" +
                     interaction.member?.user.username +
                     "**" +
-                    " How could you? 😭 \nYou lost 10xp!",
+                    " Yoooo wtf 💀, now tell a friend!",
             );
             this.interactedPlayerIds.push(interaction.user.id);
             return true;
@@ -66,15 +65,7 @@ export default class SubscribedQuest extends Quest.Base {
             .setColor("#0099ff")
             .setImage(questData.imageUrl)
             .setURL("https://www.youtube.com/@LucasDevelop")
-            .setFooter({
-                text:
-                    "Quest Ends: " +
-                    this.endDate?.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: false,
-                    }),
-            });
+            .setFooter(this.generateFooter());
 
         const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
