@@ -7,6 +7,7 @@ import {
     type CommandInteraction,
 } from "discord.js";
 import { DataBase, UserModel } from "../models/user";
+import { AppUser } from "@/user";
 
 export default class GoldCommand extends Command.Base {
     override get info(): any {
@@ -68,19 +69,11 @@ export default class GoldCommand extends Command.Base {
         interaction: CommandInteraction<any>,
     ): Promise<void> {
         const sub = interaction.options.getSubcommand();
-        const target =
-            interaction.options.get("target")?.user || interaction.user;
+        const target = await AppUser.createFromID((interaction.options.get("target")?.user || interaction.user).id);
 
         switch (sub) {
             case "view": {
-                const usersModel = await UserModel.find();
-                for (const userModel of usersModel) {
-                    if (userModel.id == target.id) {
-                        interaction.reply(
-                            `${target} has ${userModel.inventory.gold || "no"} gold`,
-                        );
-                    }
-                }
+                interaction.reply(`${target.discord} has ${target.database.inventory.gold || "no"} gold`);
                 break;
             }
             case "add": {
@@ -88,19 +81,12 @@ export default class GoldCommand extends Command.Base {
 
                 const amount = interaction.options.get("amount")
                     ?.value as number;
-                try {
-                    DataBase.setGold(target.id, amount);
-                    interaction.reply({
-                        content: `${interaction.user} added ${amount} gold to ${target}`,
-                        flags: "Ephemeral",
-                    });
-                } catch (err) {
-                    console.error(err);
-                    interaction.reply({
-                        content: `${interaction.user} failed to give ${target} ${amount} gold`,
-                        flags: "Ephemeral",
-                    });
-                }
+
+                target.addGold(amount);
+                interaction.reply({
+                    content: `${interaction.user} added ${amount} gold to ${target.discord}, new total is ${target.database.inventory.gold}`,
+                    flags: "Ephemeral",
+                });
 
                 break;
             }
@@ -109,19 +95,12 @@ export default class GoldCommand extends Command.Base {
 
                 const amount = interaction.options.get("amount")
                     ?.value as number;
-                try {
-                    DataBase.setGold(target.id, amount);
-                    interaction.reply({
-                        content: `${interaction.user} set ${target}'s gold to ${amount}`,
-                        flags: "Ephemeral",
-                    });
-                } catch (err) {
-                    console.error(err);
-                    interaction.reply({
-                        content: `${interaction.user} failed to set ${target}'s gold to ${amount}`,
-                        flags: "Ephemeral",
-                    });
-                }
+                
+                target.setGold(amount);
+                interaction.reply({
+                    content: `${interaction.user} set ${target.discord}'s gold to ${amount}`,
+                    flags: "Ephemeral",
+                });
 
                 break;
             }
