@@ -1,7 +1,7 @@
-import { DataBase } from "@/models/user";
 import Fighter from "./fighter";
 import type { User as DiscordUser } from "discord.js";
 import { BLOCK_SIZE } from "./fieldGenerate";
+import { AppUser } from "@/user";
 interface GameInitializationResult {
     success: boolean;
     reason: string;
@@ -32,12 +32,10 @@ export default class FightGame {
         if (id !== this.discordUsers[1]!.id)
             return { success: false, reason: "You are not the second player!" };
 
-        const dbCommandUser = await DataBase.getDBUserFromUser(
-            this.discordUsers[0]!,
-        );
-        const dbOpponentUser = await DataBase.getDBUserFromUser(
-            this.discordUsers[1]!,
-        );
+        const appUser1 = await AppUser.createFromID(this.discordUsers[0]!.id);
+        const appUser2 = await AppUser.createFromID(this.discordUsers[1]!.id);
+        const dbCommandUser = appUser1.database;
+        const dbOpponentUser = appUser2.database;
         if (!dbCommandUser || !dbOpponentUser) {
             return {
                 success: false,
@@ -53,8 +51,8 @@ export default class FightGame {
                 reason: "One or both users could not afford the bet",
             };
         }
-        DataBase.giveGold(this.discordUsers[0]!, -this.bet);
-        DataBase.giveGold(this.discordUsers[1]!, -this.bet);
+        appUser1.addGold(-this.bet);
+        appUser2.addGold(-this.bet);
 
         this.players[0] = await Fighter.create(
             dbCommandUser,
@@ -148,19 +146,21 @@ export default class FightGame {
         this.getNextPlayer().calculateStats();
     }
 
-    gameOver(wasCompleted: boolean = false) {
+    async gameOver(wasCompleted: boolean = false) {
         const winnerReward = this.bet * 2;
+        const user1 = await AppUser.createFromID(this.discordUsers[0]!.id);
+        const user2 = await AppUser.createFromID(this.discordUsers[1]!.id);
         if (this.players[0]!.currentHealth <= 0) {
-            DataBase.giveGold(this.discordUsers[1]!, winnerReward);
+            user2.addGold(winnerReward);
         } else if (this.players[1]!.currentHealth <= 0) {
-            DataBase.giveGold(this.discordUsers[0]!, winnerReward);
+            user1.addGold(winnerReward);
         } else {
-            DataBase.giveGold(this.discordUsers[1]!, this.bet);
-            DataBase.giveGold(this.discordUsers[0]!, this.bet);
+            user2.addGold(this.bet);
+            user1.addGold(this.bet);
         }
         if (wasCompleted) {
-            DataBase.giveXP(this.discordUsers[0]!, 10);
-            DataBase.giveXP(this.discordUsers[1]!, 10);
+            user2.addXP(10);
+            user1.addXP(10);
         }
     }
 }

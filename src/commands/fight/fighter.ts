@@ -1,5 +1,6 @@
 import { type ItemDocument } from "@/models/item";
-import { DataBase, StatsModel, type UserDocument } from "@/models/user";
+import { StatsModel, type UserDocument } from "@/models/user";
+import { AppUser } from "@/user";
 
 export default class Fighter {
     dbUser?: UserDocument;
@@ -16,7 +17,8 @@ export default class Fighter {
         imgUrl: string,
     ): Promise<Fighter> {
         let self = new Fighter(dbUser, startPosition, imgUrl);
-        self.items = await DataBase.getUserItems(dbUser.id);
+        const user = await AppUser.createFromID(dbUser.id);
+        self.items = await user.getItems();
 
         self.calculateStats();
         self.currentHealth = self.getMaxHealthStats();

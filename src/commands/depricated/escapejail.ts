@@ -1,8 +1,5 @@
 import { Command } from "@/command";
 import {
-    DataBase, UserModel 
-} from "@/models/user";
-import {
     SlashCommandBuilder,
     type Client,
     type CommandInteraction,
@@ -43,15 +40,19 @@ export default class EscapeJailCommand extends Command.Base {
                     interaction.reply(
                         "You failed to escape... you were fined extra 10 gold.",
                     );
-                    await DataBase.giveGold(interaction.user.id, -10)
+                    await DataBase.giveGold(interaction.user.id, -10);
                 } else {
-                    interaction.reply("The security guard gives in and releases you... congrats.")
+                    interaction.reply(
+                        "The security guard gives in and releases you... congrats.",
+                    );
                 }
-                
+
                 break;
             case "pay_bail":
                 // handle pay bail
-                interaction.reply("You pay the bail of 100 gold and you were freed...")
+                interaction.reply(
+                    "You pay the bail of 100 gold and you were freed...",
+                );
                 await DataBase.giveGold(interaction.user.id, -100);
                 break;
             default:

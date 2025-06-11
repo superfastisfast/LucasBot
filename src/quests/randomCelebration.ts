@@ -1,15 +1,6 @@
-import { DataBase } from "@/models/user";
 import { Quest } from "@/quest";
-import {
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonInteraction,
-    ButtonStyle,
-    EmbedBuilder,
-    Guild,
-    type Client,
-    type TextChannel,
-} from "discord.js";
+import { AppUser } from "@/user";
+import { EmbedBuilder, Guild, type Client, type TextChannel } from "discord.js";
 
 export default class RandomCelebraion extends Quest.Base {
     goldReward: number = 1;
@@ -41,7 +32,9 @@ export default class RandomCelebraion extends Quest.Base {
         const members = await guild.members.fetch();
 
         for (const user of members) {
-            DataBase.giveGold(user[1].user, this.goldReward);
+            await (
+                await AppUser.createFromID(user[1].id)
+            ).addGold(this.goldReward);
         }
 
         let msg = await questChannel.send({

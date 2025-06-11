@@ -6,7 +6,6 @@ import {
     type Client,
     type CommandInteraction,
 } from "discord.js";
-import { DataBase, UserModel } from "../models/user";
 import { AppUser } from "@/user";
 
 export default class GoldCommand extends Command.Base {
@@ -69,11 +68,15 @@ export default class GoldCommand extends Command.Base {
         interaction: CommandInteraction<any>,
     ): Promise<void> {
         const sub = interaction.options.getSubcommand();
-        const target = await AppUser.createFromID((interaction.options.get("target")?.user || interaction.user).id);
+        const target = await AppUser.createFromID(
+            (interaction.options.get("target")?.user || interaction.user).id,
+        );
 
         switch (sub) {
             case "view": {
-                interaction.reply(`${target.discord} has ${target.database.inventory.gold || "no"} gold`);
+                interaction.reply(
+                    `${target.discord} has ${target.database.inventory.gold || "no"} gold`,
+                );
                 break;
             }
             case "add": {
@@ -95,7 +98,7 @@ export default class GoldCommand extends Command.Base {
 
                 const amount = interaction.options.get("amount")
                     ?.value as number;
-                
+
                 target.setGold(amount);
                 interaction.reply({
                     content: `${interaction.user} set ${target.discord}'s gold to ${amount}`,

@@ -1,4 +1,4 @@
-import { DataBase, StatsModel, type IStats } from "@/models/user";
+import { StatsModel, type IStats } from "@/models/user";
 import { Quest } from "@/quest";
 import { AppUser } from "@/user";
 import {
@@ -111,7 +111,9 @@ export default class DragonCampaignQuest extends Quest.Base {
                 return true;
             }
             this.players.push(interaction.user);
-            const dbUser = await DataBase.getDBUserFromUser(interaction.user);
+
+            const dbUser = (await AppUser.createFromID(interaction.user.id))
+                .database;
 
             for (const statName of this.STAT_KEYS) {
                 this.playersTotalStats[statName] += dbUser.stats[statName];
@@ -157,8 +159,8 @@ export default class DragonCampaignQuest extends Quest.Base {
     }
 
     private async generateCampaignMessage() {
-        const dragonDisplayStats = DataBase.getDisplayStats(this.dragonStats!);
-        const playersDisplayStats = DataBase.getDisplayStats(
+        const dragonDisplayStats = AppUser.getDisplayStats(this.dragonStats!);
+        const playersDisplayStats = AppUser.getDisplayStats(
             this.playersTotalStats!,
         );
 

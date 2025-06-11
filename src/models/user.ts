@@ -1,14 +1,4 @@
-import {
-    Guild,
-    GuildMember,
-    Role,
-    TextChannel,
-    User,
-    type PartialUser,
-} from "discord.js";
 import mongoose, { Document, Schema } from "mongoose";
-import { client } from "..";
-import { Item, type ItemDocument } from "./item";
 
 const InventorySchema = new Schema(
     {
@@ -113,360 +103,359 @@ export const StatsModel = mongoose.model<IStats>("Stats", StatsSchema);
 export type UserModel = mongoose.InferSchemaType<typeof userSchema>;
 export const UserModel = mongoose.model<UserDocument>("User", userSchema);
 
-
-//  /$$      /$$  /$$$$$$  /$$$$$$$  /$$   /$$ /$$$$$$ /$$   /$$  /$$$$$$        /$$$$$$$  /$$$$$$$$ /$$$$$$$  /$$$$$$$  /$$$$$$  /$$$$$$   /$$$$$$  /$$$$$$$$ /$$$$$$$$ /$$$$$$$ 
+//  /$$      /$$  /$$$$$$  /$$$$$$$  /$$   /$$ /$$$$$$ /$$   /$$  /$$$$$$        /$$$$$$$  /$$$$$$$$ /$$$$$$$  /$$$$$$$  /$$$$$$  /$$$$$$   /$$$$$$  /$$$$$$$$ /$$$$$$$$ /$$$$$$$
 // | $$  /$ | $$ /$$__  $$| $$__  $$| $$$ | $$|_  $$_/| $$$ | $$ /$$__  $$      | $$__  $$| $$_____/| $$__  $$| $$__  $$|_  $$_/ /$$__  $$ /$$__  $$|__  $$__/| $$_____/| $$__  $$
 // | $$ /$$$| $$| $$  \ $$| $$  \ $$| $$$$| $$  | $$  | $$$$| $$| $$  \__/      | $$  \ $$| $$      | $$  \ $$| $$  \ $$  | $$  | $$  \__/| $$  \ $$   | $$   | $$      | $$  \ $$
 // | $$/$$ $$ $$| $$$$$$$$| $$$$$$$/| $$ $$ $$  | $$  | $$ $$ $$| $$ /$$$$      | $$  | $$| $$$$$   | $$$$$$$/| $$$$$$$/  | $$  | $$      | $$$$$$$$   | $$   | $$$$$   | $$  | $$
 // | $$$$_  $$$$| $$__  $$| $$__  $$| $$  $$$$  | $$  | $$  $$$$| $$|_  $$      | $$  | $$| $$__/   | $$____/ | $$__  $$  | $$  | $$      | $$__  $$   | $$   | $$__/   | $$  | $$
 // | $$$/ \  $$$| $$  | $$| $$  \ $$| $$\  $$$  | $$  | $$\  $$$| $$  \ $$      | $$  | $$| $$      | $$      | $$  \ $$  | $$  | $$    $$| $$  | $$   | $$   | $$      | $$  | $$
 // | $$/   \  $$| $$  | $$| $$  | $$| $$ \  $$ /$$$$$$| $$ \  $$|  $$$$$$/      | $$$$$$$/| $$$$$$$$| $$      | $$  | $$ /$$$$$$|  $$$$$$/| $$  | $$   | $$   | $$$$$$$$| $$$$$$$/
-// |__/     \__/|__/  |__/|__/  |__/|__/  \__/|______/|__/  \__/ \______/       |_______/ |________/|__/      |__/  |__/|______/ \______/ |__/  |__/   |__/   |________/|_______/ 
+// |__/     \__/|__/  |__/|__/  |__/|__/  \__/|______/|__/  \__/ \______/       |_______/ |________/|__/      |__/  |__/|______/ \______/ |__/  |__/   |__/   |________/|_______/
 
 // Go and use the src/user.ts implementation
 
-/**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
-export namespace DataBase {
-    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
-    export async function getUserItems(
-        user: User | PartialUser | string,
-    ): Promise<ItemDocument[]> {
-        const dbUser: UserDocument = await getDBUserFromUser(user);
-        const itemNames: string[] = [
-            dbUser?.inventory.helmet,
-            dbUser?.inventory.chestplate,
-            dbUser?.inventory.weapon,
-            dbUser?.inventory.leggings,
-            dbUser?.inventory.boots,
-            dbUser?.inventory.shield,
-        ];
-        let items: Array<ItemDocument> = [];
-        for (const itemName of itemNames) {
-            const item = await Item.getFromName(itemName);
-            if (item) {
-                items.push(item);
-            }
-        }
-        return items;
-    }
+// /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
+// export namespace DataBase {
+//     /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
+//     export async function getUserItems(
+//         user: User | PartialUser | string,
+//     ): Promise<ItemDocument[]> {
+//         const dbUser: UserDocument = await getDBUserFromUser(user);
+//         const itemNames: string[] = [
+//             dbUser?.inventory.helmet,
+//             dbUser?.inventory.chestplate,
+//             dbUser?.inventory.weapon,
+//             dbUser?.inventory.leggings,
+//             dbUser?.inventory.boots,
+//             dbUser?.inventory.shield,
+//         ];
+//         let items: Array<ItemDocument> = [];
+//         for (const itemName of itemNames) {
+//             const item = await Item.getFromName(itemName);
+//             if (item) {
+//                 items.push(item);
+//             }
+//         }
+//         return items;
+//     }
 
-    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
-    export function getDisplayStats(stats: StatsModel): DisplayStatsFormat[] {
-        const attributesArray: DisplayStatsFormat[] = [
-            ["⚔️", "Strength", stats.strength],
-            ["🛡️", "Defense", stats.defense],
-            ["🏃", "Agility", stats.agility],
-            ["✨", "Magicka", stats.magicka],
-            ["🔋", "Vitality", stats.vitality],
-            ["🏃‍♂️", "Stamina", stats.stamina],
-            ["🗣️", "Charisma", stats.charisma],
-        ];
-        return attributesArray;
-    }
+//     /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
+//     export function getDisplayStats(stats: StatsModel): DisplayStatsFormat[] {
+//         const attributesArray: DisplayStatsFormat[] = [
+//             ["⚔️", "Strength", stats.strength],
+//             ["🛡️", "Defense", stats.defense],
+//             ["🏃", "Agility", stats.agility],
+//             ["✨", "Magicka", stats.magicka],
+//             ["🔋", "Vitality", stats.vitality],
+//             ["🏃‍♂️", "Stamina", stats.stamina],
+//             ["🗣️", "Charisma", stats.charisma],
+//         ];
+//         return attributesArray;
+//     }
 
-    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
-    export async function getUserDisplayInfo(
-        user: User | PartialUser | string,
-    ) {
-        const itemsDisplay = Item.getStringCollection(await getUserItems(user));
-        const dbUser: UserDocument = await getDBUserFromUser(user);
-        const attributesArray = DataBase.getDisplayStats(dbUser.stats);
-        return {
-            gold: dbUser.inventory.gold,
-            xp: dbUser.xp,
-            level: dbUser.level,
-            skillPoints: dbUser.skillPoints,
-            attributesArray,
-            items: `📦 Items: \n${itemsDisplay}`,
-        };
-    }
+//     /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
+//     export async function getUserDisplayInfo(
+//         user: User | PartialUser | string,
+//     ) {
+//         const itemsDisplay = Item.getStringCollection(await getUserItems(user));
+//         const dbUser: UserDocument = await getDBUserFromUser(user);
+//         const attributesArray = DataBase.getDisplayStats(dbUser.stats);
+//         return {
+//             gold: dbUser.inventory.gold,
+//             xp: dbUser.xp,
+//             level: dbUser.level,
+//             skillPoints: dbUser.skillPoints,
+//             attributesArray,
+//             items: `📦 Items: \n${itemsDisplay}`,
+//         };
+//     }
 
-    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
-    export async function userEquipItem(
-        user: User | PartialUser | string,
-        item: ItemDocument,
-    ) {
-        const dbUser = await DataBase.getDBUserFromUser(user);
-        const equipmentSlots: Array<keyof IInventory> = [
-            "weapon",
-            "helmet",
-            "chestplate",
-            "leggings",
-            "boots",
-            "shield",
-        ];
-        console.log(equipmentSlots);
-        console.log(item);
-        if (equipmentSlots.includes(item.tag as keyof IInventory)) {
-            const slotToUpdate = item.tag;
+//     /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
+//     export async function userEquipItem(
+//         user: User | PartialUser | string,
+//         item: ItemDocument,
+//     ) {
+//         const dbUser = await DataBase.getDBUserFromUser(user);
+//         const equipmentSlots: Array<keyof IInventory> = [
+//             "weapon",
+//             "helmet",
+//             "chestplate",
+//             "leggings",
+//             "boots",
+//             "shield",
+//         ];
+//         console.log(equipmentSlots);
+//         console.log(item);
+//         if (equipmentSlots.includes(item.tag as keyof IInventory)) {
+//             const slotToUpdate = item.tag;
 
-            (dbUser.inventory as any)[slotToUpdate] = item.name;
-        } else {
-            console.log(
-                `failed to applied ${item.name} to ${dbUser.username}'s ${item.tag} slot.`,
-            );
-            return;
-        }
+//             (dbUser.inventory as any)[slotToUpdate] = item.name;
+//         } else {
+//             console.log(
+//                 `failed to applied ${item.name} to ${dbUser.username}'s ${item.tag} slot.`,
+//             );
+//             return;
+//         }
 
-        try {
-            await dbUser.save();
-            console.log(
-                `Successfully applied ${item.name} to ${dbUser.username}'s ${item.tag} slot.`,
-            );
-        } catch (error) {
-            console.error(`Error saving user inventory:`, error);
-        }
-    }
+//         try {
+//             await dbUser.save();
+//             console.log(
+//                 `Successfully applied ${item.name} to ${dbUser.username}'s ${item.tag} slot.`,
+//             );
+//         } catch (error) {
+//             console.error(`Error saving user inventory:`, error);
+//         }
+//     }
 
-    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
-    export async function getIDFromUser(
-        user: User | PartialUser | string,
-    ): Promise<string> {
-        if (typeof user === "object" && user !== null && "id" in user) {
-            return String(user.id);
-        }
-        return user;
-    }
+//     /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
+//     export async function getIDFromUser(
+//         user: User | PartialUser | string,
+//     ): Promise<string> {
+//         if (typeof user === "object" && user !== null && "id" in user) {
+//             return String(user.id);
+//         }
+//         return user;
+//     }
 
-    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
-    export async function getUser(
-        user: User | PartialUser | string,
-    ): Promise<User> {
-        const id = await getIDFromUser(user);
-        return client.users.fetch(id);
-    }
+//     /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
+//     export async function getUser(
+//         user: User | PartialUser | string,
+//     ): Promise<User> {
+//         const id = await getIDFromUser(user);
+//         return client.users.fetch(id);
+//     }
 
-    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
-    export async function getDBUserFromUser(
-        user: User | PartialUser | string,
-    ): Promise<UserDocument> {
-        const id = await getIDFromUser(user);
-        try {
-            let user = await UserModel.findOne({ id: id });
-            if (!user || user === null || user === undefined) {
-                user = await UserModel.create({
-                    id: new String(id) as string,
-                    username: (await getUser(id)).username,
-                });
-            }
-            return user;
-        } catch (err) {
-            throw new Error(`Failed to fetch user with ID ${id}: ${err}`);
-        }
-    }
+//     /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
+//     // export async function getDBUserFromUser(
+//     //     user: User | PartialUser | string,
+//     // ): Promise<UserDocument> {
+//     //     const id = await getIDFromUser(user);
+//     //     try {
+//     //         let user = await UserModel.findOne({ id: id });
+//     //         if (!user || user === null || user === undefined) {
+//     //             user = await UserModel.create({
+//     //                 id: new String(id) as string,
+//     //                 username: (await getUser(id)).username,
+//     //             });
+//     //         }
+//     //         return user;
+//     //     } catch (err) {
+//     //         throw new Error(`Failed to fetch user with ID ${id}: ${err}`);
+//     //     }
+//     // }
 
-    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
-    export async function giveSkillpoints(
-        user: User | PartialUser | string,
-        amount: number,
-    ) {
-        await giveSkillpointsDB(await getDBUserFromUser(user), amount);
-    }
+//     /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
+//     export async function giveSkillpoints(
+//         user: User | PartialUser | string,
+//         amount: number,
+//     ) {
+//         await giveSkillpointsDB(await getDBUserFromUser(user), amount);
+//     }
 
-    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
-    export async function giveSkillpointsDB(
-        dbUser: UserDocument,
-        amount: number,
-    ) {
-        dbUser.skillPoints += amount;
-        await dbUser.save();
-    }
+//     /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
+//     export async function giveSkillpointsDB(
+//         dbUser: UserDocument,
+//         amount: number,
+//     ) {
+//         dbUser.skillPoints += amount;
+//         await dbUser.save();
+//     }
 
-    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
-    export async function giveXP(
-        user: User | PartialUser | string,
-        xp: number,
-    ) {
-        let dbUser = await getDBUserFromUser(user);
+//     /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
+//     export async function giveXP(
+//         user: User | PartialUser | string,
+//         xp: number,
+//     ) {
+//         let dbUser = await getDBUserFromUser(user);
 
-        await setXP(user, dbUser.xp + xp);
-        await dbUser.save();
-        return xp;
-    }
+//         await setXP(user, dbUser.xp + xp);
+//         await dbUser.save();
+//         return xp;
+//     }
 
-    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
-    export async function setXP(user: User | PartialUser | string, xp: number) {
-        let dbUser = await getDBUserFromUser(user);
+//     /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
+//     export async function setXP(user: User | PartialUser | string, xp: number) {
+//         let dbUser = await getDBUserFromUser(user);
 
-        if (xp > 0 && dbUser.timeouts > 0) {
-            const maxTimeoutsForReduction = 20;
-            const minTimeoutsForReduction = 1;
-            let reductionFactor =
-                (dbUser.timeouts - minTimeoutsForReduction) /
-                (maxTimeoutsForReduction - minTimeoutsForReduction);
-            reductionFactor = Math.max(0, Math.min(1, reductionFactor));
-            xp = xp * (1 - reductionFactor);
-        }
+//         if (xp > 0 && dbUser.timeouts > 0) {
+//             const maxTimeoutsForReduction = 20;
+//             const minTimeoutsForReduction = 1;
+//             let reductionFactor =
+//                 (dbUser.timeouts - minTimeoutsForReduction) /
+//                 (maxTimeoutsForReduction - minTimeoutsForReduction);
+//             reductionFactor = Math.max(0, Math.min(1, reductionFactor));
+//             xp = xp * (1 - reductionFactor);
+//         }
 
-        await level(user, xp);
-        dbUser.xp = Math.max(-100, xp);
-        await dbUser.save();
-        return xp;
-    }
+//         await level(user, xp);
+//         dbUser.xp = Math.max(-100, xp);
+//         await dbUser.save();
+//         return xp;
+//     }
 
-    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
-    export async function giveGold(
-        user: User | PartialUser | string,
-        amount: number,
-    ) {
-        let dbUser = await getDBUserFromUser(user);
+//     /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
+//     export async function giveGold(
+//         user: User | PartialUser | string,
+//         amount: number,
+//     ) {
+//         let dbUser = await getDBUserFromUser(user);
 
-        await setGold(user, dbUser.inventory.gold + amount);
-        await dbUser.save();
-        return amount;
-    }
+//         await setGold(user, dbUser.inventory.gold + amount);
+//         await dbUser.save();
+//         return amount;
+//     }
 
-    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
-    export async function giveGoldDB(user: UserDocument, amount: number) {
-        await setGoldDB(user, user.inventory.gold + amount);
-        return amount;
-    }
+//     /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
+//     export async function giveGoldDB(user: UserDocument, amount: number) {
+//         await setGoldDB(user, user.inventory.gold + amount);
+//         return amount;
+//     }
 
-    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
-    export async function setGoldDB(user: UserDocument, amount: number) {
-        user.inventory.gold = Math.max(-1000, amount);
-        await user.save();
-        return amount;
-    }
+//     /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
+//     export async function setGoldDB(user: UserDocument, amount: number) {
+//         user.inventory.gold = Math.max(-1000, amount);
+//         await user.save();
+//         return amount;
+//     }
 
-    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
-    export async function setGold(
-        user: User | PartialUser | string,
-        amount: number,
-    ) {
-        let dbUser = await getDBUserFromUser(user);
+//     /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
+//     export async function setGold(
+//         user: User | PartialUser | string,
+//         amount: number,
+//     ) {
+//         let dbUser = await getDBUserFromUser(user);
 
-        dbUser.inventory.gold = Math.max(-1000, amount);
-        await dbUser.save();
-        return amount;
-    }
+//         dbUser.inventory.gold = Math.max(-1000, amount);
+//         await dbUser.save();
+//         return amount;
+//     }
 
-    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
-    export async function upgradeSkillDB(
-        dbUser: UserDocument,
-        attribute: string,
-    ) {
-        (dbUser.stats as any)[attribute]++;
-        await dbUser.save();
-    }
+//     /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
+//     export async function upgradeSkillDB(
+//         dbUser: UserDocument,
+//         attribute: string,
+//     ) {
+//         (dbUser.stats as any)[attribute]++;
+//         await dbUser.save();
+//     }
 
-    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
-    export async function giveRank(
-        guild: Guild,
-        anyUser: User | PartialUser | string,
-        roleNameOrId: string,
-    ): Promise<void> {
-        try {
-            const user = DataBase.getUser(anyUser);
+//     /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
+//     export async function giveRank(
+//         guild: Guild,
+//         anyUser: User | PartialUser | string,
+//         roleNameOrId: string,
+//     ): Promise<void> {
+//         try {
+//             const user = DataBase.getUser(anyUser);
 
-            const member: GuildMember | null = await guild.members.fetch(
-                (await user).id,
-            );
+//             const member: GuildMember | null = await guild.members.fetch(
+//                 (await user).id,
+//             );
 
-            if (!member)
-                throw new Error(
-                    `User ${user} is not a member of the guild ${guild.name}`,
-                );
+//             if (!member)
+//                 throw new Error(
+//                     `User ${user} is not a member of the guild ${guild.name}`,
+//                 );
 
-            const roleToGive: Role | undefined = guild.roles.cache.find(
-                (role) =>
-                    role.name.toLowerCase() === roleNameOrId.toLowerCase() ||
-                    role.id === roleNameOrId,
-            );
+//             const roleToGive: Role | undefined = guild.roles.cache.find(
+//                 (role) =>
+//                     role.name.toLowerCase() === roleNameOrId.toLowerCase() ||
+//                     role.id === roleNameOrId,
+//             );
 
-            if (!roleToGive)
-                throw new Error(
-                    `Role "${roleNameOrId}" not found in guild ${guild.name}`,
-                );
+//             if (!roleToGive)
+//                 throw new Error(
+//                     `Role "${roleNameOrId}" not found in guild ${guild.name}`,
+//                 );
 
-            if (
-                guild.members.me &&
-                roleToGive.position >= guild.members.me.roles.highest.position
-            )
-                throw new Error(
-                    `I cannot assign the role "${roleToGive.name}" because it is equal to or higher than my highest role`,
-                );
+//             if (
+//                 guild.members.me &&
+//                 roleToGive.position >= guild.members.me.roles.highest.position
+//             )
+//                 throw new Error(
+//                     `I cannot assign the role "${roleToGive.name}" because it is equal to or higher than my highest role`,
+//                 );
 
-            await member.roles.add(roleToGive);
-        } catch (error) {
-            throw new Error(`Error assigning role: ${error}`);
-        }
-    }
-}
+//             await member.roles.add(roleToGive);
+//         } catch (error) {
+//             throw new Error(`Error assigning role: ${error}`);
+//         }
+//     }
+// }
 
-export async function level(
-    user: User | PartialUser | string,
-    xp: number,
-): Promise<void> {
-    if (user === client.user) return;
-    const dbUser = await DataBase.getDBUserFromUser(user);
+// export async function level(
+//     user: User | PartialUser | string,
+//     xp: number,
+// ): Promise<void> {
+//     if (user === client.user) return;
+//     const dbUser = await DataBase.getDBUserFromUser(user);
 
-    if (!process.env.QUEST_CHANNEL_ID)
-        throw new Error("QUEST_CHANNEL_ID is not defined in .env");
-    const levelChannel = (await client.channels.fetch(
-        process.env.QUEST_CHANNEL_ID,
-    )) as TextChannel;
+//     if (!process.env.QUEST_CHANNEL_ID)
+//         throw new Error("QUEST_CHANNEL_ID is not defined in .env");
+//     const levelChannel = (await client.channels.fetch(
+//         process.env.QUEST_CHANNEL_ID,
+//     )) as TextChannel;
 
-    const level = calculateLevel(xp);
+//     const level = calculateLevel(xp);
 
-    if (level > dbUser.level) {
-        await DataBase.giveSkillpointsDB(dbUser, 1);
-        await DataBase.giveGoldDB(dbUser, xp);
-        dbUser.level = level;
-        await dbUser.save();
-        await levelChannel.send(
-            `${await DataBase.getUser(user)} is now level ${level}!`,
-        );
-    }
+//     if (level > dbUser.level) {
+//         await DataBase.giveSkillpointsDB(dbUser, 1);
+//         await DataBase.giveGoldDB(dbUser, xp);
+//         dbUser.level = level;
+//         await dbUser.save();
+//         await levelChannel.send(
+//             `${await DataBase.getUser(user)} is now level ${level}!`,
+//         );
+//     }
 
-    const dcUser = DataBase.getUser(user);
+//     const dcUser = DataBase.getUser(user);
 
-    const guildId = levelChannel.guild.id;
-    const guild: Guild | undefined = await client.guilds.fetch(guildId);
-    const members = await guild.members.fetch();
+//     const guildId = levelChannel.guild.id;
+//     const guild: Guild | undefined = await client.guilds.fetch(guildId);
+//     const members = await guild.members.fetch();
 
-    const rank = rankFromLevel(level) || "";
-    if (rank === "") {
-        console.log("Skipped Level");
-        return;
-    }
-    DataBase.giveRank(guild, user, rank);
-}
+//     const rank = rankFromLevel(level) || "";
+//     if (rank === "") {
+//         console.log("Skipped Level");
+//         return;
+//     }
+//     DataBase.giveRank(guild, user, rank);
+// }
 
-const xpThresholds: number[] = [
-    //  XP           Level
-    0, //     0
-    1, //     1
-    50, //     2
-    100, //     3
-    250, //     4
-    500, //     5
-    1000, //     6
-    1750, //     7
-    2750, //     8
-    4000, //     9
-    5000, //    10
-    7500, //    11
-    9500, //    12
-    10250, //    13
-    15250, //    14
-    20000, //    15
-];
+// const xpThresholds: number[] = [
+//     //  XP           Level
+//     0, //     0
+//     1, //     1
+//     50, //     2
+//     100, //     3
+//     250, //     4
+//     500, //     5
+//     1000, //     6
+//     1750, //     7
+//     2750, //     8
+//     4000, //     9
+//     5000, //    10
+//     7500, //    11
+//     9500, //    12
+//     10250, //    13
+//     15250, //    14
+//     20000, //    15
+// ];
 
-function calculateLevel(xp: number): number {
-    for (let i = xpThresholds.length - 1; i >= 0; i--) {
-        if (xp >= xpThresholds[i]!) {
-            return i;
-        }
-    }
-    return 0;
-}
+// function calculateLevel(xp: number): number {
+//     for (let i = xpThresholds.length - 1; i >= 0; i--) {
+//         if (xp >= xpThresholds[i]!) {
+//             return i;
+//         }
+//     }
+//     return 0;
+// }
 
-function rankFromLevel(level: number): string | undefined {
-    // Check if the level is a positive number and a multiple of 5
-    if (level > 0 && level % 5 === 0) {
-        return `Level ${level}`; // Return the rank string for levels like 5, 10, 15, etc.
-    }
-    // For all other levels (0, or not a multiple of 5), return undefined
-    return undefined;
-}
+// function rankFromLevel(level: number): string | undefined {
+//     // Check if the level is a positive number and a multiple of 5
+//     if (level > 0 && level % 5 === 0) {
+//         return `Level ${level}`; // Return the rank string for levels like 5, 10, 15, etc.
+//     }
+//     // For all other levels (0, or not a multiple of 5), return undefined
+//     return undefined;
+// }

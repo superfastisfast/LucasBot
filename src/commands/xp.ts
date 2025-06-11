@@ -7,7 +7,7 @@ import {
     type Client,
     type CommandInteraction,
 } from "discord.js";
-import { DataBase, UserModel } from "../models/user";
+import { UserModel } from "../models/user";
 import { AppUser } from "@/user";
 
 export default class XpCommand extends Command.Base {
@@ -32,7 +32,7 @@ export default class XpCommand extends Command.Base {
             .addSubcommand((sub) =>
                 sub
                     .setName("top")
-                    .setDescription("Show 10 people with the most XP")
+                    .setDescription("Show 10 people with the most XP"),
             )
             .addSubcommand((sub) =>
                 sub
@@ -78,34 +78,43 @@ export default class XpCommand extends Command.Base {
         interaction: CommandInteraction<any>,
     ): Promise<void> {
         const sub = interaction.options.getSubcommand();
-        const target = await AppUser.createFromID((interaction.options.get("target")?.user || interaction.user).id);
+        const target = await AppUser.createFromID(
+            (interaction.options.get("target")?.user || interaction.user).id,
+        );
 
         switch (sub) {
             case "view": {
-                interaction.reply(`${target.discord} has ${target.database.xp || "no"} XP`);
+                interaction.reply(
+                    `${target.discord} has ${target.database.xp || "no"} XP`,
+                );
                 break;
             }
-            case "top": {                
-                const topUsers = await UserModel.find().sort({ xp: -1 }).limit(10).exec();
-            
+            case "top": {
+                const topUsers = await UserModel.find()
+                    .sort({ xp: -1 })
+                    .limit(10)
+                    .exec();
+
                 if (topUsers.length === 0) {
-                    await interaction.reply("No users found in the leaderboard.");
+                    await interaction.reply(
+                        "No users found in the leaderboard.",
+                    );
                     return;
                 }
-                                
+
                 const lines = await Promise.all(
                     topUsers.map(async (user, index) => {
-                        const name = await DataBase.getUser(user.id);
+                        const name = user.username;
                         return `**${index + 1}.** ${name} — ${user.xp} XP`;
-                    })
+                    }),
                 );
                 const description = lines.join("\n");
-            
+
                 const embed = new EmbedBuilder()
                     .setTitle("🏆 XP Leaderboard")
                     .setDescription(description)
-                    .setColor(0xFFD700);
-            
+                    .setColor(0xffd700);
+
                 await interaction.reply({ embeds: [embed] });
 
                 break;
@@ -115,7 +124,7 @@ export default class XpCommand extends Command.Base {
 
                 const amount = interaction.options.get("amount")
                     ?.value as number;
-                
+
                 target.addXP(amount);
                 interaction.reply({
                     content: `${interaction.user} added ${amount} XP to ${target.discord}, new total is ${target.database.xp}`,
@@ -129,7 +138,7 @@ export default class XpCommand extends Command.Base {
 
                 const amount = interaction.options.get("amount")
                     ?.value as number;
-                
+
                 target.setXP(amount);
                 interaction.reply({
                     content: `${interaction.user} set ${target.discord}'s XP to ${amount}`,

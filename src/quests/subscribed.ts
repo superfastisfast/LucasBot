@@ -1,4 +1,3 @@
-import { DataBase } from "@/models/user";
 import { Quest } from "@/quest";
 import { AppUser } from "@/user";
 import {

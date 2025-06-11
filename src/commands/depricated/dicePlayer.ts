@@ -1,5 +1,4 @@
 import { Command } from "@/command";
-import { DataBase } from "@/models/user";
 import {
     SlashCommandBuilder,
     User,

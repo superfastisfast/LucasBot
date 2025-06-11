@@ -1,6 +1,5 @@
 import { Command } from "@/command";
 import { Item, type ItemDocument } from "@/models/item";
-import { DataBase, type UserDocument } from "@/models/user";
 import ShopService from "@/services/shopService";
 import { AppUser } from "@/user";
 import {
@@ -34,8 +33,8 @@ export default class ShopCommand extends Command.Base {
                 let responseMsg = `**You need more money!**`;
                 if (user.database.inventory.gold >= item.cost) {
                     responseMsg = `**You bought and equipped ${item.name}.**`;
-                    DataBase.giveGoldDB(user.database, -item.cost);
-                    DataBase.userEquipItem(interaction.user.id, item);
+                    user.addGold(-item.cost);
+                    user.equipItem(item);
                 }
 
                 const shopDisplay = this.generateShopDisplay(

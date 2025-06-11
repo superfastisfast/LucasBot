@@ -1,5 +1,5 @@
-import { DataBase } from "@/models/user";
 import { Quest } from "@/quest";
+import { AppUser } from "@/user";
 import {
     ActionRowBuilder,
     ButtonBuilder,
@@ -46,8 +46,8 @@ export default class SubscribedQuest extends Quest.Base {
         return false;
     }
     private async joinTeam(team: number, interaction: ButtonInteraction) {
-        const dbUser = await DataBase.getDBUserFromUser(interaction.user);
-        if (dbUser.inventory.gold < this.bet) {
+        const User = await AppUser.createFromID(interaction.user.id);
+        if (User.database.inventory.gold < this.bet) {
             interaction.reply({
                 content: `You dont have ${this.bet} gold to bet!`,
                 flags: "Ephemeral",
@@ -55,7 +55,7 @@ export default class SubscribedQuest extends Quest.Base {
             return;
         }
         this.players[team]!.push(interaction.user);
-        await DataBase.giveGold(interaction.user, -this.bet);
+        await User.addGold(-this.bet);
         const questMsg = await this.generateQuestBody();
         interaction.update(questMsg);
         return;
@@ -91,7 +91,8 @@ export default class SubscribedQuest extends Quest.Base {
                 value: `Team won ${perPlayerReward} gold per player`,
             });
             for (const player of this.players[winningTeamNumber]!) {
-                DataBase.giveGold(player, perPlayerReward);
+                const User = await AppUser.createFromID(player.id);
+                User.addGold(perPlayerReward);
             }
         }
 

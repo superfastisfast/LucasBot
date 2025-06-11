@@ -1,5 +1,5 @@
-import { DataBase } from "@/models/user";
 import { Service } from "@/service";
+import { AppUser } from "@/user";
 import {
     Client,
     Events,
@@ -75,14 +75,14 @@ export default class XpService extends Service.Base {
     };
 
     private async rewardXp(user: User | PartialUser, xp: number) {
-        const dbUser = await DataBase.getDBUserFromUser(user);
+        const appUser = await AppUser.createFromID(user.id);
         const currentTime = new Date();
         const timeDifferenceMs =
-            currentTime.getTime() - dbUser.lastXpMessageAt.getTime();
+            currentTime.getTime() - appUser.database.lastXpMessageAt.getTime();
         const timeDifferenceMinutes = timeDifferenceMs / (1000 * 3);
         if (timeDifferenceMinutes >= 1) {
-            dbUser.lastXpMessageAt = currentTime;
-            DataBase.giveXP(user, xp);
+            appUser.database.lastXpMessageAt = currentTime;
+            appUser.addXP(xp);
         }
     }
 }

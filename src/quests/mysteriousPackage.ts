@@ -1,5 +1,4 @@
 import { Item } from "@/models/item";
-import { DataBase } from "@/models/user";
 import { Quest } from "@/quest";
 import { AppUser } from "@/user";
 import {
@@ -56,7 +55,8 @@ export default class MysteriousPackage extends Quest.Base {
                     `You found the owner of the package, and recived 50 gold`,
                 flags: "Ephemeral",
             });
-            DataBase.giveGold(interaction.user, 50);
+            const user = await AppUser.createFromID(interaction.user.id);
+            user.addGold(50);
             this.interactedPlayerId = interaction.user.id;
             return true;
         } else if (
@@ -70,7 +70,8 @@ export default class MysteriousPackage extends Quest.Base {
                     `You sold the package, and recived 50 gold`,
                 flags: "Ephemeral",
             });
-            DataBase.giveGold(interaction.user, 50);
+            const user = await AppUser.createFromID(interaction.user.id);
+            user.addGold(50);
             this.interactedPlayerId = interaction.user.id;
             return true;
         }
