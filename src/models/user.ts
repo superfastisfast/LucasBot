@@ -106,14 +106,28 @@ export interface UserDocument extends Document {
     updatedAt: Date;
 }
 
-type displayStatsFormat = [string, string, number];
+type DisplayStatsFormat = [string, string, number];
 export type StatsModel = mongoose.InferSchemaType<typeof StatsSchema>;
 export const StatsModel = mongoose.model<IStats>("Stats", StatsSchema);
 
 export type UserModel = mongoose.InferSchemaType<typeof userSchema>;
 export const UserModel = mongoose.model<UserDocument>("User", userSchema);
 
+
+//  /$$      /$$  /$$$$$$  /$$$$$$$  /$$   /$$ /$$$$$$ /$$   /$$  /$$$$$$        /$$$$$$$  /$$$$$$$$ /$$$$$$$  /$$$$$$$  /$$$$$$  /$$$$$$   /$$$$$$  /$$$$$$$$ /$$$$$$$$ /$$$$$$$ 
+// | $$  /$ | $$ /$$__  $$| $$__  $$| $$$ | $$|_  $$_/| $$$ | $$ /$$__  $$      | $$__  $$| $$_____/| $$__  $$| $$__  $$|_  $$_/ /$$__  $$ /$$__  $$|__  $$__/| $$_____/| $$__  $$
+// | $$ /$$$| $$| $$  \ $$| $$  \ $$| $$$$| $$  | $$  | $$$$| $$| $$  \__/      | $$  \ $$| $$      | $$  \ $$| $$  \ $$  | $$  | $$  \__/| $$  \ $$   | $$   | $$      | $$  \ $$
+// | $$/$$ $$ $$| $$$$$$$$| $$$$$$$/| $$ $$ $$  | $$  | $$ $$ $$| $$ /$$$$      | $$  | $$| $$$$$   | $$$$$$$/| $$$$$$$/  | $$  | $$      | $$$$$$$$   | $$   | $$$$$   | $$  | $$
+// | $$$$_  $$$$| $$__  $$| $$__  $$| $$  $$$$  | $$  | $$  $$$$| $$|_  $$      | $$  | $$| $$__/   | $$____/ | $$__  $$  | $$  | $$      | $$__  $$   | $$   | $$__/   | $$  | $$
+// | $$$/ \  $$$| $$  | $$| $$  \ $$| $$\  $$$  | $$  | $$\  $$$| $$  \ $$      | $$  | $$| $$      | $$      | $$  \ $$  | $$  | $$    $$| $$  | $$   | $$   | $$      | $$  | $$
+// | $$/   \  $$| $$  | $$| $$  | $$| $$ \  $$ /$$$$$$| $$ \  $$|  $$$$$$/      | $$$$$$$/| $$$$$$$$| $$      | $$  | $$ /$$$$$$|  $$$$$$/| $$  | $$   | $$   | $$$$$$$$| $$$$$$$/
+// |__/     \__/|__/  |__/|__/  |__/|__/  \__/|______/|__/  \__/ \______/       |_______/ |________/|__/      |__/  |__/|______/ \______/ |__/  |__/   |__/   |________/|_______/ 
+
+// Go and use the src/user.ts implementation
+
+/**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
 export namespace DataBase {
+    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
     export async function getUserItems(
         user: User | PartialUser | string,
     ): Promise<ItemDocument[]> {
@@ -136,8 +150,9 @@ export namespace DataBase {
         return items;
     }
 
-    export function getDisplayStats(stats: StatsModel): displayStatsFormat[] {
-        const attributesArray: displayStatsFormat[] = [
+    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
+    export function getDisplayStats(stats: StatsModel): DisplayStatsFormat[] {
+        const attributesArray: DisplayStatsFormat[] = [
             ["⚔️", "Strength", stats.strength],
             ["🛡️", "Defense", stats.defense],
             ["🏃", "Agility", stats.agility],
@@ -149,6 +164,7 @@ export namespace DataBase {
         return attributesArray;
     }
 
+    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
     export async function getUserDisplayInfo(
         user: User | PartialUser | string,
     ) {
@@ -165,6 +181,7 @@ export namespace DataBase {
         };
     }
 
+    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
     export async function userEquipItem(
         user: User | PartialUser | string,
         item: ItemDocument,
@@ -201,6 +218,7 @@ export namespace DataBase {
         }
     }
 
+    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
     export async function getIDFromUser(
         user: User | PartialUser | string,
     ): Promise<string> {
@@ -210,6 +228,7 @@ export namespace DataBase {
         return user;
     }
 
+    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
     export async function getUser(
         user: User | PartialUser | string,
     ): Promise<User> {
@@ -217,6 +236,7 @@ export namespace DataBase {
         return client.users.fetch(id);
     }
 
+    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
     export async function getDBUserFromUser(
         user: User | PartialUser | string,
     ): Promise<UserDocument> {
@@ -235,6 +255,7 @@ export namespace DataBase {
         }
     }
 
+    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
     export async function giveSkillpoints(
         user: User | PartialUser | string,
         amount: number,
@@ -242,6 +263,7 @@ export namespace DataBase {
         await giveSkillpointsDB(await getDBUserFromUser(user), amount);
     }
 
+    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
     export async function giveSkillpointsDB(
         dbUser: UserDocument,
         amount: number,
@@ -250,6 +272,7 @@ export namespace DataBase {
         await dbUser.save();
     }
 
+    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
     export async function giveXP(
         user: User | PartialUser | string,
         xp: number,
@@ -261,6 +284,7 @@ export namespace DataBase {
         return xp;
     }
 
+    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
     export async function setXP(user: User | PartialUser | string, xp: number) {
         let dbUser = await getDBUserFromUser(user);
 
@@ -280,6 +304,7 @@ export namespace DataBase {
         return xp;
     }
 
+    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
     export async function giveGold(
         user: User | PartialUser | string,
         amount: number,
@@ -290,16 +315,21 @@ export namespace DataBase {
         await dbUser.save();
         return amount;
     }
+
+    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
     export async function giveGoldDB(user: UserDocument, amount: number) {
         await setGoldDB(user, user.inventory.gold + amount);
         return amount;
     }
+
+    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
     export async function setGoldDB(user: UserDocument, amount: number) {
         user.inventory.gold = Math.max(-1000, amount);
         await user.save();
         return amount;
     }
 
+    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
     export async function setGold(
         user: User | PartialUser | string,
         amount: number,
@@ -311,6 +341,7 @@ export namespace DataBase {
         return amount;
     }
 
+    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
     export async function upgradeSkillDB(
         dbUser: UserDocument,
         attribute: string,
@@ -319,6 +350,7 @@ export namespace DataBase {
         await dbUser.save();
     }
 
+    /**@deprecated Use 'src/user.ts implementation' instead. This namespace is depricated! Please PLEASE don't use. */
     export async function giveRank(
         guild: Guild,
         anyUser: User | PartialUser | string,

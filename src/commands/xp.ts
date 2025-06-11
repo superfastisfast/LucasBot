@@ -8,6 +8,7 @@ import {
     type CommandInteraction,
 } from "discord.js";
 import { DataBase, UserModel } from "../models/user";
+import { AppUser } from "@/user";
 
 export default class XpCommand extends Command.Base {
     override get info(): any {
@@ -77,50 +78,35 @@ export default class XpCommand extends Command.Base {
         interaction: CommandInteraction<any>,
     ): Promise<void> {
         const sub = interaction.options.getSubcommand();
-        const target =
-            interaction.options.get("target")?.user || interaction.user;
+        const target = await AppUser.createFromID((interaction.options.get("target")?.user || interaction.user).id);
 
         switch (sub) {
             case "view": {
-                const usersModel = await UserModel.find();
-                for (const userModel of usersModel) {
-                    if (userModel.id == target.id) {
-                        interaction.reply(
-                            `${target} has ${userModel.xp || "no"} XP`,
-                        );
-                    }
-                }
+                interaction.reply(`${target.discord} has ${target.database.xp || "no"} XP`);
                 break;
             }
             case "top": {                
-                try {
-                    const topUsers = await UserModel.find().sort({ xp: -1 }).limit(10).exec();
-                
-                    if (topUsers.length === 0) {
-                        await interaction.reply("No users found in the leaderboard.");
-                        return;
-                    }
-                                    
-                    const lines = await Promise.all(
-                        topUsers.map(async (user, index) => {
-                            const name = await DataBase.getUser(user.id);
-                            return `**${index + 1}.** ${name} — ${user.xp} XP`;
-                        })
-                    );
-                    const description = lines.join("\n");
-
-                
-                    const embed = new EmbedBuilder()
-                        .setTitle("🏆 XP Leaderboard")
-                        .setDescription(description)
-                        .setColor(0xFFD700);
-                
-                    await interaction.reply({ embeds: [embed] });
-                
-                } catch (err) {
-                    console.error("Failed to fetch leaderboard:", err);
-                    await interaction.reply("There was an error while fetching the leaderboard.");
+                const topUsers = await UserModel.find().sort({ xp: -1 }).limit(10).exec();
+            
+                if (topUsers.length === 0) {
+                    await interaction.reply("No users found in the leaderboard.");
+                    return;
                 }
+                                
+                const lines = await Promise.all(
+                    topUsers.map(async (user, index) => {
+                        const name = await DataBase.getUser(user.id);
+                        return `**${index + 1}.** ${name} — ${user.xp} XP`;
+                    })
+                );
+                const description = lines.join("\n");
+            
+                const embed = new EmbedBuilder()
+                    .setTitle("🏆 XP Leaderboard")
+                    .setDescription(description)
+                    .setColor(0xFFD700);
+            
+                await interaction.reply({ embeds: [embed] });
 
                 break;
             }
@@ -129,19 +115,12 @@ export default class XpCommand extends Command.Base {
 
                 const amount = interaction.options.get("amount")
                     ?.value as number;
-                try {
-                    DataBase.giveXP(target.id, amount);
-                    interaction.reply({
-                        content: `${interaction.user} added ${amount} XP to ${target}`,
-                        flags: "Ephemeral",
-                    });
-                } catch (err) {
-                    console.error(err);
-                    interaction.reply({
-                        content: `${interaction.user} failed to give ${target} ${amount} XP`,
-                        flags: "Ephemeral",
-                    });
-                }
+                
+                target.addXP(amount);
+                interaction.reply({
+                    content: `${interaction.user} added ${amount} XP to ${target.discord}, new total is ${target.database.xp}`,
+                    flags: "Ephemeral",
+                });
 
                 break;
             }
@@ -150,19 +129,12 @@ export default class XpCommand extends Command.Base {
 
                 const amount = interaction.options.get("amount")
                     ?.value as number;
-                try {
-                    DataBase.setXP(target.id, amount);
-                    interaction.reply({
-                        content: `${interaction.user} set ${target}'s XP to ${amount}`,
-                        flags: "Ephemeral",
-                    });
-                } catch (err) {
-                    console.error(err);
-                    interaction.reply({
-                        content: `${interaction.user} failed to set ${target}'s XP to ${amount}`,
-                        flags: "Ephemeral",
-                    });
-                }
+                
+                target.setXP(amount);
+                interaction.reply({
+                    content: `${interaction.user} set ${target.discord}'s XP to ${amount}`,
+                    flags: "Ephemeral",
+                });
 
                 break;
             }
