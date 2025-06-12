@@ -85,7 +85,7 @@ export default class GoldCommand extends Command.Base {
                 const amount = interaction.options.get("amount")
                     ?.value as number;
 
-                target.addGold(amount);
+                await target.addGold(amount).save();
                 interaction.reply({
                     content: `${interaction.user} added ${amount} gold to ${target.discord}, new total is ${target.database.inventory.gold}`,
                     flags: "Ephemeral",
@@ -99,7 +99,7 @@ export default class GoldCommand extends Command.Base {
                 const amount = interaction.options.get("amount")
                     ?.value as number;
 
-                target.setGold(amount);
+                await target.setGold(amount).save();
                 interaction.reply({
                     content: `${interaction.user} set ${target.discord}'s gold to ${amount}`,
                     flags: "Ephemeral",

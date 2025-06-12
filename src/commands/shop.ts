@@ -33,8 +33,10 @@ export default class ShopCommand extends Command.Base {
                 let responseMsg = `**You need more money!**`;
                 if (user.database.inventory.gold >= item.cost) {
                     responseMsg = `**You bought and equipped ${item.name}.**`;
-                    user.addGold(-item.cost);
-                    user.equipItem(item);
+                    await user
+                        .addGold(-item.cost)
+                        .equipItem(item)
+                        .save();
                 }
 
                 const shopDisplay = this.generateShopDisplay(

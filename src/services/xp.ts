@@ -82,7 +82,7 @@ export default class XpService extends Service.Base {
         const timeDifferenceMinutes = timeDifferenceMs / (1000 * 3);
         if (timeDifferenceMinutes >= 1) {
             appUser.database.lastXpMessageAt = currentTime;
-            appUser.addXP(xp);
+            await appUser.addXP(xp).save();
         }
     }
 }
