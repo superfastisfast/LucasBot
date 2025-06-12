@@ -28,7 +28,6 @@ export type ItemModel = mongoose.InferSchemaType<typeof itemSchema>;
 export const ItemModel = mongoose.model<ItemDocument>("Item", itemSchema);
 
 export namespace Item {
-    const ITEM_LIST = ["Leather Chestplate", "Leather Helmet", "Club"];
     export async function getFromName(
         name: string,
     ): Promise<ItemDocument | null> {
@@ -43,17 +42,14 @@ export namespace Item {
     }
 
     export async function getRandom(): Promise<ItemDocument | null> {
-        const itemName =
-            ITEM_LIST[Math.floor(Math.random() * ITEM_LIST.length)];
         try {
-            const item = await ItemModel.findOne({ name: itemName });
+            const randomItems = await ItemModel.aggregate<ItemDocument>([
+                { $sample: { size: 1 } },
+            ]);
+            const item = randomItems.length > 0 ? randomItems[0]! : null;
             return item;
-            // return await client.users.fetch(id);
         } catch (error) {
-            console.error(
-                `Failed to fetch weapon with name ${itemName}:`,
-                error,
-            );
+            console.error(`Failed to fetch random item`, error);
             return null;
         }
     }
