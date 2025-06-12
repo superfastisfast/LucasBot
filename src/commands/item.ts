@@ -4,6 +4,7 @@ import {
     SlashCommandBuilder,
     type Client,
     type CommandInteraction,
+    type Interaction,
 } from "discord.js";
 import { ItemModel } from '../models/item';
 import { AutocompleteInteraction } from 'discord.js';
@@ -18,7 +19,7 @@ export default class ItemCommand extends Command.Base {
             .addSubcommand((sub) =>
                 sub
                     .setName("add")
-                    .setDescription("Add the item")
+                    .setDescription("Add an item")
                     .addStringOption((opt) =>
                         opt
                             .setName("name")
@@ -53,6 +54,18 @@ export default class ItemCommand extends Command.Base {
                             .setRequired(true),
                     )
             )
+            .addSubcommand((sub) =>
+                sub
+                    .setName("remove")
+                    .setDescription("Remove an item")
+                    .addStringOption((opt) =>
+                        opt
+                            .setName("name")
+                            .setDescription("User to give gold to")
+                            .setAutocomplete(true)
+                            .setRequired(true),
+                    )
+            )
             .setDefaultMemberPermissions(0n)
             .setContexts(InteractionContextType.Guild)
             .toJSON();
@@ -62,75 +75,101 @@ export default class ItemCommand extends Command.Base {
         client: Client,
         interaction: AutocompleteInteraction,
     ): Promise<void> {
+        const sub = interaction.options.getSubcommand();
+
         const rawInput = interaction.options.getFocused().toString();
 
-        const parts = rawInput.split(",").map(p => p.trim());
+        switch (sub) {
+            case "add": {
+                const parts = rawInput.split(",").map(p => p.trim());
 
-        const rawLast = parts.pop() ?? "";
+                const rawLast = parts.pop() ?? "";
 
-        // Checks if its a number
-        if (/\d$/.test(rawLast)) {
-            const prefix = parts.length > 0 ? parts.join(", ") + ", " : "";
-            const suggestionBase = prefix + rawLast;
-        
-            const suggestions = [
-                {
-                    name: suggestionBase + ",",
-                    value: suggestionBase + ",",
-                },
-                {
-                    name: suggestionBase + "%,",
-                    value: suggestionBase + "%,",
-                },
-            ];
-        
-            await interaction.respond(suggestions);
-            return;
+                // Checks if its a number
+                if (/\d$/.test(rawLast)) {
+                    const prefix = parts.length > 0 ? parts.join(", ") + ", " : "";
+                    const suggestionBase = prefix + rawLast;
+                
+                    const suggestions = [
+                        {
+                            name: suggestionBase + ",",
+                            value: suggestionBase + ",",
+                        },
+                        {
+                            name: suggestionBase + "%,",
+                            value: suggestionBase + "%,",
+                        },
+                    ];
+                
+                    await interaction.respond(suggestions);
+                    return;
+                }
+            
+            
+                let possibleStats = [
+                    "strength",
+                    "agility",
+                    "charisma",
+                    "magicka",
+                    "stamina",
+                    "defense",
+                    "vitality",
+                ];
+            
+                for (const part of parts) {
+                    const cleanedPart = (part.split("=")[0] || "").replace(/[^a-z]/gi, "").toLowerCase();
+                    possibleStats = possibleStats.filter(stat => stat.toLowerCase() !== cleanedPart);
+                }
+            
+                const [keyPart, valuePart] = rawLast.split("=");
+            
+                const filteredStats = possibleStats.filter(stat =>
+                    stat.toLowerCase().startsWith((keyPart ?? "").toLowerCase())
+                );
+            
+                const suggestions = filteredStats.map(stat => {
+                    const newInput = parts.length > 0
+                        ? parts.join(", ") + ", " + stat + "="
+                        : stat + "=";
+                
+                    return {
+                        name: newInput,
+                        value: newInput,
+                    };
+                });
+            
+                if (rawInput.trim() === "") {
+                    const allStats = possibleStats.map(stat => ({
+                        name: stat + "=",
+                        value: stat + "=",
+                }));
+                    await interaction.respond(allStats.slice(0, 25));
+                    return;
+                }
+
+                await interaction.respond(suggestions.slice(0, 25));       
+                return;
+            }
+            case "remove": {
+
+                // Search the DB using case-insensitive regex match
+                const matchingThings = await ItemModel.find({
+                    name: { $regex: new RegExp(rawInput, "i") }
+                })
+                    .sort({ name: 1 })
+                    .limit(25);
+            
+                const suggestions = matchingThings.map(item => ({
+                    name: item.name,
+                    value: item.name,
+                }));
+            
+                await interaction.respond(suggestions.slice(0, 25));  
+                return;
+            }
+            default:
+                return;
         }
-
-
-        let possibleStats = [
-            "strength",
-            "agility",
-            "charisma",
-            "magicka",
-            "stamina",
-            "defense",
-            "vitality",
-        ];
-
-        for (const part of parts) {
-            const cleanedPart = (part.split("=")[0] || "").replace(/[^a-z]/gi, "").toLowerCase();
-            possibleStats = possibleStats.filter(stat => stat.toLowerCase() !== cleanedPart);
-        }
-
-        const [keyPart, valuePart] = rawLast.split("=");
-
-        const filteredStats = possibleStats.filter(stat =>
-            stat.toLowerCase().startsWith((keyPart ?? "").toLowerCase())
-        );
-
-        const suggestions = filteredStats.map(stat => {
-            const newInput = parts.length > 0
-                ? parts.join(", ") + ", " + stat + "="
-                : stat + "=";
-
-            return {
-                name: newInput,
-                value: newInput,
-            };
-        });
-
-        if (rawInput.trim() === "") {
-            const allStats = possibleStats.map(stat => ({
-                name: stat + "=",
-                value: stat + "=",
-        }));
-            await interaction.respond(allStats.slice(0, 25));
-            return;
-        }
-
-        await interaction.respond(suggestions.slice(0, 25));
     }
 
 
@@ -163,6 +202,17 @@ export default class ItemCommand extends Command.Base {
                     content: `${interaction.user} added item name: '${nameOption}', tag: '${tagOption}', cost: ${costOption} gold, attr: '${attributesOption}'`,
                     flags: "Ephemeral",
                 });
+
+                break;
+            }
+            case "remove": {
+                const nameOption = interaction.options.get("name")?.value as string;
+
+                await ItemModel.findOneAndDelete({ name: nameOption });
+                interaction.reply({
+                    content: `${interaction.user} removed item '${nameOption}'`,
+                    flags: "Ephemeral",
+                })
 
                 break;
             }
