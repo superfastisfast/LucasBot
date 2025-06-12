@@ -36,8 +36,10 @@ export default class StatsCommand extends Command.Base {
             if (interaction.customId === interaction.user.id + attribute) {
                 await interaction.deferUpdate();
 
-                await user.upgradeSkill(attribute!.toLowerCase());
-                await user.addSkillPoints(-1);
+                await user
+                    .upgradeSkill(attribute!.toLowerCase())
+                    .addSkillPoints(-1)
+                    .save();
                 const replyMsg = await this.generateStatsResponse(
                     interaction.user,
                     true,

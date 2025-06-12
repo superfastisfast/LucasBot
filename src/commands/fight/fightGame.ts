@@ -51,8 +51,8 @@ export default class FightGame {
                 reason: "One or both users could not afford the bet",
             };
         }
-        appUser1.addGold(-this.bet);
-        appUser2.addGold(-this.bet);
+        await appUser1.addGold(-this.bet).save();
+        await appUser2.addGold(-this.bet).save();
 
         this.players[0] = await Fighter.create(
             dbCommandUser,
@@ -151,16 +151,16 @@ export default class FightGame {
         const user1 = await AppUser.createFromID(this.discordUsers[0]!.id);
         const user2 = await AppUser.createFromID(this.discordUsers[1]!.id);
         if (this.players[0]!.currentHealth <= 0) {
-            user2.addGold(winnerReward);
+            await user2.addGold(winnerReward).save();
         } else if (this.players[1]!.currentHealth <= 0) {
-            user1.addGold(winnerReward);
+            await user1.addGold(winnerReward).save();
         } else {
-            user2.addGold(this.bet);
-            user1.addGold(this.bet);
+            await user2.addGold(this.bet).save();
+            await user1.addGold(this.bet).save();
         }
         if (wasCompleted) {
-            user2.addXP(10);
-            user1.addXP(10);
+            await user2.addXP(10).save();
+            await user1.addXP(10).save();
         }
     }
 }

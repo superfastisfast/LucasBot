@@ -132,17 +132,17 @@ export default class DragonCampaignQuest extends Quest.Base {
                     if (reward[0] == "Skillpoints") {
                         for (const user of this.players) {
                             const appUser = await AppUser.createFromID(user.id);
-                            appUser.addSkillPoints(reward[1]);
+                            await appUser.addSkillPoints(reward[1]).save();
                         }
                     } else if (reward[0] == "XP") {
                         for (const user of this.players) {
                             const appUser = await AppUser.createFromID(user.id);
-                            appUser.addXP(reward[1]);
+                            await appUser.addXP(reward[1]).save();
                         }
                     } else if (reward[0] == "Gold") {
                         for (const user of this.players) {
                             const appUser = await AppUser.createFromID(user.id);
-                            appUser.addGold(reward[1]);
+                            await appUser.addGold(reward[1]).save();
                         }
                     }
                 }

@@ -32,9 +32,9 @@ export default class RandomCelebraion extends Quest.Base {
         const members = await guild.members.fetch();
 
         for (const user of members) {
-            await (
-                await AppUser.createFromID(user[1].id)
-            ).addGold(this.goldReward);
+            await (await AppUser.createFromID(user[1].id))
+                .addGold(this.goldReward)
+                .save();
         }
 
         let msg = await questChannel.send({

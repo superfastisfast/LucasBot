@@ -55,7 +55,7 @@ export default class SubscribedQuest extends Quest.Base {
             return;
         }
         this.players[team]!.push(interaction.user);
-        await User.addGold(-this.bet);
+        await User.addGold(-this.bet).save();
         const questMsg = await this.generateQuestBody();
         interaction.update(questMsg);
         return;
@@ -92,7 +92,7 @@ export default class SubscribedQuest extends Quest.Base {
             });
             for (const player of this.players[winningTeamNumber]!) {
                 const User = await AppUser.createFromID(player.id);
-                User.addGold(perPlayerReward);
+                await User.addGold(perPlayerReward).save();
             }
         }
 

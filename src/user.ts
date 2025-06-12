@@ -190,7 +190,7 @@ export class AppUser {
         await this.level(this.database.xp);
         await this.database.save();
         return this;
-    } 
+    }
 
     /////////////////////////////////////////////////////////
     ///                      OTHER                         //
@@ -278,8 +278,7 @@ export class AppUser {
         const level = calculateLevel(xp);
 
         if (level > this.database.level) {
-            await this.addSkillPoints(1);
-            await this.addGold(xp);
+            this.addSkillPoints(1).addGold(level);
             this.database.level = level;
             await levelChannel.send(`${this.discord} is now level ${level}!`);
         }

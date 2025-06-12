@@ -39,7 +39,7 @@ export default class MysteriousPackage extends Quest.Base {
             );
             if (item) {
                 const user = await AppUser.createFromID(interaction.user.id);
-                await user.equipItem(item);
+                await user.equipItem(item).save();
             }
             this.interactedPlayerId = interaction.user.id;
             return true;
@@ -56,7 +56,7 @@ export default class MysteriousPackage extends Quest.Base {
                 flags: "Ephemeral",
             });
             const user = await AppUser.createFromID(interaction.user.id);
-            user.addGold(50);
+            await user.addGold(50).save();
             this.interactedPlayerId = interaction.user.id;
             return true;
         } else if (
@@ -71,7 +71,7 @@ export default class MysteriousPackage extends Quest.Base {
                 flags: "Ephemeral",
             });
             const user = await AppUser.createFromID(interaction.user.id);
-            user.addGold(50);
+            await user.addGold(50).save();
             this.interactedPlayerId = interaction.user.id;
             return true;
         }

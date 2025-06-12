@@ -39,7 +39,7 @@ export default class SubscribedQuest extends Quest.Base {
             );
             this.interactedPlayerIds.push(interaction.user.id);
             const user = await AppUser.createFromID(interaction.user.id);
-            user.addXP(this.xpAmount);
+            await user.addXP(this.xpAmount).save();
             return true;
         } else if (
             interaction.customId === `#${this.generateUniqueButtonID()}_no`

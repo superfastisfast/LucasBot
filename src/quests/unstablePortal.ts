@@ -76,7 +76,7 @@ export default class UnstablePortalQuest extends Quest.Base {
                 flags: "Ephemeral",
             });
             const user = await AppUser.createFromID(interaction.user.id);
-            user.addGold(this.goldReward);
+            await user.addGold(this.goldReward).save();
             return true;
         }
 
@@ -95,7 +95,7 @@ export default class UnstablePortalQuest extends Quest.Base {
         const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
                 .setCustomId(`#${this.generateUniqueButtonID()}_enter`)
-                .setLabel("Try to enter the portal? (???)")
+                .setLabel("Try to enter the portal?")
                 .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
                 .setCustomId(`#${this.generateUniqueButtonID()}_destroy`)
