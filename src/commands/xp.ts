@@ -125,7 +125,7 @@ export default class XpCommand extends Command.Base {
                 const amount = interaction.options.get("amount")
                     ?.value as number;
 
-                target.addXP(amount);
+                await target.addXP(amount).save();
                 interaction.reply({
                     content: `${interaction.user} added ${amount} XP to ${target.discord}, new total is ${target.database.xp}`,
                     flags: "Ephemeral",
@@ -139,7 +139,7 @@ export default class XpCommand extends Command.Base {
                 const amount = interaction.options.get("amount")
                     ?.value as number;
 
-                target.setXP(amount);
+                await target.setXP(amount).save();
                 interaction.reply({
                     content: `${interaction.user} set ${target.discord}'s XP to ${amount}`,
                     flags: "Ephemeral",
