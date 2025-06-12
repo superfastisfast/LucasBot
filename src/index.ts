@@ -3,7 +3,6 @@ import { Service } from "@/service";
 import { Client, GatewayIntentBits, Partials, Events } from "discord.js";
 import mongoose from "mongoose";
 import { Quest } from "./quest";
-import { NewQuest } from "./new_quest";
 
 export const client = new Client({
     intents: [
@@ -29,8 +28,7 @@ client.once(Events.ClientReady, async (readyClient) => {
         await Service.load(client);
         await Service.start(client);
         await Command.register(client);
-        await Quest.loadQuests();
-        await NewQuest.load();
+        await Quest.load();
     })();
 
     setInterval(
@@ -48,7 +46,6 @@ client.once(Events.ClientReady, async (readyClient) => {
             await Command.handleAutocompleteInteraction(client, interaction);
         } else if (interaction.isButton()) {
             await Command.handleButtonInteraction(client, interaction);
-            await Quest.handleButtonInteraction(client, interaction);
         }
     });
 

@@ -1,67 +1,35 @@
-import type { ButtonInteraction, Client, EmbedFooterOptions } from "discord.js";
+import type { Client, TextChannel } from "discord.js";
+import type { AppButton } from "./button";
 
 export namespace Quest {
-    export interface Data {
-        title: string;
-        imageUrl: string;
-        description: string;
-    }
-
     export abstract class Base {
-        public async onButtonInteract(
-            client: Client,
-            interaction: ButtonInteraction,
-        ): Promise<boolean> {
-            return false;
-        }
-        public abstract startQuest(client: Client): Promise<void>;
-        public fileName = "";
-        public abstract questData: Data;
-        public footerText: EmbedFooterOptions = { text: "" };
+        public globalID: number = 0;
         public endDate: Date = new Date();
+        public timerMS: number = 1000 * 60 * 10;
+
+        public abstract buttons: Map<string, AppButton>;
+
+        public get info(): any {
+            return undefined;
+        }
+        public async start(client: Client): Promise<void> {}
+
+        public generateEndDate() {
+            const currentTimestamp = new Date().getTime();
+            const newTimestamp = currentTimestamp + this.timerMS;
+            this.endDate = new Date(newTimestamp);
+        }
         public isQuestActive(): boolean {
             return (
                 this.endDate !== undefined &&
                 this.endDate.getTime() > new Date().getTime()
             );
         }
-        public generateEndDate(offSetTimeMilliseconds: number) {
-            const currentTimestamp = new Date().getTime();
-            const newTimestamp = currentTimestamp + offSetTimeMilliseconds;
-            this.endDate = new Date(newTimestamp);
-        }
-
-        public generateFooter() {
-            this.footerText = {
-                text:
-                    "Quest Started: " +
-                    new Date().toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: false,
-                        timeZoneName: "shortOffset",
-                    }) +
-                    "\nQuest Ends: " +
-                    this.endDate?.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: false,
-                        timeZoneName: "shortOffset",
-                    }),
-            };
-        }
-
-        public getQuestData(): Quest.Data {
-            return this.questData;
-        }
-        public generateUniqueButtonID(): string {
-            return `${this.fileName}_${this.endDate}`;
-        }
     }
 
-    export const quests: Map<string, Quest.Base> = new Map();
+    export const quests: Map<string, Base> = new Map();
 
-    export async function loadQuests() {
+    export async function load() {
         const glob = new Bun.Glob("src/quests/*.ts");
         console.log(`Registered quests:`);
 
@@ -71,53 +39,46 @@ export namespace Quest {
             const { default: QuestClass } = await import(
                 path.replace("src/quests/", "./quests/")
             );
-            const quest: Quest.Base = new QuestClass();
+            const quest: Base = new QuestClass();
 
-            quest.fileName = path.split("/").pop()?.replace(".ts", "")!;
+            const name = path.split("/").pop()?.replace(".ts", "")!;
 
-            Quest.quests.set(quest.fileName, quest);
-            console.log(`\t${quest.fileName}`);
+            console.log(`\t${name}`);
+            quests.set(name, quest);
         }
     }
+
+    export async function start(client: Client, name: string) {
+        try {
+            const quest = await quests.get(name);
+            if (!quest) throw undefined;
+
+            quest.generateEndDate();
+            quest.start(client);
+
+        } catch (error) {
+            console.error(`Failed to start quest: ${name}`, error)
+        }
+    }
+
+    export async function getChannel(client: Client): Promise<TextChannel> {
+        if (!process.env.QUEST_CHANNEL_ID)
+            throw new Error("QUEST_CHANNEL_ID is not defined in .env");
+        return (await client.channels.fetch(
+            process.env.QUEST_CHANNEL_ID,
+        )) as TextChannel;
+    }
+
     export function generateRadomQuest(client: Client) {
-        const quests: Quest.Base[] = Quest.getQuests();
-        const firstIndex = Math.floor(Math.random() * quests.length);
-        for (let index = 0; index < quests.length; index++) {
-            let quest = quests[(firstIndex + index) % quests.length];
+        const arr = Array.from(quests);
+        const firstIndex = Math.floor(Math.random() * arr.length);
+        for (let index = 0; index < arr.length; index++) {
+            let quest = arr[(firstIndex + index) % arr.length];
             console.log("index: " + index);
-            if (quest && quest.isQuestActive() === false) {
-                quest.startQuest(client);
+            if (quest && quest[1].isQuestActive() === false) {
+                start(client, quest[0])
                 return;
             }
         }
-    }
-
-    export async function handleButtonInteraction(
-        client: Client,
-        interaction: any,
-    ) {
-        for (const quest of await Quest.getQuests()) {
-            try {
-                if (quest.isQuestActive() === false) continue;
-                if (await quest.onButtonInteract(client, interaction)) {
-                    return true;
-                }
-            } catch (err) {
-                console.error(
-                    `Error running button interaction for quest ${quest.fileName}:`,
-                    err,
-                );
-                return false;
-            }
-        }
-        return false;
-    }
-
-    export function getQuest(name: string): Quest.Base | undefined {
-        return Quest.quests.get(name);
-    }
-
-    export function getQuests(): Quest.Base[] {
-        return Array.from(Quest.quests.values());
     }
 }

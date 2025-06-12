@@ -6,7 +6,7 @@ import {
     type Interaction,
 } from "discord.js";
 
-export default class XpService extends Service.Base {
+export default class ButtonService extends Service.Base {
     override async start(client: Client): Promise<void> {
         client.on(Events.InteractionCreate, this.handleButton);
     }

@@ -1,5 +1,5 @@
 import { Command } from "@/command";
-import { NewQuest } from "@/new_quest";
+import { Quest } from "@/quest";
 import {
     AutocompleteInteraction,
     InteractionContextType,
@@ -31,7 +31,7 @@ export default class ExecuteQuestCommand extends Command.Base {
     ): Promise<void> {
         const focusedOption = interaction.options.getFocused(true).name;
         if (focusedOption == "class") {
-            const options = [...NewQuest.quests.keys()].map(q => ({
+            const options = Array.from(Quest.quests.keys()).map(q => ({
                 name: q,
                 value: q,
             }));
@@ -47,7 +47,7 @@ export default class ExecuteQuestCommand extends Command.Base {
     ): Promise<void> {
         const name = interaction.options.get("class", true).value as string;
     
-        const quest = NewQuest.quests.get(name);
+        const quest = Quest.quests.get(name);
     
         if (!quest) {
             await interaction.reply(`Quest class "${name}" not found.`);

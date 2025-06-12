@@ -1,8 +1,8 @@
 import type { Client, ButtonInteraction, TextChannel } from "discord.js";
-import { NewQuest } from "@/new_quest";
+import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 
-export default class TestQuest extends NewQuest.Base {
+export default class TestQuest extends Quest.Base {
     public override buttons: Map<string, AppButton> = new Map<string, AppButton>([
         ["Test", new AppButton("Test Label", this.onPressTest)],
     ]);
@@ -14,7 +14,7 @@ export default class TestQuest extends NewQuest.Base {
 
         const actionRow = AppButton.createActionRow(this.buttons, ["Test"])
 
-        const channel = await NewQuest.getChannel(client);
+        const channel = await Quest.getChannel(client);
 
         await channel.send({
             content: "Test!!!",
