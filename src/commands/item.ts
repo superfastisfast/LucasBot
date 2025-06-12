@@ -6,6 +6,7 @@ import {
     type CommandInteraction,
 } from "discord.js";
 import { ItemModel } from '../models/item';
+import { AutocompleteInteraction } from 'discord.js';
 
 
 
@@ -28,7 +29,6 @@ export default class ItemCommand extends Command.Base {
                       opt
                         .setName("tag")
                         .setDescription("The tag")
-                        .setRequired(true)
                         .addChoices(
                             { name: "Weapon", value: "weapon" },
                             { name: "Helmet", value: "helmet" },
@@ -36,23 +36,103 @@ export default class ItemCommand extends Command.Base {
                             { name: "Leggings", value: "leggings" },
                             { name: "Boots", value: "boots" },
                             { name: "Shield", value: "shield" },
-                        ),
+                        )
+                        .setRequired(true),
                     )
                     .addIntegerOption(opt =>
                         opt
                             .setName("cost")
-                            .setDescription("The item cost"),
+                            .setDescription("The item cost")
+                            .setRequired(true),
                     )
                     .addStringOption(opt =>
                         opt
                             .setName("attributes")
-                            .setDescription("Attributes"),
+                            .setDescription("Attributes")
+                            .setAutocomplete(true)
+                            .setRequired(true),
                     )
             )
             .setDefaultMemberPermissions(0n)
             .setContexts(InteractionContextType.Guild)
             .toJSON();
     }
+
+    override async executeAutoComplete(
+        client: Client,
+        interaction: AutocompleteInteraction,
+    ): Promise<void> {
+        const rawInput = interaction.options.getFocused().toString();
+
+        const parts = rawInput.split(",").map(p => p.trim());
+
+        const rawLast = parts.pop() ?? "";
+
+        // Checks if its a number
+        if (/\d$/.test(rawLast)) {
+            const prefix = parts.length > 0 ? parts.join(", ") + ", " : "";
+            const suggestionBase = prefix + rawLast;
+        
+            const suggestions = [
+                {
+                    name: suggestionBase + ",",
+                    value: suggestionBase + ",",
+                },
+                {
+                    name: suggestionBase + "%,",
+                    value: suggestionBase + "%,",
+                },
+            ];
+        
+            await interaction.respond(suggestions);
+            return;
+        }
+
+
+        let possibleStats = [
+            "strength",
+            "agility",
+            "charisma",
+            "magicka",
+            "stamina",
+            "defense",
+            "vitality",
+        ];
+
+        for (const part of parts) {
+            const cleanedPart = (part.split("=")[0] || "").replace(/[^a-z]/gi, "").toLowerCase();
+            possibleStats = possibleStats.filter(stat => stat.toLowerCase() !== cleanedPart);
+        }
+
+        const [keyPart, valuePart] = rawLast.split("=");
+
+        const filteredStats = possibleStats.filter(stat =>
+            stat.toLowerCase().startsWith((keyPart ?? "").toLowerCase())
+        );
+
+        const suggestions = filteredStats.map(stat => {
+            const newInput = parts.length > 0
+                ? parts.join(", ") + ", " + stat + "="
+                : stat + "=";
+
+            return {
+                name: newInput,
+                value: newInput,
+            };
+        });
+
+        if (rawInput.trim() === "") {
+            const allStats = possibleStats.map(stat => ({
+                name: stat + "=",
+                value: stat + "=",
+        }));
+            await interaction.respond(allStats.slice(0, 25));
+            return;
+        }
+
+        await interaction.respond(suggestions.slice(0, 25));
+    }
+
 
     override async executeCommand(
         client: Client,
