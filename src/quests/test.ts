@@ -18,7 +18,7 @@ export default class TestQuest extends Quest.Base {
 
         await channel.send({
             content: "Test!!!",
-            components: [actionRow],
+            components: actionRow,
         });
     }
 

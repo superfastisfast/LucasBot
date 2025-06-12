@@ -28,14 +28,24 @@ export class AppButton {
     static createActionRow(
         buttons: Map<string, AppButton>,
         selected: string[],
-    ): ActionRowBuilder<ButtonBuilder> {
+    ): ActionRowBuilder<ButtonBuilder>[] {
         const selectedButtons = selected
             .map(key => buttons.get(key))
             .filter((btn): btn is AppButton => btn !== undefined);
 
-        const components = selectedButtons.map(btn => btn.builder);
+        if (selectedButtons.length === 0) {
+            throw new Error(`You must select between 1 and 25 buttons. Got: ${selectedButtons.length}`);
+        }
 
-        return new ActionRowBuilder<ButtonBuilder>().addComponents(components);
+        const rows: ActionRowBuilder<ButtonBuilder>[] = [];
+        for (let i = 0; i < selectedButtons.length; i += 5) {
+            const chunk = selectedButtons.slice(i, i + 5);
+            const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+                ...chunk.map(btn => btn.builder)
+            );
+            rows.push(row);
+        }
+
+        return rows;
     }
-
 }
