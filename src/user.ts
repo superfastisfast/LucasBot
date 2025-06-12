@@ -143,7 +143,7 @@ export class AppUser {
     /////////////////////////////////////////////////////////
     ///                      HELPER                        //
     /////////////////////////////////////////////////////////
-    async setXP(amount: number): Promise<void> {
+    setXP(amount: number): AppUser {
         if (amount > 0 && this.database.timeouts > 0) {
             const maxTimeoutsForReduction = 20;
             const minTimeoutsForReduction = 1;
@@ -153,42 +153,49 @@ export class AppUser {
             reductionFactor = Math.max(0, Math.min(1, reductionFactor));
             amount = amount * (1 - reductionFactor);
         }
-        await this.level(amount);
         this.database.xp = Math.max(-100, amount);
-        await this.database.save();
+
+        return this;
     }
 
-    async addXP(amount: number): Promise<void> {
-        await this.setXP(this.database.xp + amount);
+    addXP(amount: number): AppUser {
+        return this.setXP(this.database.xp + amount);
     }
 
-    async setGold(amount: number): Promise<void> {
+    setGold(amount: number): AppUser {
         this.database.inventory.gold = Math.max(-1000, amount);
-        await this.database.save();
+
+        return this;
     }
 
-    async addGold(amount: number): Promise<void> {
-        await this.setGold(this.database.inventory.gold + amount);
+    addGold(amount: number): AppUser {
+        return this.setGold(this.database.inventory.gold + amount);
     }
 
-    async setSkillPoints(amount: number): Promise<void> {
+    setSkillPoints(amount: number): AppUser {
         this.database.skillPoints = amount;
-        await this.database.save();
+        return this;
     }
 
-    async addSkillPoints(amount: number): Promise<void> {
-        await this.setSkillPoints(this.database.skillPoints + amount);
+    addSkillPoints(amount: number): AppUser {
+        return this.setSkillPoints(this.database.skillPoints + amount);
     }
 
-    async upgradeSkill(attribute: string): Promise<void> {
+    upgradeSkill(attribute: string): AppUser {
         (this.database.stats as any)[attribute]++;
-        await this.database.save();
+        return this;
     }
+
+    async save(): Promise<AppUser> {
+        await this.level(this.database.xp);
+        await this.database.save();
+        return this;
+    } 
 
     /////////////////////////////////////////////////////////
     ///                      OTHER                         //
     /////////////////////////////////////////////////////////
-    async equipItem(item: ItemDocument) {
+    equipItem(item: ItemDocument): AppUser {
         const equipmentSlots: Array<keyof IInventory> = [
             "weapon",
             "helmet",
@@ -205,10 +212,11 @@ export class AppUser {
             );
 
         try {
-            await this.database.save();
         } catch (error) {
             throw new Error(`Error saving user inventory: ${error}`);
         }
+
+        return this;
     }
 
     async getItems(): Promise<ItemDocument[]> {
@@ -247,7 +255,7 @@ export class AppUser {
         return attributesArray;
     }
 
-    async getDisplayInfo() {
+    async getDisplayInfo(): Promise<any> {
         const itemsDisplay = Item.getStringCollection(await this.getItems());
         const attributesArray = AppUser.getDisplayStats(this.database.stats);
         return {
@@ -273,7 +281,6 @@ export class AppUser {
             await this.addSkillPoints(1);
             await this.addGold(xp);
             this.database.level = level;
-            await this.database.save();
             await levelChannel.send(`${this.discord} is now level ${level}!`);
         }
 
