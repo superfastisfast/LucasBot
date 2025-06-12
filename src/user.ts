@@ -44,16 +44,23 @@ export class AppUser {
         discordUser: User,
     ): Promise<UserDocument> {
         try {
-            let databaseUser = await UserModel.findOne({ id: discordUser.id });
-            if (
-                !databaseUser ||
-                databaseUser === null ||
-                databaseUser === undefined
-            ) {
-                databaseUser = await UserModel.create({
-                    id: discordUser.id as string,
-                    username: discordUser.username,
-                });
+            let databaseUser = await UserModel.findOneAndUpdate(
+                { id: discordUser.id },
+                {
+                    $setOnInsert: {
+                        id: discordUser.id as string,
+                        username: discordUser.username,
+                    },
+                },
+                {
+                    upsert: true,
+                    new: true,
+                },
+            );
+            if (!databaseUser) {
+                throw new Error(
+                    `Failed to retrieve or create database user for ID ${discordUser.id}`,
+                );
             }
             return databaseUser;
         } catch (error) {
