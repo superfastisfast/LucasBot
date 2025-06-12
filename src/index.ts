@@ -3,6 +3,7 @@ import { Service } from "@/service";
 import { Client, GatewayIntentBits, Partials, Events } from "discord.js";
 import mongoose from "mongoose";
 import { Quest } from "./quest";
+import { NewQuest } from "./new_quest";
 
 export const client = new Client({
     intents: [
@@ -29,6 +30,7 @@ client.once(Events.ClientReady, async (readyClient) => {
         await Service.start(client);
         await Command.register(client);
         await Quest.loadQuests();
+        await NewQuest.load();
     })();
 
     setInterval(
