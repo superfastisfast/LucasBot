@@ -26,15 +26,15 @@ export default class TimmyQuest extends Quest.Base {
         const user = await AppUser.createFromID(interaction.user.id);
 
         user.database.stats.strength -= 3;
-        user.save()
+        await user.save()
         interaction.reply({
             content: `You helped but you also lost 3 strengh`, 
             flags: 'Ephemeral',
         });
     }
 
-    private onPressDoNothing(interaction: ButtonInteraction): void {
-        interaction.reply({
+    private async onPressDoNothing(interaction: ButtonInteraction): Promise<void> {
+        await interaction.reply({
             content: `You decided to do nothing, you gain nothing...`,
             flags: 'Ephemeral',
         });
@@ -43,9 +43,9 @@ export default class TimmyQuest extends Quest.Base {
     private async onPressKill(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.createFromID(interaction.user.id);
 
-        user.addGold(100).save();
+        await user.addGold(100).save();
 
-        interaction.reply({
+        await interaction.reply({
             content: `Bastard, but you gain 100 gold`,
             flags: 'Ephemeral',
         });

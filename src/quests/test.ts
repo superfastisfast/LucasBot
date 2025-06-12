@@ -22,8 +22,11 @@ export default class TestQuest extends Quest.Base {
         });
     }
 
-    private onPressTest(interaction: ButtonInteraction): void {
+    private async onPressTest(interaction: ButtonInteraction): Promise<void> {
         this.amount += 0;
-        interaction.reply(`I HATE Typescript AND I AM STEBE - Lucas: ${this.amount}`);
+        await interaction.reply({
+            content: `I HATE Typescript AND I AM STEBE - Lucas: ${this.amount}`,
+            flags: 'Ephemeral',
+        });
     }
 }
