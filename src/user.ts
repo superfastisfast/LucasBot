@@ -40,10 +40,13 @@ export class AppUser {
         }
     }
 
+    //RACE CONDTION MAY OCCUR!
     private static async getDataBaseUser(
         discordUser: User,
     ): Promise<UserDocument> {
         try {
+            //Tried to fix it with this
+            // if both A and B proccess try to find and create user we wil have duplicated key
             let databaseUser = await UserModel.findOneAndUpdate(
                 { id: discordUser.id },
                 {
