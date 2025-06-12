@@ -31,12 +31,12 @@ export default class ExecuteQuestCommand extends Command.Base {
     ): Promise<void> {
         const focusedOption = interaction.options.getFocused(true).name;
         if (focusedOption == "class") {
-            interaction.respond(
-                await Quest.getQuests().map((q) => ({
-                    name: q.fileName,
-                    value: q.fileName,
-                })),
-            );
+            const options = Array.from(Quest.quests.keys()).map(q => ({
+                name: q,
+                value: q,
+            }));
+
+            await interaction.respond(options);
             return;
         }
     }
@@ -45,16 +45,16 @@ export default class ExecuteQuestCommand extends Command.Base {
         client: Client,
         interaction: CommandInteraction,
     ): Promise<void> {
-        const className = interaction.options.get("class", true)
-            .value as string;
-
-        const quest = Quest.getQuest(className);
+        const name = interaction.options.get("class", true).value as string;
+    
+        const quest = Quest.quests.get(name);
+    
         if (!quest) {
-            await interaction.reply(`Quest class "${className}" not found.`);
+            await interaction.reply(`Quest class "${name}" not found.`);
             return;
         }
-
-        await interaction.reply(`Executing quest: "${className}"`);
-        await quest.startQuest(client);
+    
+        await interaction.reply(`Executing quest: "${name}"`);
+        await quest.start(client);
     }
 }

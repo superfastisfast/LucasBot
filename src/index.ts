@@ -28,7 +28,7 @@ client.once(Events.ClientReady, async (readyClient) => {
         await Service.load(client);
         await Service.start(client);
         await Command.register(client);
-        await Quest.loadQuests();
+        await Quest.load();
     })();
 
     setInterval(
@@ -46,7 +46,6 @@ client.once(Events.ClientReady, async (readyClient) => {
             await Command.handleAutocompleteInteraction(client, interaction);
         } else if (interaction.isButton()) {
             await Command.handleButtonInteraction(client, interaction);
-            await Quest.handleButtonInteraction(client, interaction);
         }
     });
 
