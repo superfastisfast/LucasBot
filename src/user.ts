@@ -25,7 +25,7 @@ export class AppUser {
         this.database = databaseUser;
     }
 
-    static async createFromID(userId: string): Promise<AppUser> {
+    static async fromID(userId: string): Promise<AppUser> {
         try {
             const discordUser = await client.users.fetch(userId);
             const databaseUser = await AppUser.getDataBaseUser(discordUser);
@@ -207,14 +207,7 @@ export class AppUser {
         if (equipmentSlots.includes(item.tag as keyof IInventory))
             (this.database.inventory as any)[item.tag] = item.name;
         else
-            throw new Error(
-                `failed to applied ${item.name} to ${this.discord.username}'s ${item.tag} slot`,
-            );
-
-        try {
-        } catch (error) {
-            throw new Error(`Error saving user inventory: ${error}`);
-        }
+            console.warn(`Failed to applied ${item.name} to ${this.discord.username}'s ${item.tag} slot`);
 
         return this;
     }

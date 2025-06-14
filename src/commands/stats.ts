@@ -29,7 +29,7 @@ export default class StatsCommand extends Command.Base {
         client: Client,
         interaction: ButtonInteraction,
     ): Promise<boolean> {
-        const user = await AppUser.createFromID(interaction.user.id);
+        const user = await AppUser.fromID(interaction.user.id);
         const userInfo = await user.getDisplayInfo();
 
         for (const [icon, attribute, value] of userInfo.attributesArray) {
@@ -56,7 +56,7 @@ export default class StatsCommand extends Command.Base {
     }
 
     private async generateStatsResponse(user: User, isMainUser: boolean) {
-        const appUser = await AppUser.createFromID(user.id);
+        const appUser = await AppUser.fromID(user.id);
         const userInfo = await appUser.getDisplayInfo();
 
         let attributeString = "";

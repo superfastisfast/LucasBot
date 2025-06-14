@@ -1,6 +1,6 @@
 import { Command } from "@/command";
 import { Item, type ItemDocument } from "@/models/item";
-import ShopService from "@/services/shopService";
+import ShopService from "@/services/shop";
 import { AppUser } from "@/user";
 import {
     ActionRowBuilder,
@@ -29,7 +29,7 @@ export default class ShopCommand extends Command.Base {
         for (const item of availableItems) {
             if (interaction.customId === interaction.user.id + item.name) {
                 await interaction.deferUpdate();
-                const user = await AppUser.createFromID(interaction.user.id);
+                const user = await AppUser.fromID(interaction.user.id);
                 let responseMsg = `**You need more money!**`;
                 if (user.database.inventory.gold >= item.cost) {
                     responseMsg = `**You bought and equipped ${item.name}.**`;
@@ -92,7 +92,7 @@ export default class ShopCommand extends Command.Base {
         client: Client,
         interaction: CommandInteraction,
     ): Promise<void> {
-        const user = await AppUser.createFromID(interaction.user.id);
+        const user = await AppUser.fromID(interaction.user.id);
         const validItems = await ShopService.getActiveShopItems();
 
         const shopInfo = this.generateShopDisplay(user, validItems);

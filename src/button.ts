@@ -20,11 +20,6 @@ export class AppButton {
         AppButton.buttons.set(this.id, this);
     }
 
-    reset() {
-        const randomId = Math.random()
-        this.id = `#${randomId.toString()}`;
-    }
-
     static createActionRow(
         buttons: Map<string, AppButton>,
         selected: string[],

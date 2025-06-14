@@ -68,7 +68,7 @@ export default class GoldCommand extends Command.Base {
         interaction: CommandInteraction<any>,
     ): Promise<void> {
         const sub = interaction.options.getSubcommand();
-        const target = await AppUser.createFromID(
+        const target = await AppUser.fromID(
             (interaction.options.get("target")?.user || interaction.user).id,
         );
 

@@ -76,7 +76,7 @@ export default class XpService extends Service.Base {
 
     private async rewardXp(user: User | PartialUser, xp: number) {
         if (!user) return; //TODO: valid solution right?
-        const appUser = await AppUser.createFromID(user.id);
+        const appUser = await AppUser.fromID(user.id);
         const currentTime = new Date();
         const timeDifferenceMs =
             currentTime.getTime() - appUser.database.lastXpMessageAt.getTime();

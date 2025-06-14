@@ -1,6 +1,6 @@
 import { Command } from "@/command";
 import { Service } from "@/service";
-import { Client, GatewayIntentBits, Partials, Events } from "discord.js";
+import { Client, GatewayIntentBits, Partials, Events, REST, Routes } from "discord.js";
 import mongoose from "mongoose";
 import { Quest } from "./quest";
 
@@ -16,6 +16,14 @@ export const client = new Client({
 });
 
 client.once(Events.ClientReady, async (readyClient) => {
+    // Clear command cache
+    // const rest = new REST({ version: "9" }).setToken(process.env.BOT_TOKEN || "undefined")
+
+    // rest.put(Routes.applicationCommands(client.user?.id || "undefined"), { body: [] })
+    // 	.then(() => console.log('Successfully deleted all application commands.'))
+    // 	.catch(console.error);
+
+
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 
     console.log("Connecting to MongoDB...");
@@ -30,14 +38,6 @@ client.once(Events.ClientReady, async (readyClient) => {
         await Command.register(client);
         await Quest.load();
     })();
-
-    setInterval(
-        () => {
-            Quest.generateRadomQuest(client);
-        },
-        1000 * 60 * 30,
-        // 1000,
-    );
 
     client.on(Events.InteractionCreate, async (interaction) => {
         if (interaction.isCommand()) {
