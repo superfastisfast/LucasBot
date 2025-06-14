@@ -1,11 +1,6 @@
 import { Command } from "@/command";
 import { AppUser } from "@/user";
-import {
-    SlashCommandBuilder,
-    InteractionContextType,
-    type Client,
-    type CommandInteraction,
-} from "discord.js";
+import { SlashCommandBuilder, InteractionContextType, type Client, type CommandInteraction } from "discord.js";
 
 export default class XpCommand extends Command.Base {
     override get info(): any {
@@ -17,16 +12,10 @@ export default class XpCommand extends Command.Base {
                     .setName("give")
                     .setDescription("Gives a role to a user")
                     .addUserOption((opt) =>
-                        opt
-                            .setName("target")
-                            .setDescription("User to give role to")
-                            .setRequired(true),
+                        opt.setName("target").setDescription("User to give role to").setRequired(true),
                     )
                     .addRoleOption((opt) =>
-                        opt
-                            .setName("role")
-                            .setDescription("The role you want to be given")
-                            .setRequired(true),
+                        opt.setName("role").setDescription("The role you want to be given").setRequired(true),
                     ),
             )
             .addSubcommand((sub) =>
@@ -34,16 +23,10 @@ export default class XpCommand extends Command.Base {
                     .setName("remove")
                     .setDescription("Remove a role of a user")
                     .addUserOption((opt) =>
-                        opt
-                            .setName("target")
-                            .setDescription("User to remove role frome")
-                            .setRequired(true),
+                        opt.setName("target").setDescription("User to remove role frome").setRequired(true),
                     )
                     .addRoleOption((opt) =>
-                        opt
-                            .setName("role")
-                            .setDescription("The role you want to be removed")
-                            .setRequired(true),
+                        opt.setName("role").setDescription("The role you want to be removed").setRequired(true),
                     ),
             )
             .setDefaultMemberPermissions(0n)
@@ -51,11 +34,8 @@ export default class XpCommand extends Command.Base {
             .toJSON();
     }
 
-    override async executeCommand(
-        client: Client,
-        interaction: CommandInteraction<any>,
-    ): Promise<void> {
-        const sub = interaction.options.getSubcommand();
+    override async executeCommand(client: Client, interaction: CommandInteraction<any>): Promise<void> {
+        const sub = (interaction.options as any).getSubcommand();
         const target = await AppUser.fromID((interaction.options.get("target")?.user || interaction.user).id);
         const role = interaction.options.get("role")?.role || "everyone";
 
@@ -91,7 +71,7 @@ export default class XpCommand extends Command.Base {
                     content: `${interaction.user} removed role ${role.toString()} from ${target.discord}`,
                     flags: "Ephemeral",
                 });
-                
+
                 break;
             }
             default:

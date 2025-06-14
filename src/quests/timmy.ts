@@ -10,7 +10,7 @@ export default class TimmyQuest extends Quest.Base {
     ]);
 
     public override async start(): Promise<Message<true>> {
-        const actionRow = AppButton.createActionRow(this.buttons, ["Help", "Kill"])
+        const actionRow = AppButton.createActionRow(this.buttons, ["Help", "Kill"]);
 
         return await Quest.channel.send({
             content: "You walk in the woods and find a boy called Timmy, he askes you for help. What do you do?",
@@ -22,10 +22,10 @@ export default class TimmyQuest extends Quest.Base {
         const user = await AppUser.fromID(interaction.user.id);
 
         user.database.stats.strength -= 3;
-        await user.save()
+        await user.save();
         interaction.reply({
-            content: `You helped but you also lost 3 strengh`, 
-            flags: 'Ephemeral',
+            content: `You helped but you also lost 3 strengh`,
+            flags: "Ephemeral",
         });
     }
 
@@ -36,7 +36,7 @@ export default class TimmyQuest extends Quest.Base {
 
         await interaction.reply({
             content: `Bastard, but you gain 100 gold`,
-            flags: 'Ephemeral',
+            flags: "Ephemeral",
         });
     }
 }

@@ -1,14 +1,9 @@
-import {
-    Client,
-    Events,
-    GuildMember,
-    type PartialGuildMember,
-} from "discord.js";
+import { Client, Events, GuildMember, type PartialGuildMember } from "discord.js";
 import { UserModel } from "@/models/user";
 import { Service } from "@/service";
 
 export default class TimeoutService extends Service.Base {
-    override async  start(client: Client): Promise<void> {
+    override async start(client: Client): Promise<void> {
         client.on(Events.GuildMemberUpdate, this.handleGuildMemberUpdate);
     }
 
@@ -20,10 +15,7 @@ export default class TimeoutService extends Service.Base {
         oldMember: GuildMember | PartialGuildMember,
         newMember: GuildMember,
     ): Promise<void> => {
-        if (
-            !oldMember.communicationDisabledUntil &&
-            newMember.communicationDisabledUntil
-        ) {
+        if (!oldMember.communicationDisabledUntil && newMember.communicationDisabledUntil) {
             try {
                 const dbUser = await UserModel.findOneAndUpdate(
                     { id: newMember.id },
@@ -34,10 +26,7 @@ export default class TimeoutService extends Service.Base {
                     `User ${newMember.displayName} (${newMember.id}) timeout count updated to ${dbUser.timeouts}.`,
                 );
             } catch (err) {
-                console.error(
-                    err,
-                    `Failed to update timeout for user ${newMember.id}`,
-                );
+                console.error(err, `Failed to update timeout for user ${newMember.id}`);
             }
         }
     };

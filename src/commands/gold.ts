@@ -1,11 +1,5 @@
 import { Command } from "@/command";
-import {
-    InteractionContextType,
-    SlashCommandBuilder,
-    User,
-    type Client,
-    type CommandInteraction,
-} from "discord.js";
+import { InteractionContextType, SlashCommandBuilder, User, type Client, type CommandInteraction } from "discord.js";
 import { AppUser } from "@/user";
 
 export default class GoldCommand extends Command.Base {
@@ -18,10 +12,7 @@ export default class GoldCommand extends Command.Base {
                     .setName("view")
                     .setDescription("View how much gold a user has")
                     .addUserOption((opt) =>
-                        opt
-                            .setName("target")
-                            .setDescription("Users gold that gets viewed")
-                            .setRequired(true),
+                        opt.setName("target").setDescription("Users gold that gets viewed").setRequired(true),
                     ),
             )
             .addSubcommand((sub) =>
@@ -29,16 +20,10 @@ export default class GoldCommand extends Command.Base {
                     .setName("add")
                     .setDescription("Add gold to a user")
                     .addUserOption((opt) =>
-                        opt
-                            .setName("target")
-                            .setDescription("User to give gold to")
-                            .setRequired(true),
+                        opt.setName("target").setDescription("User to give gold to").setRequired(true),
                     )
                     .addIntegerOption((opt) =>
-                        opt
-                            .setName("amount")
-                            .setDescription("Amount of gold")
-                            .setRequired(true),
+                        opt.setName("amount").setDescription("Amount of gold").setRequired(true),
                     ),
             )
             .addSubcommand((sub) =>
@@ -46,16 +31,10 @@ export default class GoldCommand extends Command.Base {
                     .setName("set")
                     .setDescription("Set a users gold to a value")
                     .addUserOption((opt) =>
-                        opt
-                            .setName("target")
-                            .setDescription("User to set gold to")
-                            .setRequired(true),
+                        opt.setName("target").setDescription("User to set gold to").setRequired(true),
                     )
                     .addIntegerOption((opt) =>
-                        opt
-                            .setName("amount")
-                            .setDescription("Amount of gold")
-                            .setRequired(true),
+                        opt.setName("amount").setDescription("Amount of gold").setRequired(true),
                     ),
             )
             .setDefaultMemberPermissions(0n)
@@ -63,27 +42,19 @@ export default class GoldCommand extends Command.Base {
             .toJSON();
     }
 
-    override async executeCommand(
-        client: Client,
-        interaction: CommandInteraction<any>,
-    ): Promise<void> {
-        const sub = interaction.options.getSubcommand();
-        const target = await AppUser.fromID(
-            (interaction.options.get("target")?.user || interaction.user).id,
-        );
+    override async executeCommand(client: Client, interaction: CommandInteraction<any>): Promise<void> {
+        const sub = (interaction.options as any).getSubcommand();
+        const target = await AppUser.fromID((interaction.options.get("target")?.user || interaction.user).id);
 
         switch (sub) {
             case "view": {
-                interaction.reply(
-                    `${target.discord} has ${target.database.inventory.gold || "no"} gold`,
-                );
+                interaction.reply(`${target.discord} has ${target.database.inventory.gold || "no"} gold`);
                 break;
             }
             case "add": {
                 if (!interaction.memberPermissions?.has("Administrator")) break;
 
-                const amount = interaction.options.get("amount")
-                    ?.value as number;
+                const amount = interaction.options.get("amount")?.value as number;
 
                 await target.addGold(amount).save();
                 interaction.reply({
@@ -96,8 +67,7 @@ export default class GoldCommand extends Command.Base {
             case "set": {
                 if (!interaction.memberPermissions?.has("Administrator")) break;
 
-                const amount = interaction.options.get("amount")
-                    ?.value as number;
+                const amount = interaction.options.get("amount")?.value as number;
 
                 await target.setGold(amount).save();
                 interaction.reply({

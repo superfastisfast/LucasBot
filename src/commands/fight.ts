@@ -30,17 +30,12 @@ export default class FightCommand extends Command.Base {
             .setName("fight")
             .setDescription("fight a player")
             .addUserOption((option) =>
-                option
-                    .setName("opponent")
-                    .setDescription("The opponent to fight")
-                    .setRequired(true),
+                option.setName("opponent").setDescription("The opponent to fight").setRequired(true),
             )
             .addNumberOption((option) =>
                 option
                     .setName("bet")
-                    .setDescription(
-                        "how much money to bet (both players must be able to afford)",
-                    )
+                    .setDescription("how much money to bet (both players must be able to afford)")
                     .setMinValue(0)
                     .setMaxValue(100)
                     .setRequired(true),
@@ -57,13 +52,8 @@ export default class FightCommand extends Command.Base {
         return undefined;
     }
 
-    public override async onButtonInteract(
-        client: Client,
-        interaction: ButtonInteraction,
-    ): Promise<boolean> {
-        let currentGame: FightGame | undefined = this.isUserPartOfFight(
-            interaction.user.id,
-        );
+    public override async onButtonInteract(client: Client, interaction: ButtonInteraction): Promise<boolean> {
+        let currentGame: FightGame | undefined = this.isUserPartOfFight(interaction.user.id);
         if (currentGame === undefined) {
             return false;
         }
@@ -82,28 +72,13 @@ export default class FightCommand extends Command.Base {
         if (currentGame.isValidCombatMovement(interaction.user.id)) {
             if (interaction.customId === currentGame.id + "#moveLeft") {
                 currentGame.movePlayer("left");
-                interaction.editReply(
-                    await this.getFightDisplayOptions(
-                        "Moved left",
-                        currentGame,
-                    ),
-                );
+                interaction.editReply(await this.getFightDisplayOptions("Moved left", currentGame));
             } else if (interaction.customId === currentGame.id + "#moveRight") {
                 currentGame.movePlayer("right");
-                interaction.editReply(
-                    await this.getFightDisplayOptions(
-                        "Moved right",
-                        currentGame,
-                    ),
-                );
+                interaction.editReply(await this.getFightDisplayOptions("Moved right", currentGame));
             } else if (interaction.customId === currentGame.id + "#attack") {
                 const actionInfo: string = currentGame.playerAttack();
-                interaction.editReply(
-                    await this.getFightDisplayOptions(
-                        "Attacked\n" + actionInfo,
-                        currentGame,
-                    ),
-                );
+                interaction.editReply(await this.getFightDisplayOptions("Attacked\n" + actionInfo, currentGame));
                 if (currentGame.getNextPlayer().currentHealth <= 0) {
                     currentGame.gameOver(true);
                     this.games.delete(currentGame.id);
@@ -127,12 +102,7 @@ export default class FightCommand extends Command.Base {
                 }
             } else if (interaction.customId === currentGame.id + "#sleep") {
                 const manaAndHealthGainedMsg = currentGame.playerSleep();
-                interaction.editReply(
-                    await this.getFightDisplayOptions(
-                        manaAndHealthGainedMsg,
-                        currentGame,
-                    ),
-                );
+                interaction.editReply(await this.getFightDisplayOptions(manaAndHealthGainedMsg, currentGame));
             }
 
             currentGame.nextTurn();
@@ -142,12 +112,7 @@ export default class FightCommand extends Command.Base {
             if (interaction.customId === currentGame.id + "#acceptFight") {
                 const res = await currentGame.initGame(interaction.user.id);
                 if (res.success) {
-                    await interaction.editReply(
-                        await this.getFightDisplayOptions(
-                            res.reason,
-                            currentGame,
-                        ),
-                    );
+                    await interaction.editReply(await this.getFightDisplayOptions(res.reason, currentGame));
                     currentGame.nextTurn();
                 } else {
                     interaction.followUp({
@@ -157,10 +122,7 @@ export default class FightCommand extends Command.Base {
                     });
                     return true;
                 }
-            } else if (
-                interaction.customId ===
-                currentGame.id + "#declineFight"
-            ) {
+            } else if (interaction.customId === currentGame.id + "#declineFight") {
                 interaction.editReply({
                     content: `The fight was cancelled by ${interaction.user.username}.`,
                     components: [],
@@ -173,11 +135,7 @@ export default class FightCommand extends Command.Base {
         return false;
     }
 
-    getPlayerDisplay(
-        player: Fighter,
-        healthbar: string,
-        manaBar: string,
-    ): PlayerDisplay {
+    getPlayerDisplay(player: Fighter, healthbar: string, manaBar: string): PlayerDisplay {
         const itemsDisplay = Item.getStringCollection(player.items);
 
         return {
@@ -213,10 +171,7 @@ export default class FightCommand extends Command.Base {
         return `${current.toFixed(2)}/${max.toFixed(2)}\`\`\`ansi\n[2;${filledColorCode}m${filledBar}[0m[2;37m${emptyBar}[0m\n\`\`\` `;
     }
 
-    private async getFightDisplayOptions(
-        action: string,
-        currentGame: FightGame,
-    ): Promise<InteractionUpdateOptions> {
+    private async getFightDisplayOptions(action: string, currentGame: FightGame): Promise<InteractionUpdateOptions> {
         const currentPlayer = currentGame.getCurrentPlayer();
         const nextPlayer = currentGame.getNextPlayer();
         const player1 = currentGame.getPlayers()[0]!;
@@ -245,16 +200,8 @@ export default class FightCommand extends Command.Base {
             player2.getMaxManaStats(),
             "34",
         );
-        const player1DisplayStats = this.getPlayerDisplay(
-            player1,
-            player1HealthBar,
-            player1ManaBar,
-        );
-        const player2DisplayStats = this.getPlayerDisplay(
-            player2,
-            player2HealthBar,
-            player2ManaBar,
-        );
+        const player1DisplayStats = this.getPlayerDisplay(player1, player1HealthBar, player1ManaBar);
+        const player2DisplayStats = this.getPlayerDisplay(player2, player2HealthBar, player2ManaBar);
         const fieldImageAttachment = await getFieldImage(currentGame);
         const builder = new EmbedBuilder()
             .setColor(0x0099ff)
@@ -318,12 +265,8 @@ export default class FightCommand extends Command.Base {
 
     private InitiateFight(user1: User, user2: User, game: FightGame) {
         const builder = new EmbedBuilder()
-            .setTitle(
-                `:crossed_swords: ${user1?.displayName} -VS- ${user2?.displayName} :crossed_swords:`,
-            )
-            .setDescription(
-                `:moneybag:**Bet: ${game.bet}**\n${user2} do you accept the fight?`,
-            )
+            .setTitle(`:crossed_swords: ${user1?.displayName} -VS- ${user2?.displayName} :crossed_swords:`)
+            .setDescription(`:moneybag:**Bet: ${game.bet}**\n${user2} do you accept the fight?`)
             .setTimestamp();
         const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
@@ -341,10 +284,7 @@ export default class FightCommand extends Command.Base {
         };
     }
 
-    override async executeCommand(
-        client: Client,
-        interaction: CommandInteraction,
-    ): Promise<void> {
+    override async executeCommand(client: Client, interaction: CommandInteraction): Promise<void> {
         if (interaction.user === interaction.options.get("opponent")?.user) {
             interaction.reply({
                 content: "You cannot fight yourself!",
@@ -353,8 +293,7 @@ export default class FightCommand extends Command.Base {
             return;
         }
 
-        const otherUser =
-            interaction.options.get("opponent")?.user || interaction.user;
+        const otherUser = interaction.options.get("opponent")?.user || interaction.user;
         if (this.isUserPartOfFight(interaction.user.id) !== undefined) {
             interaction.reply({
                 content: "You are already in a fight!",

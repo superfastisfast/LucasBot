@@ -13,9 +13,7 @@ export namespace Service {
         console.log(`Loaded services:`);
 
         for (const path of glob.scanSync(".")) {
-            const { default: ServiceClass } = await import(
-                path.replace("./src/", "./")
-            );
+            const { default: ServiceClass } = await import(path.replace("./src/", "./"));
             const instance: Base = new ServiceClass();
             services.push(instance);
             console.log(`\t${instance.constructor.name.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase()}`);

@@ -17,18 +17,11 @@ export default class StatsCommand extends Command.Base {
         return new SlashCommandBuilder()
             .setName("stats")
             .setDescription("display your stats")
-            .addUserOption((option) =>
-                option
-                    .setName("user")
-                    .setDescription("who do you wanna stalk?"),
-            )
+            .addUserOption((option) => option.setName("user").setDescription("who do you wanna stalk?"))
             .toJSON();
     }
 
-    public override async onButtonInteract(
-        client: Client,
-        interaction: ButtonInteraction,
-    ): Promise<boolean> {
+    public override async onButtonInteract(client: Client, interaction: ButtonInteraction): Promise<boolean> {
         const user = await AppUser.fromID(interaction.user.id);
         const userInfo = await user.getDisplayInfo();
 
@@ -36,14 +29,8 @@ export default class StatsCommand extends Command.Base {
             if (interaction.customId === interaction.user.id + attribute) {
                 await interaction.deferUpdate();
 
-                await user
-                    .upgradeSkill(attribute!.toLowerCase())
-                    .addSkillPoints(-1)
-                    .save();
-                const replyMsg = await this.generateStatsResponse(
-                    interaction.user,
-                    true,
-                );
+                await user.upgradeSkill(attribute!.toLowerCase()).addSkillPoints(-1).save();
+                const replyMsg = await this.generateStatsResponse(interaction.user, true);
                 interaction.editReply({
                     content: `You upgraded: **${attribute!.toUpperCase()}**`,
                     embeds: replyMsg.embed,
@@ -91,9 +78,7 @@ export default class StatsCommand extends Command.Base {
             inline: false,
         });
 
-        const userStatsEmbed = new EmbedBuilder()
-            .setTitle(`${appUser.discord.username}'s`)
-            .addFields(statFields);
+        const userStatsEmbed = new EmbedBuilder().setTitle(`${appUser.discord.username}'s`).addFields(statFields);
 
         const actionRows: ActionRowBuilder<ButtonBuilder>[] = [];
         let currentActionRow = new ActionRowBuilder<ButtonBuilder>();
@@ -129,23 +114,11 @@ export default class StatsCommand extends Command.Base {
         return { embed: [userStatsEmbed], components: actionRows };
     }
 
-    override async executeCommand(
-        client: Client,
-        interaction: CommandInteraction,
-    ): Promise<void> {
+    override async executeCommand(client: Client, interaction: CommandInteraction): Promise<void> {
         await interaction.deferReply({ flags: "Ephemeral" });
         let user = interaction.options.get("user")?.user;
-        user =
-            user &&
-            user !== null &&
-            user !== undefined &&
-            user.id !== interaction.user.id
-                ? user
-                : interaction.user;
-        const replyMsg = await this.generateStatsResponse(
-            user,
-            user === interaction.user,
-        );
+        user = user && user !== null && user !== undefined && user.id !== interaction.user.id ? user : interaction.user;
+        const replyMsg = await this.generateStatsResponse(user, user === interaction.user);
         await interaction.editReply({
             embeds: replyMsg.embed,
             components: replyMsg.components,

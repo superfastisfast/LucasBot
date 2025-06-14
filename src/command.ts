@@ -1,30 +1,16 @@
-import type {
-    AutocompleteInteraction,
-    ButtonInteraction,
-    Client,
-    CommandInteraction,
-} from "discord.js";
+import type { AutocompleteInteraction, ButtonInteraction, Client, CommandInteraction } from "discord.js";
 import { UserModel } from "./models/user";
 
 export namespace Command {
     export abstract class Base {
         abstract get info(): any;
-        public async onButtonInteract(
-            client: Client,
-            interaction: ButtonInteraction,
-        ): Promise<boolean> {
+        public async onButtonInteract(client: Client, interaction: ButtonInteraction): Promise<boolean> {
             return false;
         }
-        async executeAutoComplete(
-            client: Client,
-            interaction: AutocompleteInteraction,
-        ): Promise<void> {
+        async executeAutoComplete(client: Client, interaction: AutocompleteInteraction): Promise<void> {
             interaction.respond([]);
         }
-        abstract executeCommand(
-            client: Client,
-            interaction: CommandInteraction,
-        ): Promise<void>;
+        abstract executeCommand(client: Client, interaction: CommandInteraction): Promise<void>;
     }
 
     export const commands = new Map<string, Base>();
@@ -34,9 +20,7 @@ export namespace Command {
         console.log(`Registered commands:`);
 
         for (const path of glob.scanSync(".")) {
-            const { default: CommandClass } = await import(
-                path.replace("./src/", "./")
-            );
+            const { default: CommandClass } = await import(path.replace("./src/", "./"));
             const instance: Base = new CommandClass();
             const info = instance.info;
             commands.set(info.name, instance);
@@ -55,18 +39,12 @@ export namespace Command {
         try {
             await command.executeCommand(client, interaction);
         } catch (err) {
-            console.error(
-                `Error running command ${interaction.commandName}:`,
-                err,
-            );
+            console.error(`Error running command ${interaction.commandName}:`, err);
             // interaction.reply("Error executing command.");
         }
     }
 
-    export async function handleAutocompleteInteraction(
-        client: Client,
-        interaction: any,
-    ) {
+    export async function handleAutocompleteInteraction(client: Client, interaction: any) {
         const command = commands.get(interaction.commandName);
         if (!command) {
             interaction.respond([]);
@@ -75,18 +53,12 @@ export namespace Command {
         try {
             await command.executeAutoComplete(client, interaction);
         } catch (err) {
-            console.error(
-                `Error running autocomplete for command ${interaction.commandName}:`,
-                err,
-            );
+            console.error(`Error running autocomplete for command ${interaction.commandName}:`, err);
             interaction.respond([]);
         }
     }
 
-    export async function handleButtonInteraction(
-        client: Client,
-        interaction: any,
-    ) {
+    export async function handleButtonInteraction(client: Client, interaction: any) {
         for (const command of await commands) {
             try {
                 //TODO if inactive command dont check interaction
@@ -94,10 +66,7 @@ export namespace Command {
                     break;
                 }
             } catch (err) {
-                console.error(
-                    `Error running button interaction for quest ${command[0]}:`,
-                    err,
-                );
+                console.error(`Error running button interaction for quest ${command[0]}:`, err);
             }
         }
     }

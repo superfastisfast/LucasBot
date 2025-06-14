@@ -33,13 +33,9 @@ export default class XpService extends Service.Base {
         this.rewardXp(message.author, 2);
     };
 
-    private handleMessageDelete = async (
-        message: Message | PartialMessage | Snowflake,
-    ) => {
+    private handleMessageDelete = async (message: Message | PartialMessage | Snowflake) => {
         if (typeof message === "string") {
-            console.log(
-                "Only message ID received, cannot get author directly.",
-            );
+            console.log("Only message ID received, cannot get author directly.");
             return;
         }
 
@@ -78,8 +74,7 @@ export default class XpService extends Service.Base {
         if (!user) return; //TODO: valid solution right?
         const appUser = await AppUser.fromID(user.id);
         const currentTime = new Date();
-        const timeDifferenceMs =
-            currentTime.getTime() - appUser.database.lastXpMessageAt.getTime();
+        const timeDifferenceMs = currentTime.getTime() - appUser.database.lastXpMessageAt.getTime();
         const timeDifferenceMinutes = timeDifferenceMs / (1000 * 3);
         if (timeDifferenceMinutes >= 1) {
             appUser.database.lastXpMessageAt = currentTime;
