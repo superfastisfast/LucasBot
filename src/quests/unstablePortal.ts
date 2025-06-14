@@ -1,19 +1,18 @@
-import { type Client, type ButtonInteraction, type TextChannel, EmbedBuilder } from "discord.js";
+import { type Client, Message, type ButtonInteraction, EmbedBuilder } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
 
 export default class UnstablePortalQuest extends Quest.Base {
     public override buttons: Map<string, AppButton> = new Map<string, AppButton>([
-        ["Enter", new AppButton("Enter", this.onPressEnter)],
-        ["Destroy", new AppButton("Destroy", this.onPressDestroy)],
+        ["Enter", new AppButton("Enter", this.onPressEnter.bind(this))],
+        ["Destroy", new AppButton("Destroy", this.onPressDestroy.bind(this))],
     ]);
 
     goldReward: number = 10;
     isDestroyed: boolean = false;
 
-    override async start(client: Client): Promise<void> {
-
+    public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons, ["Enter", "Destroy"])
         const embed = new EmbedBuilder()
             .setTitle("Unstable Portal")
@@ -23,15 +22,14 @@ export default class UnstablePortalQuest extends Quest.Base {
             .setURL("https://www.youtube.com/@LucasDevelop")
             .toJSON();
 
-        const channel = await Quest.getChannel(client);
-        await channel.send({
+        return await Quest.channel.send({
             embeds: [embed],
             components: actionRow,
         });
     }
 
     private async onPressEnter(interaction: ButtonInteraction): Promise<void> {
-        const user = await AppUser.createFromID(interaction.user.id);
+        const user = await AppUser.fromID(interaction.user.id);
 
         const successfullyEnterdPortal: boolean = (Math.floor(Math.random() * 100 - user.database.stats.magicka) > 50);
         const successfullyEarnLoot: boolean = (Math.floor(Math.random() * 10 + user.database.stats.magicka) > 9);
@@ -55,5 +53,6 @@ export default class UnstablePortalQuest extends Quest.Base {
             content: this.isDestroyed ? "You can't destroy the portal anymore... someone destroyed it!" : "You destroyed the portal!",
             flags: 'Ephemeral',
         });
+        this.isDestroyed = true;
     }
 }

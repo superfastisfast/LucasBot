@@ -18,7 +18,7 @@ export namespace Service {
             );
             const instance: Base = new ServiceClass();
             services.push(instance);
-            console.log(`\t${instance.constructor.name}`);
+            console.log(`\t${instance.constructor.name.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase()}`);
         }
     }
 

@@ -56,7 +56,7 @@ export default class XpCommand extends Command.Base {
         interaction: CommandInteraction<any>,
     ): Promise<void> {
         const sub = interaction.options.getSubcommand();
-        const target = await AppUser.createFromID((interaction.options.get("target")?.user || interaction.user).id);
+        const target = await AppUser.fromID((interaction.options.get("target")?.user || interaction.user).id);
         const role = interaction.options.get("role")?.role || "everyone";
 
         const member = await target.getGuildMember(interaction.guild);

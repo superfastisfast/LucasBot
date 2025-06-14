@@ -17,7 +17,7 @@ export default class Fighter {
         imgUrl: string,
     ): Promise<Fighter> {
         let self = new Fighter(dbUser, startPosition, imgUrl);
-        const user = await AppUser.createFromID(dbUser.id);
+        const user = await AppUser.fromID(dbUser.id);
         self.items = await user.getItems();
 
         self.calculateStats();

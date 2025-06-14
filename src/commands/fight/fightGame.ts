@@ -32,8 +32,8 @@ export default class FightGame {
         if (id !== this.discordUsers[1]!.id)
             return { success: false, reason: "You are not the second player!" };
 
-        const appUser1 = await AppUser.createFromID(this.discordUsers[0]!.id);
-        const appUser2 = await AppUser.createFromID(this.discordUsers[1]!.id);
+        const appUser1 = await AppUser.fromID(this.discordUsers[0]!.id);
+        const appUser2 = await AppUser.fromID(this.discordUsers[1]!.id);
         const dbCommandUser = appUser1.database;
         const dbOpponentUser = appUser2.database;
         if (!dbCommandUser || !dbOpponentUser) {
@@ -148,8 +148,8 @@ export default class FightGame {
 
     async gameOver(wasCompleted: boolean = false) {
         const winnerReward = this.bet * 2;
-        const user1 = await AppUser.createFromID(this.discordUsers[0]!.id);
-        const user2 = await AppUser.createFromID(this.discordUsers[1]!.id);
+        const user1 = await AppUser.fromID(this.discordUsers[0]!.id);
+        const user2 = await AppUser.fromID(this.discordUsers[1]!.id);
         if (this.players[0]!.currentHealth <= 0) {
             await user2.addGold(winnerReward).save();
         } else if (this.players[1]!.currentHealth <= 0) {
