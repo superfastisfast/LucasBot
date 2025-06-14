@@ -4,7 +4,7 @@ import { AppButton } from "@/button";
 import { AppUser } from "@/user";
 
 export default class RescueQuest extends Quest.Base {
-    public override buttons: Map<string, AppButton> = new Map<string, AppButton>([
+    public override buttons: Map<string, AppButton> = new Map([
         ["Rescue", new AppButton("Rescue the villager", this.onPressRescue.bind(this))],
     ]);
 

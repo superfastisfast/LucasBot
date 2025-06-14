@@ -4,7 +4,7 @@ import { AppButton } from "@/button";
 import { AppUser } from "@/user";
 
 export default class TimmyQuest extends Quest.Base {
-    public override buttons: Map<string, AppButton> = new Map<string, AppButton>([
+    public override buttons: Map<string, AppButton> = new Map([
         ["Help", new AppButton("Help", this.onPressHelp)],
         ["Kill", new AppButton("Kill", this.onPressKill)],
     ]);

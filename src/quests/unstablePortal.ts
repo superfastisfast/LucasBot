@@ -4,7 +4,7 @@ import { AppButton } from "@/button";
 import { AppUser } from "@/user";
 
 export default class UnstablePortalQuest extends Quest.Base {
-    public override buttons: Map<string, AppButton> = new Map<string, AppButton>([
+    public override buttons: Map<string, AppButton> = new Map([
         ["Enter", new AppButton("Enter", this.onPressEnter.bind(this))],
         ["Destroy", new AppButton("Destroy", this.onPressDestroy.bind(this))],
     ]);

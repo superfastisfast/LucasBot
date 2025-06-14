@@ -3,7 +3,7 @@ import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 
 export default class TestQuest extends Quest.Base {
-    public override buttons: Map<string, AppButton> = new Map<string, AppButton>([
+    public override buttons: Map<string, AppButton> = new Map([
         ["Test", new AppButton("Test Label", this.onPressTest.bind(this))],
     ]);
 

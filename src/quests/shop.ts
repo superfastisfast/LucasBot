@@ -5,7 +5,7 @@ import { AppUser } from "@/user";
 import { Item, type ItemDocument } from "@/models/item";
 
 export default class ShopQuest extends Quest.Base {
-    public override buttons: Map<string, AppButton> = new Map<string, AppButton>([
+    public override buttons: Map<string, AppButton> = new Map([
         ["Enter", new AppButton("Enter shop", this.onPressEnter.bind(this))],
     ]);
 

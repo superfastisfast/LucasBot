@@ -4,7 +4,7 @@ import { AppButton } from "@/button";
 import { AppUser } from "@/user";
 
 export default class SubscribeQuest extends Quest.Base {
-    public override buttons: Map<string, AppButton> = new Map<string, AppButton>([
+    public override buttons: Map<string, AppButton> = new Map([
         ["Yes", new AppButton("Yes", this.onPressYes.bind(this))],
         ["No", new AppButton("No", this.onPressNo.bind(this))],
     ]);
