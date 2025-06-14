@@ -32,7 +32,7 @@ export default class CelebrationQuest extends Quest.Base {
 
     goldRewardAmount: number = 10
 
-    public override async start(client: Client): Promise<Message<true>> {
+    public override async start(): Promise<Message<true>> {
         const randomIndex = Math.floor(Math.random() * celebrations.length);
         const celebration = celebrations[randomIndex];
         if (!celebration) {
@@ -57,13 +57,17 @@ export default class CelebrationQuest extends Quest.Base {
                 .save()
         )
 
+        setTimeout(() => {
+            this.end()
+        }, 1000 * 5);
+
 
         return await Quest.channel.send({
             embeds: [embed],
         });
     }
 
-    public override end(): Promise<Quest.EndReturn> {
+    public override async end(): Promise<Quest.EndReturn> {
         return Quest.end(this.name);
     }
 }

@@ -11,7 +11,7 @@ export default class SubscribeQuest extends Quest.Base {
 
     xpRewardAmount: number = 10
 
-    public override async start(client: Client): Promise<Message<true>> {
+    public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons, ["Yes", "No"])
         const embed = new EmbedBuilder()
             .setTitle("Subscribed")

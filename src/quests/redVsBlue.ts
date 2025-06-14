@@ -13,7 +13,7 @@ export default class SubscribePortalQuest extends Quest.Base {
     teams: Map<string, string> = new Map();
     private winningTeam: "red" | "blue" | null = null;
 
-    public override async start(client: Client): Promise<Message<true>> {
+    public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons, ["Red", "Blue"])
         const embed = new EmbedBuilder()
             .setTitle("Red vs Blue")

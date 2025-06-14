@@ -11,7 +11,7 @@ export default class DragonCampaignQuest extends Quest.Base {
 
     players: string[] = [];
 
-    public override async start(client: Client): Promise<Message<true>> {
+    public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons, ["Join"])
 
         const embed = new EmbedBuilder()
@@ -26,17 +26,24 @@ export default class DragonCampaignQuest extends Quest.Base {
                 🌟 Best-case: No one is harmed\n\n
                 Survivors gain legendary treasure. Dare to fight the beast — or watch Lucamon fall`
             )
-            .setColor("#0099ff")
+            .setColor("#FF4500")
             .setImage("https://cdn.discordapp.com/attachments/1379101132743250082/1381274300987867216/CoolDragon.jpg?ex=6846eb70&is=684599f0&hm=a901607a7f42b3970f60320d16dee2c04ce655201aa8df64ef123829d5e0bc47&")
+            .setURL("https://www.youtube.com/@LucasDevelop")
+            .toJSON();
+
+        const lobby = new EmbedBuilder()
+            .setTitle("Lobby")
+            .setDescription("No players have joined yet!")
+            .setColor("#FF4500")
             .setURL("https://www.youtube.com/@LucasDevelop")
             .toJSON();
 
         await Quest.channel.send({
             embeds: [embed],
-            components: actionRow,
         });
         return await Quest.channel.send({
-            content: "No joined players yet",
+            embeds: [lobby],
+            components: actionRow,
         });
     }
 
@@ -71,11 +78,11 @@ export default class DragonCampaignQuest extends Quest.Base {
         })
 
         const embed = new EmbedBuilder()
-            .setTitle("Dragon Campaign Results")
+            .setTitle("Result")
             .setDescription(
                 `${playersWon ? "The players won over the dragon!" : "The dragon won against the players"}\n
                 Player strengh was ${playerStrength}, dragon strengh was ${dragonStrength}`)
-            .setColor("#0099ff")
+            .setColor("#FF4500")
             .setURL("https://www.youtube.com/@LucasDevelop")
             .toJSON();
 
@@ -87,20 +94,33 @@ export default class DragonCampaignQuest extends Quest.Base {
     }
 
     private async onPressJoin(interaction: ButtonInteraction): Promise<void> {
-        this.players.push(interaction.user.id)
+        const user = await AppUser.fromID(interaction.user.id);
+
+        for (const index in this.players) {
+            if (user.discord.id == this.players[index]) {
+                await interaction.reply({
+                    content: `You are already in the lobby!`,
+                    flags: 'Ephemeral',
+                });
+                return;
+            }
+        }
+
+        this.players.push(user.discord.id)
         await interaction.reply({
             content: `You joined the campaign!`,
             flags: 'Ephemeral',
         });
 
         let joinedPlayerString: string = "";
+        
         for (const index in this.players)
             joinedPlayerString += `${(await AppUser.fromID(this.players[index]!)).discord}, `
 
         const joinedPlayersEmbed = new EmbedBuilder()
-            .setTitle("Dragon Campaign Lobby")
+            .setTitle("Lobby")
             .setDescription(`Players: ${joinedPlayerString}`)
-            .setColor("#0099ff")
+            .setColor("#FF4500")
             .setURL("https://www.youtube.com/@LucasDevelop")
             .toJSON();
 

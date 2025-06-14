@@ -9,7 +9,7 @@ export default class TestQuest extends Quest.Base {
 
     amount: number = 0;
 
-    public override async start(client: Client): Promise<Message<true>> {
+    public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons, ["Test"])
 
         return await Quest.channel.send({

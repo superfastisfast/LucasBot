@@ -11,7 +11,7 @@ export default class PackageQuest extends Quest.Base {
         ["Sell", new AppButton("Sell it", this.onPressSell.bind(this))],
     ]);
 
-    public override async start(client: Client): Promise<Message<true>> {
+    public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons, ["Open", "Owner", "Sell"])
 
         const embed = new EmbedBuilder()

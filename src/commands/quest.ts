@@ -47,34 +47,14 @@ export default class QuestCommand extends Command.Base {
         interaction: AutocompleteInteraction,
     ): Promise<void> {
         const sub = (interaction.options as any).getSubcommand();
+        const quests = sub === "execute" ? Quest.quests : Quest.active;
 
-        const focusedOption = interaction.options.getFocused(true).name;
-        const handlers: Record<string, () => void> = {
-            execute: async () => {
-                const options = Array.from(Quest.quests.keys()).map(q => ({
-                    name: q,
-                    value: q,
-                }));
+        const options = Array.from(quests.keys()).map(q => ({
+            name: q,
+            value: q,
+        }));
 
-                await interaction.respond(options);
-                return;
-            },
-            end: async () => {
-                const options = Array.from(Quest.active.keys()).map(q => ({
-                    name: q,
-                    value: q,
-                }));
-
-                await interaction.respond(options);
-                return;
-            },
-        };
-
-        const handler = handlers[sub];
-        if (handler)
-            handler();
-        else
-            console.warn(`Unknown sub command: ${sub}`);
+        await interaction.respond(options);
     }
 
     override async executeCommand(
@@ -101,7 +81,7 @@ export default class QuestCommand extends Command.Base {
                     flags: 'Ephemeral',
                 })
 
-                await Quest.start(client, quest.name)
+                await Quest.start(quest.name)
                 return;
             },
             end: async () => {

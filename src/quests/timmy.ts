@@ -9,7 +9,7 @@ export default class TimmyQuest extends Quest.Base {
         ["Kill", new AppButton("Kill", this.onPressKill)],
     ]);
 
-    public override async start(client: Client): Promise<Message<true>> {
+    public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons, ["Help", "Kill"])
 
         return await Quest.channel.send({

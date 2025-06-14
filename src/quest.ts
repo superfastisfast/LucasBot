@@ -11,9 +11,9 @@ export namespace Quest {
 
         public maxTimeActiveMS: number = 1000 * 60 * 10; 
         public endTime: number = 0;
-        public isActive: boolean = false;
+        public readonly isActive: boolean = false;
 
-        public async start(client: Client): Promise<Message<true>> {
+        public async start(): Promise<Message<true>> {
             return undefined!
         }
         public async end(): Promise<EndReturn> {
@@ -28,6 +28,7 @@ export namespace Quest {
     export const quests: Map<string, Base> = new Map();
     export const active: Map<string, Base> = new Map();
     export let channel: TextChannel; 
+    export const link: string = "https://www.youtube.com/@LucasDevelop"; 
 
     export async function load() {
         if (!process.env.QUEST_CHANNEL_ID)
@@ -37,7 +38,7 @@ export namespace Quest {
         )) as TextChannel;
 
         const glob = new Bun.Glob("src/quests/*.ts");
-        console.log(`Registered quests:`);
+        console.log(`Loaded quests:`);
 
         for (const path of glob.scanSync(".")) {
             const file = Bun.file(path);
@@ -55,15 +56,15 @@ export namespace Quest {
         }
     }
 
-    export async function start(client: Client, name: string) {
+    export async function start(name: string) {
         try {
             const oldQuest = await quests.get(name);
             if (!oldQuest) return console.log(`Failed to get quest: '${name}'`);
             const quest = new oldQuest.class;
             quest.name = oldQuest.name;
             quest.endTime = new Date().getTime() + quest.maxTimeActiveMS;
-            quest.isActive = true;
-            quest.message = await quest.start(client);
+            (quest as any).isActive = true;
+            quest.message = await quest.start();
 
             quests.set(name, quest);
             active.set(name, quest);
@@ -83,7 +84,7 @@ export namespace Quest {
             }
 
             if (quest.isActive) quest.end();
-            quest.isActive = false;
+            (quest as any).isActive = false;
             quest.message.edit({
                 components: [],
             })

@@ -12,7 +12,7 @@ export default class UnstablePortalQuest extends Quest.Base {
     goldReward: number = 10;
     isDestroyed: boolean = false;
 
-    public override async start(client: Client): Promise<Message<true>> {
+    public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons, ["Enter", "Destroy"])
         const embed = new EmbedBuilder()
             .setTitle("Unstable Portal")
