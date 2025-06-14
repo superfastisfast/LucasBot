@@ -1,6 +1,6 @@
 import { Command } from "@/command";
 import { Service } from "@/service";
-import { Client, GatewayIntentBits, Partials, Events, REST, Routes } from "discord.js";
+import { Client, GatewayIntentBits, Partials, Events } from "discord.js";
 import mongoose from "mongoose";
 import { Quest } from "./quest";
 
