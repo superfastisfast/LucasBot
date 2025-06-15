@@ -31,7 +31,10 @@ export default class ShopQuest extends Quest.Base {
 
         for (let i: number = 0; i < this.stock; i++) {
             const item: ItemDocument = (await Item.getRandom())!;
-            if (!item) console.warn("Item is null");
+            if (!item) {
+                console.warn("Item is null");
+                return Quest.channel.send("Something went wrong... concult a Adam");
+            }
 
             let modifiers: string = "";
             if (item.flatStatModifiers.size! + item.percentageStatModifiers.size! !== 0) {
