@@ -51,12 +51,13 @@ export default class UnstablePortalQuest extends Quest.Base {
     }
 
     private async onPressDestroy(interaction: ButtonInteraction): Promise<void> {
+        this.isDestroyed = true;
+
         await interaction.reply({
             content: this.isDestroyed
                 ? "You can't destroy the portal anymore... someone destroyed it!"
                 : "You destroyed the portal!",
             flags: "Ephemeral",
         });
-        this.isDestroyed = true;
     }
 }
