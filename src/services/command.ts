@@ -1,4 +1,4 @@
-import { NewCommand } from "@/new_commands";
+import { Command } from "@/commands";
 import { Service } from "@/service";
 import { Client, Events, type Interaction, MessageFlags } from "discord.js";
 
@@ -12,57 +12,34 @@ export default class CommandService extends Service.Base {
     }
 
     private handleCommand = async (interaction: Interaction) => {
-        if (interaction.isChatInputCommand()) {
-            try {
-                const commandInstance = NewCommand.commands.get(interaction.commandName);
-                if (!commandInstance) {
-                    return await interaction.reply({ content: "Command not found.", flags: [MessageFlags.Ephemeral] });
-                }
-
-                let targetExecutionLogic: NewCommand.Command = commandInstance.main;
-                const subcommandName = interaction.options.getSubcommand(false);
-
-                if (subcommandName) {
-                    const foundSub = commandInstance.subs.find((sub) => sub.name === subcommandName);
-                    if (foundSub) {
-                        targetExecutionLogic = foundSub;
-                    } else {
-                        return await interaction.reply({
-                            content: "Subcommand not found.",
-                            flags: [MessageFlags.Ephemeral],
-                        });
-                    }
-                }
-
-                await targetExecutionLogic.onExecute(interaction);
-            } catch (error) {
-                if (interaction.replied || interaction.deferred) {
-                    await interaction.followUp({ content: "An error occurred.", flags: [MessageFlags.Ephemeral] });
-                } else {
-                    await interaction.reply({ content: "An error occurred.", flags: [MessageFlags.Ephemeral] });
-                }
+        if (interaction.isCommand()) {
+            const command = Command.commands.get(interaction.commandName);
+            if (!command) {
+                interaction.reply(`Command not found: '${interaction.commandName}'`);
+                return;
             }
-        } else if (interaction.isAutocomplete()) {
-            try {
-                const commandInstance = NewCommand.commands.get(interaction.commandName);
-                if (!commandInstance) {
-                    return await interaction.respond([]);
-                }
 
-                let targetAutocompleteLogic: NewCommand.Command = commandInstance.main;
-                const subcommandName = interaction.options.getSubcommand(false);
+            const subName = (interaction.options as any).getSubcommand(false);
+            if (!subName) await command.main.onExecute(interaction);
+            else
+                command.subs.forEach(async (sub) => {
+                    if (subName === sub.name) await sub.onExecute(interaction);
+                });
+        }
 
-                if (subcommandName) {
-                    const foundSub = commandInstance.subs.find((sub) => sub.name === subcommandName);
-                    if (foundSub) {
-                        targetAutocompleteLogic = foundSub;
-                    }
-                }
-
-                await targetAutocompleteLogic.onAutocomplete(interaction);
-            } catch (error) {
-                await interaction.respond([]);
+        if (interaction.isAutocomplete()) {
+            const command = Command.commands.get(interaction.commandName);
+            if (!command) {
+                interaction.respond([{ name: "Missing autocomplete", value: "undefined" }]);
+                return;
             }
+
+            const subName = (interaction.options as any).getSubcommand(false);
+            if (!subName) await command.main.onAutocomplete(interaction);
+            else
+                command.subs.forEach(async (sub) => {
+                    if (subName === sub.name) await sub.onAutocomplete(interaction);
+                });
         }
     };
 }

@@ -6,7 +6,7 @@ import {
     type CommandInteraction,
     type Interaction,
 } from "discord.js";
-import { ItemModel } from "../models/item";
+import { ItemModel } from "../../models/item";
 import { AutocompleteInteraction } from "discord.js";
 
 export default class ItemCommand extends Command.Base {
