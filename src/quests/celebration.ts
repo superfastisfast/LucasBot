@@ -29,6 +29,7 @@ export const celebrations: Celebration[] = [
 
 export default class CelebrationQuest extends Quest.Base {
     public override buttons: AppButton[] = [];
+    override maxTimeActiveMS = 0;
 
     goldRewardAmount: number = 10;
 
@@ -53,10 +54,6 @@ export default class CelebrationQuest extends Quest.Base {
         (await Quest.channel.guild.members.fetch()).forEach(async (member) =>
             (await AppUser.fromID(member.id)).addGold(this.goldRewardAmount).save(),
         );
-
-        setTimeout(() => {
-            this.end();
-        }, 1000 * 5);
 
         return await Quest.channel.send({
             embeds: [embed],

@@ -58,8 +58,10 @@ export namespace Quest {
 
     export async function start(name: string) {
         try {
+            console.log(`try to start quest: ${name}`);
             const oldQuest = await quests.get(name);
             if (!oldQuest) return console.log(`Failed to get quest: '${name}'`);
+            // Quest.end(oldQuest.name);
             const quest = new oldQuest.class();
             quest.name = oldQuest.name;
             quest.endTime = new Date().getTime() + quest.maxTimeActiveMS;

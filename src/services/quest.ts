@@ -15,27 +15,36 @@ export default class QuestService extends Service.Base {
     }
 
     private update(client: Client): void {
-        // const currentTime = new Date().getTime();
+        const currentTime = new Date().getTime();
 
-        // Array.from(Quest.active).forEach((quest) => {
-        //     if (currentTime > quest[1].endTime)
-        //         Quest.end(quest[0]);
-        // })
+        Array.from(Quest.active).forEach((quest) => {
+            if (currentTime > quest[1].endTime) Quest.end(quest[0]);
+        });
 
         // 120 is max amount of min
-        if (this.questChance < 120) {
-            this.questChance += Math.floor(Math.random() * 3);
+        if (this.questChance < 45) {
+            this.questChance += 1 + Math.floor(Math.random());
             return;
         }
         this.questChance = 0;
 
         const quests = Array.from(Quest.quests);
-        const randomQuestIndex = Math.floor(Math.random() * quests.length);
-        [...quests.slice(randomQuestIndex), ...quests.slice(0, randomQuestIndex)].forEach((quest) => {
+        const firstIndex = Math.floor(Math.random() * quests.length);
+        for (let index = 0; index < quests.length; index++) {
+            let quest = quests[(firstIndex + index) % quests.length];
+            console.log("index: " + (firstIndex + index));
             if (quest && quest[1].isActive === false) {
                 Quest.start(quest[0]);
                 return;
             }
-        });
+        }
+        // const quests = Array.from(Quest.quests);
+        // const randomQuestIndex = Math.floor(Math.random() * quests.length);
+        // [...quests.slice(randomQuestIndex), ...quests.slice(0, randomQuestIndex)].forEach((quest) => {
+        //     if (quest && quest[1].isActive === false) {
+        //         Quest.start(quest[0]);
+        //         return;
+        //     }
+        // });
     }
 }
