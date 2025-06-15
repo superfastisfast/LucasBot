@@ -9,12 +9,12 @@ export namespace Quest {
         public message: Message<true> = undefined!;
         public name: string = undefined!;
 
-        public maxTimeActiveMS: number = 1000 * 60 * 10; 
+        public maxTimeActiveMS: number = 1000 * 60 * 10;
         public endTime: number = 0;
         public readonly isActive: boolean = false;
 
         public async start(): Promise<Message<true>> {
-            return undefined!
+            return undefined!;
         }
         public async end(): Promise<EndReturn> {
             return Quest.end(this.name);
@@ -27,15 +27,12 @@ export namespace Quest {
 
     export const quests: Map<string, Base> = new Map();
     export const active: Map<string, Base> = new Map();
-    export let channel: TextChannel; 
-    export const link: string = "https://www.youtube.com/@LucasDevelop"; 
+    export let channel: TextChannel;
+    export const link: string = "https://www.youtube.com/@LucasDevelop";
 
     export async function load() {
-        if (!process.env.QUEST_CHANNEL_ID)
-            throw new Error("QUEST_CHANNEL_ID is not defined in .env");
-        channel = (await client.channels.fetch(
-            process.env.QUEST_CHANNEL_ID,
-        )) as TextChannel;
+        if (!process.env.QUEST_CHANNEL_ID) throw new Error("QUEST_CHANNEL_ID is not defined in .env");
+        channel = (await client.channels.fetch(process.env.QUEST_CHANNEL_ID)) as TextChannel;
 
         const glob = new Bun.Glob("src/quests/*.ts");
         console.log(`Loaded quests:`);
@@ -43,12 +40,15 @@ export namespace Quest {
         for (const path of glob.scanSync(".")) {
             const file = Bun.file(path);
 
-            const { default: QuestClass } = await import(
-                path.replace("src/quests/", "./quests/")
-            );
+            const { default: QuestClass } = await import(path.replace("src/quests/", "./quests/"));
             const quest: Base = new QuestClass();
-            
-            const name = path.split("/").pop()?.replace(".ts", "").replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase()!;
+
+            const name = path
+                .split("/")
+                .pop()
+                ?.replace(".ts", "")
+                .replace(/([a-z])([A-Z])/g, "$1 $2")
+                .toLowerCase()!;
             quest.name = name;
 
             console.log(`\t${name}`);
@@ -60,7 +60,7 @@ export namespace Quest {
         try {
             const oldQuest = await quests.get(name);
             if (!oldQuest) return console.log(`Failed to get quest: '${name}'`);
-            const quest = new oldQuest.class;
+            const quest = new oldQuest.class();
             quest.name = oldQuest.name;
             quest.endTime = new Date().getTime() + quest.maxTimeActiveMS;
             (quest as any).isActive = true;
@@ -69,7 +69,7 @@ export namespace Quest {
             quests.set(name, quest);
             active.set(name, quest);
         } catch (error) {
-            console.error(`Failed to start quest: ${name}`, error)
+            console.error(`Failed to start quest: ${name}`, error);
         }
     }
 
@@ -79,18 +79,18 @@ export namespace Quest {
         try {
             const quest = await quests.get(name);
             if (!quest) {
-                console.log(`Failed to get quest: '${name}'`); 
-                return {}; 
+                console.log(`Failed to get quest: '${name}'`);
+                return {};
             }
 
             if (quest.isActive) quest.end();
             (quest as any).isActive = false;
             quest.message.edit({
                 components: [],
-            })
+            });
             active.delete(name);
         } catch (error) {
-            console.error(`Failed to start quest: ${name}`, error)
+            console.error(`Failed to start quest: ${name}`, error);
         }
 
         return {};

@@ -23,13 +23,10 @@ client.once(Events.ClientReady, async (readyClient) => {
     // 	.then(() => console.log('Successfully deleted all application commands.'))
     // 	.catch(console.error);
 
-
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 
     console.log("Connecting to MongoDB...");
-    await mongoose.connect(
-        process.env.DATABASE_URL || "mongodb://localhost:27017/mydiscordapp",
-    );
+    await mongoose.connect(process.env.DATABASE_URL || "mongodb://localhost:27017/mydiscordapp");
     console.log("Connected to MongoDB");
 
     (async () => {

@@ -1,18 +1,5 @@
-import {
-    User,
-    Guild,
-    GuildMember,
-    Role,
-    PermissionsBitField,
-    DiscordAPIError,
-    TextChannel,
-} from "discord.js";
-import {
-    StatsModel,
-    UserModel,
-    type IInventory,
-    type UserDocument,
-} from "./models/user";
+import { User, Guild, GuildMember, Role, PermissionsBitField, DiscordAPIError, TextChannel } from "discord.js";
+import { StatsModel, UserModel, type IInventory, type UserDocument } from "./models/user";
 import { client } from ".";
 import { Item, type ItemDocument } from "./models/item";
 
@@ -31,19 +18,14 @@ export class AppUser {
             const databaseUser = await AppUser.getDataBaseUser(discordUser);
             return new AppUser(discordUser, databaseUser);
         } catch (error: any) {
-            if (error.code === 10013)
-                throw new Error(
-                    `Attempted to fetch unknown user ID: ${userId}: ${error}`,
-                );
+            if (error.code === 10013) throw new Error(`Attempted to fetch unknown user ID: ${userId}: ${error}`);
 
             throw new Error(`Failed to fetch user ${userId}: ${error}`);
         }
     }
 
     //RACE CONDTION MAY OCCUR!
-    private static async getDataBaseUser(
-        discordUser: User,
-    ): Promise<UserDocument> {
+    private static async getDataBaseUser(discordUser: User): Promise<UserDocument> {
         try {
             //Tried to fix it with this
             // if both A and B proccess try to find and create user we wil have duplicated key
@@ -61,25 +43,18 @@ export class AppUser {
                 },
             );
             if (!databaseUser) {
-                throw new Error(
-                    `Failed to retrieve or create database user for ID ${discordUser.id}`,
-                );
+                throw new Error(`Failed to retrieve or create database user for ID ${discordUser.id}`);
             }
             return databaseUser;
         } catch (error) {
-            throw new Error(
-                `Failed to fetch database user with ID ${discordUser.id}: ${error}`,
-            );
+            throw new Error(`Failed to fetch database user with ID ${discordUser.id}: ${error}`);
         }
     }
 
     async getGuildMember(guild: Guild): Promise<GuildMember> {
         const member = await guild.members.fetch(this.discord.id);
 
-        if (!member)
-            throw new Error(
-                `User with ID "${this.discord.id}" is not a member of the guild "${guild.name}"`,
-            );
+        if (!member) throw new Error(`User with ID "${this.discord.id}" is not a member of the guild "${guild.name}"`);
 
         return member;
     }
@@ -87,29 +62,15 @@ export class AppUser {
     async setRole(guild: Guild, name: string, state: boolean): Promise<void> {
         try {
             const botMember: GuildMember | null = guild.members.me;
-            if (!botMember)
-                throw new Error(
-                    `Bot cannot manage member roles in another guild ${guild.name}`,
-                );
+            if (!botMember) throw new Error(`Bot cannot manage member roles in another guild ${guild.name}`);
 
-            if (
-                !botMember.permissions.has(
-                    PermissionsBitField.Flags.ManageRoles,
-                )
-            )
-                throw new Error(
-                    `Bot is missing 'Manage Roles' permission in guild "${guild.name}".`,
-                );
+            if (!botMember.permissions.has(PermissionsBitField.Flags.ManageRoles))
+                throw new Error(`Bot is missing 'Manage Roles' permission in guild "${guild.name}".`);
 
             const role: Role | undefined = guild.roles.cache.find(
-                (role) =>
-                    role.name.toLowerCase() ===
-                        new String(name).toLowerCase() || role.id === name,
+                (role) => role.name.toLowerCase() === new String(name).toLowerCase() || role.id === name,
             );
-            if (!role)
-                throw new Error(
-                    `Role '${name}' not found in guild '${guild.name}'`,
-                );
+            if (!role) throw new Error(`Role '${name}' not found in guild '${guild.name}'`);
 
             if (role.position >= botMember.roles.highest.position)
                 throw new Error(
@@ -127,8 +88,7 @@ export class AppUser {
             if (error instanceof DiscordAPIError) {
                 errorMessage += `Discord API Error ${error.code}: ${error.message}`;
                 if (error.status === 403) {
-                    errorMessage +=
-                        " (Missing permissions or hierarchy issue from Discord's side)";
+                    errorMessage += " (Missing permissions or hierarchy issue from Discord's side)";
                 }
             } else if (error instanceof Error) {
                 errorMessage += error.message;
@@ -206,8 +166,7 @@ export class AppUser {
         ];
         if (equipmentSlots.includes(item.tag as keyof IInventory))
             (this.database.inventory as any)[item.tag] = item.name;
-        else
-            console.warn(`Failed to applied ${item.name} to ${this.discord.username}'s ${item.tag} slot`);
+        else console.warn(`Failed to applied ${item.name} to ${this.discord.username}'s ${item.tag} slot`);
 
         return this;
     }
@@ -262,11 +221,8 @@ export class AppUser {
     }
 
     async level(xp: number): Promise<void> {
-        if (!process.env.QUEST_CHANNEL_ID)
-            throw new Error("QUEST_CHANNEL_ID is not defined in .env");
-        const levelChannel = (await client.channels.fetch(
-            process.env.QUEST_CHANNEL_ID,
-        )) as TextChannel;
+        if (!process.env.QUEST_CHANNEL_ID) throw new Error("QUEST_CHANNEL_ID is not defined in .env");
+        const levelChannel = (await client.channels.fetch(process.env.QUEST_CHANNEL_ID)) as TextChannel;
 
         const level = calculateLevel(xp);
 

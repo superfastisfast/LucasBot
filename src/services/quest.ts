@@ -1,8 +1,6 @@
 import { Quest } from "@/quest";
 import { Service } from "@/service";
-import {
-    Client,
-} from "discord.js";
+import { Client } from "discord.js";
 
 export default class QuestService extends Service.Base {
     intervalId: NodeJS.Timeout = undefined!;
@@ -13,7 +11,7 @@ export default class QuestService extends Service.Base {
     }
 
     override async stop(client: Client): Promise<void> {
-        clearInterval(this.intervalId)
+        clearInterval(this.intervalId);
     }
 
     private update(client: Client): void {
@@ -24,21 +22,20 @@ export default class QuestService extends Service.Base {
         //         Quest.end(quest[0]);
         // })
 
-        // 120 is max amount of min 
+        // 120 is max amount of min
         if (this.questChance < 120) {
             this.questChance += Math.floor(Math.random() * 3);
             return;
         }
         this.questChance = 0;
 
-        const quests = Array.from(Quest.quests)
+        const quests = Array.from(Quest.quests);
         const randomQuestIndex = Math.floor(Math.random() * quests.length);
-        [...quests.slice(randomQuestIndex), ...quests.slice(0, randomQuestIndex)]
-            .forEach((quest) => {
-                if (quest && quest[1].isActive === false) {
-                    Quest.start(client, quest[0])
-                    return;
-                }
-            })
-    };
+        [...quests.slice(randomQuestIndex), ...quests.slice(0, randomQuestIndex)].forEach((quest) => {
+            if (quest && quest[1].isActive === false) {
+                Quest.start(quest[0]);
+                return;
+            }
+        });
+    }
 }

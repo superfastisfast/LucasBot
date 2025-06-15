@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, type ButtonInteraction } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, type ButtonInteraction } from "discord.js";
 
 export class AppButton {
     id: string;
@@ -7,25 +7,23 @@ export class AppButton {
 
     static buttons: Map<string, AppButton> = new Map();
 
-    constructor(label: string, onPress: (interaction: ButtonInteraction) => void, style: ButtonStyle = ButtonStyle.Primary) {
+    constructor(
+        label: string,
+        onPress: (interaction: ButtonInteraction) => void,
+        style: ButtonStyle = ButtonStyle.Primary,
+    ) {
         this.onPress = onPress;
-        const randomId = Math.random()
+        const randomId = Math.random();
         this.id = `#${randomId.toString()}`;
 
-        this.builder = new ButtonBuilder()
-            .setCustomId(this.id)
-            .setLabel(label)
-            .setStyle(style)
+        this.builder = new ButtonBuilder().setCustomId(this.id).setLabel(label).setStyle(style);
 
         AppButton.buttons.set(this.id, this);
     }
 
-    static createActionRow(
-        buttons: Map<string, AppButton>,
-        selected: string[],
-    ): ActionRowBuilder<ButtonBuilder>[] {
+    static createActionRow(buttons: Map<string, AppButton>, selected: string[]): ActionRowBuilder<ButtonBuilder>[] {
         const selectedButtons = selected
-            .map(key => buttons.get(key))
+            .map((key) => buttons.get(key))
             .filter((btn): btn is AppButton => btn !== undefined);
 
         if (selectedButtons.length === 0) {
@@ -35,9 +33,7 @@ export class AppButton {
         const rows: ActionRowBuilder<ButtonBuilder>[] = [];
         for (let i = 0; i < selectedButtons.length; i += 5) {
             const chunk = selectedButtons.slice(i, i + 5);
-            const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-                ...chunk.map(btn => btn.builder)
-            );
+            const row = new ActionRowBuilder<ButtonBuilder>().addComponents(...chunk.map((btn) => btn.builder));
             rows.push(row);
         }
 

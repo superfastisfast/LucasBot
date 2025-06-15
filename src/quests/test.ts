@@ -3,14 +3,14 @@ import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 
 export default class TestQuest extends Quest.Base {
-    public override buttons: Map<string, AppButton> = new Map<string, AppButton>([
+    public override buttons: Map<string, AppButton> = new Map([
         ["Test", new AppButton("Test Label", this.onPressTest.bind(this))],
     ]);
 
     amount: number = 0;
 
     public override async start(): Promise<Message<true>> {
-        const actionRow = AppButton.createActionRow(this.buttons, ["Test"])
+        const actionRow = AppButton.createActionRow(this.buttons, ["Test"]);
 
         return await Quest.channel.send({
             content: "Test!!!",
@@ -26,13 +26,13 @@ export default class TestQuest extends Quest.Base {
         this.amount += 1;
         await interaction.reply({
             content: `Added 1 to the amount, new amount is now ${this.amount}`,
-            flags: 'Ephemeral',
+            flags: "Ephemeral",
         });
 
         if (this.amount >= 3) this.end();
 
         this.message.edit({
-            content: this.amount >= 3 ? `Final amount was: ${this.amount}` : `Amount is now: ${this.amount}`
-        })
+            content: this.amount >= 3 ? `Final amount was: ${this.amount}` : `Amount is now: ${this.amount}`,
+        });
     }
 }

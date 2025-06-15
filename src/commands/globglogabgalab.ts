@@ -46,35 +46,35 @@ glabble shwibble shwap-dap
 Dibble dabble shribble
 shrabble glibbi-shwap glab
 
-Ahhh...||`
+Ahhh...||`;
 
 interface Globglogabgelab {
     url: string;
     option: string;
     desc?: string;
-    use_youtube_url_prefix?: boolean,
+    use_youtube_url_prefix?: boolean;
 }
 
 const songs: Globglogabgelab[] = [
     { url: "hLljd8pfiFg", option: "Official" },
-    { url: "cIwRQwAS_YY", option: "Lil"},
-    { url: "7C5zM8CnZF0", option: "XXX"},
-    { url: "2vhQBN0xJJ8", option: "Havana"},
+    { url: "cIwRQwAS_YY", option: "Lil" },
+    { url: "7C5zM8CnZF0", option: "XXX" },
+    { url: "2vhQBN0xJJ8", option: "Havana" },
     { url: "47ZSI7nPAqo", option: "Stressed" },
-    { url: "xnl0iddwELA", option: "Pumped up"},
+    { url: "xnl0iddwELA", option: "Pumped up" },
     { url: "geWmx4YnRZA", option: "Gangnam style" },
     { url: "ZSAypaq7log", option: "Gods Plan" },
     { url: "a-QpDm0A3Ng", option: "Bad and Boujee" },
     { url: "lCS3y1qn4C8", option: "What is Love" },
     { url: "DVQsKYPm7mA", option: "Piano Man" },
-    { url: "slogfEswemE", option: "I'm blue"},
+    { url: "slogfEswemE", option: "I'm blue" },
     { url: "-pQnurfQZPI", option: "Believer" },
     { url: "wSXIblva5No", option: "Osaki" },
     { url: "OT4MyqrWo6E", option: "Darude - Sandstorm" },
     { url: "_OFN2Uztp34", option: "Schwabblestorm" },
     { url: "WMemX2uKUNI", option: "The Glob Man" },
     { url: "7XBjuDkXJ60", option: "Rap Glob" },
-    { url: "uQASsDVChTQ", option: "Loves Books"},
+    { url: "uQASsDVChTQ", option: "Loves Books" },
     { url: "FSAibrRAUjM", option: "Glob On Me" },
     { url: "nV-ypF0L6Xs", option: "Ear Rape", desc: "EAR WARNING ⚠️" },
     { url: "TtqMwwfhErQ", option: "Globglogabgalab Busters" },
@@ -100,13 +100,13 @@ const songs: Globglogabgelab[] = [
     { url: "Hh-soLTb2uo", option: "Wrong Notes" },
     { url: "nmjHp_EkR9U", option: "360" },
     { url: "O5QAJQzeYas", option: "Minecraft" },
-    { url: "dDTKAwikm94", option: "Ｇｌｏｂｇｌｏｇａｂｇｅｌａｂ"},
+    { url: "dDTKAwikm94", option: "Ｇｌｏｂｇｌｏｇａｂｇｅｌａｂ" },
     { url: "9PT4UnsUvNw", option: "Africa" },
-    { url: "rCm-R4nZM1s", option: "Likes To Party"},
+    { url: "rCm-R4nZM1s", option: "Likes To Party" },
     { url: "OvVWcb8KhPs", option: "All Star" },
     { url: "bUEBTr4cImY", option: "Wrong Singing" },
     { url: "89c4Y59z2rc", option: "Faster and faster" },
-    { url: "lWO8TLqAwNU", option: "Drunk"},
+    { url: "lWO8TLqAwNU", option: "Drunk" },
     { url: "eHN3rbUWENI", option: "Vocoded" },
     { url: "CVWE9BPo0g0", option: "Swedish", desc: "🇸🇪" },
     { url: "0RxNKzLFxNY", option: "Polish", desc: "🇵🇱" },
@@ -114,7 +114,11 @@ const songs: Globglogabgelab[] = [
     { url: "ostAWWuazsc", option: "bstchld", desc: "Sigma" },
     { url: "vel-CyHrvb4", option: "Strawinski" },
     { url: "yNOlOqLSAwk", option: "Walter" },
-    { url: "y81WZvnHTt8", option: "The Creator", desc: "This man ruined Lucas's life" },
+    {
+        url: "y81WZvnHTt8",
+        option: "The Creator",
+        desc: "This man ruined Lucas's life",
+    },
     { url: "YeemJlrNx2Q", option: "Mark", desc: "Secretly a globglogebgelab" },
     { url: "zISYDnXs5QI", option: "Globzilla" },
     { url: "U19kFq-zxzU", option: "GMod" },
@@ -122,8 +126,13 @@ const songs: Globglogabgelab[] = [
     { url: "oxqCKsUiIWg", option: "Instrumental" },
     { url: "h6EuSlzO4m0", option: "Ends it all" },
     { url: "aTtnRjRJstc", option: "Spiderman" },
-    { url: "", option: "Script", desc: globglogabgelabScript, use_youtube_url_prefix: false }
-]
+    {
+        url: "",
+        option: "Script",
+        desc: globglogabgelabScript,
+        use_youtube_url_prefix: false,
+    },
+];
 
 export default class GlobglogabgalabCommand extends Command.Base {
     override get info(): any {
@@ -131,18 +140,12 @@ export default class GlobglogabgalabCommand extends Command.Base {
             .setName("globglogabgalab")
             .setDescription("Plays a random globglogabgalab song")
             .addNumberOption((option) =>
-                option.setName("song")
-                .setDescription("The song you want")
-                .setAutocomplete(true)
-                .setRequired(false),
+                option.setName("song").setDescription("The song you want").setAutocomplete(true).setRequired(false),
             )
             .toJSON();
     }
 
-    override async executeAutoComplete(
-        client: Client,
-        interaction: AutocompleteInteraction,
-    ): Promise<void> {
+    override async executeAutoComplete(client: Client, interaction: AutocompleteInteraction): Promise<void> {
         const rawInput = interaction.options.getFocused().toString();
         const focusedValue = rawInput.toLowerCase().replace(/[^a-z\s]/g, "");
 
@@ -165,10 +168,8 @@ export default class GlobglogabgalabCommand extends Command.Base {
                 value: index,
                 cleanedName: song.option.toLowerCase().replace(/[^a-z\s]/g, ""),
             }))
-            .filter(choice =>
-                searchWords.every(word => choice.cleanedName.includes(word))
-            )
-                .sort((a, b) => {
+            .filter((choice) => searchWords.every((word) => choice.cleanedName.includes(word)))
+            .sort((a, b) => {
                 const firstWord = searchWords[0] || "";
                 const aIndex = a.cleanedName.indexOf(firstWord);
                 const bIndex = b.cleanedName.indexOf(firstWord);
@@ -180,15 +181,16 @@ export default class GlobglogabgalabCommand extends Command.Base {
         await interaction.respond(filtered);
     }
 
-
     override async executeCommand(client: Client, interaction: CommandInteraction): Promise<void> {
         const song = interaction.options.get("song", false)?.value as number;
-        const index = song ?? Math.floor(Math.random() * (songs.length));
+        const index = song ?? Math.floor(Math.random() * songs.length);
 
         if (!songs[index]?.use_youtube_url_prefix) {
-            interaction.reply(`**${songs[index]?.option}** video *[here](https://www.youtube.com/watch?v=${songs[index]?.url})* ${songs[index]?.desc || "..."}`)
+            interaction.reply(
+                `**${songs[index]?.option}** video *[here](https://www.youtube.com/watch?v=${songs[index]?.url})* ${songs[index]?.desc || "..."}`,
+            );
         } else {
-            interaction.reply(`**${songs[index]?.option}** ${songs[index]?.url} ${songs[index]?.desc || "..."}`)
+            interaction.reply(`**${songs[index]?.option}** ${songs[index]?.url} ${songs[index]?.desc || "..."}`);
         }
     }
 }

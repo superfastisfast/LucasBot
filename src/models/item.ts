@@ -28,9 +28,7 @@ export type ItemModel = mongoose.InferSchemaType<typeof itemSchema>;
 export const ItemModel = mongoose.model<ItemDocument>("Item", itemSchema);
 
 export namespace Item {
-    export async function getFromName(
-        name: string,
-    ): Promise<ItemDocument | null> {
+    export async function getFromName(name: string): Promise<ItemDocument | null> {
         try {
             const item = await ItemModel.findOne({ name: name });
             return item;
@@ -43,9 +41,7 @@ export namespace Item {
 
     export async function getRandom(): Promise<ItemDocument | null> {
         try {
-            const randomItems = await ItemModel.aggregate<ItemDocument>([
-                { $sample: { size: 1 } },
-            ]);
+            const randomItems = await ItemModel.aggregate<ItemDocument>([{ $sample: { size: 1 } }]);
             const item = randomItems.length > 0 ? randomItems[0]! : null;
             return item;
         } catch (error) {
@@ -54,20 +50,12 @@ export namespace Item {
         }
     }
 
-    // export function getAttributeFom(item: ItemDocument) {
-
-    //     return { item.flatStatModifiers, item.percentageStatModifiers };
-    // }
-
     export function getStringCollection(items: Array<ItemDocument>): string {
         const formattedItems = items
             .map((item) => {
                 let itemDetails = `**${item.name}**`;
                 const flatStatsParts: string[] = [];
-                for (const [
-                    statName,
-                    amplifier,
-                ] of item.flatStatModifiers.entries()) {
+                for (const [statName, amplifier] of item.flatStatModifiers.entries()) {
                     flatStatsParts.push(`${statName}: ${amplifier}`);
                 }
                 if (flatStatsParts.length > 0) {
@@ -75,13 +63,8 @@ export namespace Item {
                 }
 
                 const percentageStatsParts: string[] = [];
-                for (const [
-                    statName,
-                    amplifier,
-                ] of item.percentageStatModifiers.entries()) {
-                    percentageStatsParts.push(
-                        `${statName}: ${(amplifier * 100).toFixed(0)}%`,
-                    );
+                for (const [statName, amplifier] of item.percentageStatModifiers.entries()) {
+                    percentageStatsParts.push(`${statName}: ${(amplifier * 100).toFixed(0)}%`);
                 }
                 if (percentageStatsParts.length > 0) {
                     itemDetails += `\n${percentageStatsParts.join(", ")}`;
@@ -91,8 +74,7 @@ export namespace Item {
             })
             .join("\n");
 
-        const itemsDisplay =
-            formattedItems.length > 0 ? formattedItems : "None";
+        const itemsDisplay = formattedItems.length > 0 ? formattedItems : "None";
 
         return itemsDisplay;
     }

@@ -22,83 +22,42 @@ export default class XpCommand extends Command.Base {
                 sub
                     .setName("view")
                     .setDescription("View the XP of a user")
-                    .addUserOption((opt) =>
-                        opt
-                            .setName("target")
-                            .setDescription(targetDesc)
-                            .setRequired(true),
-                    ),
+                    .addUserOption((opt) => opt.setName("target").setDescription(targetDesc).setRequired(true)),
             )
-            .addSubcommand((sub) =>
-                sub
-                    .setName("top")
-                    .setDescription("Show 10 people with the most XP"),
-            )
+            .addSubcommand((sub) => sub.setName("top").setDescription("Show 10 people with the most XP"))
             .addSubcommand((sub) =>
                 sub
                     .setName("add")
                     .setDescription("Add XP to a user")
-                    .addUserOption((opt) =>
-                        opt
-                            .setName("target")
-                            .setDescription(targetDesc)
-                            .setRequired(true),
-                    )
-                    .addIntegerOption((opt) =>
-                        opt
-                            .setName("amount")
-                            .setDescription(amountDesc)
-                            .setRequired(true),
-                    ),
+                    .addUserOption((opt) => opt.setName("target").setDescription(targetDesc).setRequired(true))
+                    .addIntegerOption((opt) => opt.setName("amount").setDescription(amountDesc).setRequired(true)),
             )
             .addSubcommand((sub) =>
                 sub
                     .setName("set")
                     .setDescription("Set a users XP to a value")
-                    .addUserOption((opt) =>
-                        opt
-                            .setName("target")
-                            .setDescription(targetDesc)
-                            .setRequired(true),
-                    )
-                    .addIntegerOption((opt) =>
-                        opt
-                            .setName("amount")
-                            .setDescription(amountDesc)
-                            .setRequired(true),
-                    ),
+                    .addUserOption((opt) => opt.setName("target").setDescription(targetDesc).setRequired(true))
+                    .addIntegerOption((opt) => opt.setName("amount").setDescription(amountDesc).setRequired(true)),
             )
             .setDefaultMemberPermissions(0n)
             .setContexts(InteractionContextType.Guild)
             .toJSON();
     }
 
-    override async executeCommand(
-        client: Client,
-        interaction: CommandInteraction<any>,
-    ): Promise<void> {
-        const sub = interaction.options.getSubcommand();
-        const target = await AppUser.fromID(
-            (interaction.options.get("target")?.user || interaction.user).id,
-        );
+    override async executeCommand(client: Client, interaction: CommandInteraction<any>): Promise<void> {
+        const sub = (interaction.options as any).getSubcommand();
+        const target = await AppUser.fromID((interaction.options.get("target")?.user || interaction.user).id);
 
         switch (sub) {
             case "view": {
-                interaction.reply(
-                    `${target.discord} has ${target.database.xp || "no"} XP`,
-                );
+                interaction.reply(`${target.discord} has ${target.database.xp || "no"} XP`);
                 break;
             }
             case "top": {
-                const topUsers = await UserModel.find()
-                    .sort({ xp: -1 })
-                    .limit(10)
-                    .exec();
+                const topUsers = await UserModel.find().sort({ xp: -1 }).limit(10).exec();
 
                 if (topUsers.length === 0) {
-                    await interaction.reply(
-                        "No users found in the leaderboard.",
-                    );
+                    await interaction.reply("No users found in the leaderboard.");
                     return;
                 }
 
@@ -122,8 +81,7 @@ export default class XpCommand extends Command.Base {
             case "add": {
                 if (!interaction.memberPermissions?.has("Administrator")) break;
 
-                const amount = interaction.options.get("amount")
-                    ?.value as number;
+                const amount = interaction.options.get("amount")?.value as number;
 
                 await target.addXP(amount).save();
                 interaction.reply({
@@ -136,8 +94,7 @@ export default class XpCommand extends Command.Base {
             case "set": {
                 if (!interaction.memberPermissions?.has("Administrator")) break;
 
-                const amount = interaction.options.get("amount")
-                    ?.value as number;
+                const amount = interaction.options.get("amount")?.value as number;
 
                 await target.setXP(amount).save();
                 interaction.reply({

@@ -13,7 +13,7 @@ export default class QuestCommand extends Command.Base {
         return new SlashCommandBuilder()
             .setName("quest")
             .setDescription("Execute a quest")
-            .addSubcommand((opt) => 
+            .addSubcommand((opt) =>
                 opt
                     .setName("execute")
                     .setDescription("Executes a quest")
@@ -23,9 +23,9 @@ export default class QuestCommand extends Command.Base {
                             .setDescription("The name of the quest you want to execute")
                             .setAutocomplete(true)
                             .setRequired(true),
-                    )
+                    ),
             )
-            .addSubcommand((opt) => 
+            .addSubcommand((opt) =>
                 opt
                     .setName("end")
                     .setDescription("Ends a quest")
@@ -35,21 +35,18 @@ export default class QuestCommand extends Command.Base {
                             .setDescription("The name of the quest you want to execute")
                             .setAutocomplete(true)
                             .setRequired(true),
-                    )
+                    ),
             )
             .setDefaultMemberPermissions(0n)
             .setContexts(InteractionContextType.Guild)
             .toJSON();
     }
 
-    override async executeAutoComplete(
-        client: Client,
-        interaction: AutocompleteInteraction,
-    ): Promise<void> {
+    override async executeAutoComplete(client: Client, interaction: AutocompleteInteraction): Promise<void> {
         const sub = (interaction.options as any).getSubcommand();
         const quests = sub === "execute" ? Quest.quests : Quest.active;
 
-        const options = Array.from(quests.keys()).map(q => ({
+        const options = Array.from(quests.keys()).map((q) => ({
             name: q,
             value: q,
         }));
@@ -57,19 +54,16 @@ export default class QuestCommand extends Command.Base {
         await interaction.respond(options);
     }
 
-    override async executeCommand(
-        client: Client,
-        interaction: CommandInteraction,
-    ): Promise<void> {
+    override async executeCommand(client: Client, interaction: CommandInteraction): Promise<void> {
         const sub = (interaction.options as any).getSubcommand();
         const nameOption = interaction.options.get("name", true).value as string;
-    
-        const quest = Quest.quests.get(nameOption) ;
-    
+
+        const quest = Quest.quests.get(nameOption);
+
         if (!quest) {
             await interaction.reply({
                 content: `Quest '${quest!.name}' not found`,
-                flags: 'Ephemeral'
+                flags: "Ephemeral",
             });
             return;
         }
@@ -78,27 +72,25 @@ export default class QuestCommand extends Command.Base {
             execute: async () => {
                 await interaction.reply({
                     content: `Executing quest: ${quest.name}`,
-                    flags: 'Ephemeral',
-                })
+                    flags: "Ephemeral",
+                });
 
-                await Quest.start(quest.name)
+                await Quest.start(quest.name);
                 return;
             },
             end: async () => {
                 await interaction.reply({
                     content: `Ending quest: ${quest.name}`,
-                    flags: 'Ephemeral'
-                })
+                    flags: "Ephemeral",
+                });
 
-                await Quest.end(quest.name)
+                await Quest.end(quest.name);
                 return;
             },
         };
 
         const handler = handlers[sub];
-        if (handler)
-            handler();
-        else
-            await interaction.reply(`Invalid sub command ${sub}`);
+        if (handler) handler();
+        else await interaction.reply(`Invalid sub command ${sub}`);
     }
 }

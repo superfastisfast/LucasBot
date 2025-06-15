@@ -16,9 +16,7 @@ export default class ShopService extends Service.Base {
                 await Item.getFromName("Leather Helmet"),
                 await Item.getFromName("Leather Chestplate"),
             ];
-            this.items = newItems.filter(
-                (item) => item !== null && item !== undefined,
-            );
+            this.items = newItems.filter((item) => item !== null && item !== undefined);
         }
         return this.items;
     }

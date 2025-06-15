@@ -24,13 +24,13 @@ export const celebrations: Celebration[] = [
         title: "Zig Zelebration",
         descrition: "A new future Zig enjoyer was allocated on the heap!",
         image: "https://cdn.discordapp.com/attachments/1379101132743250082/1383431991780970650/Zw.png?ex=684ec4f1&is=684d7371&hm=d1ddb8139591189b0af5024e4df23f10253f4a32e9922265d5746ccf75b81a45&",
-    }
-]
+    },
+];
 
 export default class CelebrationQuest extends Quest.Base {
-    public override buttons: Map<string, AppButton> = new Map<string, AppButton>([]);
+    public override buttons: Map<string, AppButton> = new Map([]);
 
-    goldRewardAmount: number = 10
+    goldRewardAmount: number = 10;
 
     public override async start(): Promise<Message<true>> {
         const randomIndex = Math.floor(Math.random() * celebrations.length);
@@ -46,21 +46,18 @@ export default class CelebrationQuest extends Quest.Base {
             .setDescription(celebration.descrition)
             .setColor("#e63946")
             .setImage(celebration.image)
-            .setURL("https://www.youtube.com/@LucasDevelop")
+            .setURL(Quest.link)
             .toJSON();
 
         this.goldRewardAmount = Math.floor(Math.random() * 5);
 
         (await Quest.channel.guild.members.fetch()).forEach(async (member) =>
-            (await AppUser.fromID(member.id))
-                .addGold(this.goldRewardAmount)
-                .save()
-        )
+            (await AppUser.fromID(member.id)).addGold(this.goldRewardAmount).save(),
+        );
 
         setTimeout(() => {
-            this.end()
+            this.end();
         }, 1000 * 5);
-
 
         return await Quest.channel.send({
             embeds: [embed],
