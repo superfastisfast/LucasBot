@@ -13,8 +13,6 @@ export namespace Command {
         public abstract main: Command;
         public subs: Command[] = [];
 
-        public name: string = undefined!;
-
         public get slash(): SlashCommandBuilder {
             const builder = new SlashCommandBuilder().setName(this.main.name).setDescription(this.main.description);
 
@@ -104,7 +102,6 @@ export namespace Command {
                 ?.replace(".ts", "")
                 .replace(/([a-z])([A-Z])/g, "$1 $2")
                 .toLowerCase()!;
-            command.name = name;
 
             console.log(`\t${name}`);
             commands.set(name, command);

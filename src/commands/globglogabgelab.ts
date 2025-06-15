@@ -1,58 +1,15 @@
-import { Command } from "@/command";
-import { AutocompleteInteraction, SlashCommandBuilder, type Client, type CommandInteraction } from "discord.js";
-
-const globglogabgelabScript = `||
-I'm the Globglogabgalab.
-
-And I love books.
-And this basement is
-
-a true treasure trove.
-
-I am the Glob-glo-gab-galab
-The shwabble-dabble-wabble-gabble
-flibba blabba blab
-I'm full of shwibbly glib-a-kind
-I am the yeast of thoughts and minds
-
-
-Shwabble dabble glibble
-glabble schribble shwap glab
-Dibble dabble shribble
-shrabble glibbi-glap shwap
-Shwabble dabble glibble
-glabble shwibble shwap-dap
-Dibble dabble shribble
-shrabble glibbi-shwap glab
-
-Oooh, ha ha ha, mmm, splendid!
-Simply delicious~!
-Ooooohm, ha ha ha ha!
-
-
-I am the Glob-glo-gab-galab
-The shwabble-dabble-wabble-gabble
-flibba blabba blab
-I'm full of shwibbly glib-a-kind
-I am the yeast of thoughts and minds
-
-
-Shwabble dabble glibble
-glabble schribble shwap glab
-Dibble dabble shribble
-shrabble glibbi-glap shwap
-Shwabble dabble glibble
-glabble shwibble shwap-dap
-Dibble dabble shribble
-shrabble glibbi-shwap glab
-
-Ahhh...||`;
+import { Command } from "@/commands";
+import {
+    CommandInteraction,
+    InteractionResponse,
+    ApplicationCommandOptionType,
+    AutocompleteInteraction,
+} from "discord.js";
 
 interface Globglogabgelab {
     url: string;
     option: string;
     desc?: string;
-    use_youtube_url_prefix?: boolean;
 }
 
 const songs: Globglogabgelab[] = [
@@ -114,11 +71,7 @@ const songs: Globglogabgelab[] = [
     { url: "ostAWWuazsc", option: "bstchld", desc: "Sigma" },
     { url: "vel-CyHrvb4", option: "Strawinski" },
     { url: "yNOlOqLSAwk", option: "Walter" },
-    {
-        url: "y81WZvnHTt8",
-        option: "The Creator",
-        desc: "This man ruined Lucas's life",
-    },
+    { url: "y81WZvnHTt8", option: "The Creator", desc: "This man ruined Lucas's life" },
     { url: "YeemJlrNx2Q", option: "Mark", desc: "Secretly a globglogebgelab" },
     { url: "zISYDnXs5QI", option: "Globzilla" },
     { url: "U19kFq-zxzU", option: "GMod" },
@@ -126,26 +79,33 @@ const songs: Globglogabgelab[] = [
     { url: "oxqCKsUiIWg", option: "Instrumental" },
     { url: "h6EuSlzO4m0", option: "Ends it all" },
     { url: "aTtnRjRJstc", option: "Spiderman" },
-    {
-        url: "",
-        option: "Script",
-        desc: globglogabgelabScript,
-        use_youtube_url_prefix: false,
-    },
 ];
 
-export default class GlobglogabgalabCommand extends Command.Base {
-    override get info(): any {
-        return new SlashCommandBuilder()
-            .setName("globglogabgalab")
-            .setDescription("Plays a random globglogabgalab song")
-            .addNumberOption((option) =>
-                option.setName("song").setDescription("The song you want").setAutocomplete(true).setRequired(false),
-            )
-            .toJSON();
+export default class GlobglogabgelabCommand extends Command.Base {
+    // prettier-ignore
+    public override main: Command.Command = new Command.Command("globglogabgelab", "The Globglogabgelab will sing you a banger from 2016", 
+        [{
+            name: "song", 
+            description: "The song you want to play", 
+            type: ApplicationCommandOptionType.Number, 
+            autocomplete: true, 
+        }], 
+        this.onExecute, 
+        this.onAutocomplete, 
+    );
+
+    public async onExecute(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
+        const song = interaction.options.get("song", false)?.value as number;
+        const index = song ?? Math.floor(Math.random() * songs.length);
+
+        return interaction.reply(
+            `**${songs[index]?.option}** video *[here](https://www.youtube.com/watch?v=${songs[index]?.url})* ${songs[index]?.desc || "..."}`,
+        );
     }
 
-    override async executeAutoComplete(client: Client, interaction: AutocompleteInteraction): Promise<void> {
+    public async onAutocomplete(interaction: AutocompleteInteraction): Promise<void> {
+        console.log("ROOOOOOOOOOOOOOOOO");
+
         const rawInput = interaction.options.getFocused().toString();
         const focusedValue = rawInput.toLowerCase().replace(/[^a-z\s]/g, "");
 
@@ -179,18 +139,5 @@ export default class GlobglogabgalabCommand extends Command.Base {
             .map(({ name, value }) => ({ name, value })); // Clean up object for Discord
 
         await interaction.respond(filtered);
-    }
-
-    override async executeCommand(client: Client, interaction: CommandInteraction): Promise<void> {
-        const song = interaction.options.get("song", false)?.value as number;
-        const index = song ?? Math.floor(Math.random() * songs.length);
-
-        if (!songs[index]?.use_youtube_url_prefix) {
-            interaction.reply(
-                `**${songs[index]?.option}** video *[here](https://www.youtube.com/watch?v=${songs[index]?.url})* ${songs[index]?.desc || "..."}`,
-            );
-        } else {
-            interaction.reply(`**${songs[index]?.option}** ${songs[index]?.url} ${songs[index]?.desc || "..."}`);
-        }
     }
 }

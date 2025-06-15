@@ -1,6 +1,6 @@
 import { Command } from "@/commands";
 import { Service } from "@/service";
-import { Client, Events, type Interaction, MessageFlags } from "discord.js";
+import { AutocompleteInteraction, Client, Events, type Interaction, MessageFlags } from "discord.js";
 
 export default class CommandService extends Service.Base {
     override async start(client: Client): Promise<void> {
@@ -21,25 +21,31 @@ export default class CommandService extends Service.Base {
 
             const subName = (interaction.options as any).getSubcommand(false);
             if (!subName) await command.main.onExecute(interaction);
-            else
-                command.subs.forEach(async (sub) => {
-                    if (subName === sub.name) await sub.onExecute(interaction);
-                });
-        }
-
-        if (interaction.isAutocomplete()) {
+            else {
+                for (const sub of command.subs) {
+                    if (subName === sub.name) {
+                        await sub.onExecute(interaction);
+                        break;
+                    }
+                }
+            }
+        } else if (interaction.isAutocomplete()) {
             const command = Command.commands.get(interaction.commandName);
             if (!command) {
-                interaction.respond([{ name: "Missing autocomplete", value: "undefined" }]);
+                console.error(`Autocomplete: Command not found: '${interaction.commandName}'`);
                 return;
             }
 
-            const subName = (interaction.options as any).getSubcommand(false);
+            const subName = ((interaction as AutocompleteInteraction).options as any).getSubcommand(false);
             if (!subName) await command.main.onAutocomplete(interaction);
-            else
-                command.subs.forEach(async (sub) => {
-                    if (subName === sub.name) await sub.onAutocomplete(interaction);
-                });
+            else {
+                for (const sub of command.subs) {
+                    if (subName === sub.name) {
+                        await sub.onAutocomplete(interaction);
+                        break;
+                    }
+                }
+            }
         }
     };
 }
