@@ -15,39 +15,39 @@ export class AppUser {
     static async fromID(userId: string): Promise<AppUser> {
         try {
             const discordUser = await client.users.fetch(userId);
-            const databaseUser = await AppUser.getDataBaseUser(discordUser);
+            const databaseUser = await AppUser.getDatabaseUser(discordUser);
             return new AppUser(discordUser, databaseUser);
         } catch (error: any) {
-            if (error.code === 10013) throw new Error(`Attempted to fetch unknown user ID: ${userId}: ${error}`);
-
-            throw new Error(`Failed to fetch user ${userId}: ${error}`);
+            console.warn(`Failed to fetch user ${userId}: ${error}`);
+            throw new Error(`Failed to fetch user`);
         }
     }
 
-    //RACE CONDTION MAY OCCUR!
-    private static async getDataBaseUser(discordUser: User): Promise<UserDocument> {
+    private static async getDatabaseUser(discordUser: User): Promise<UserDocument> {
         try {
-            //Tried to fix it with this
-            // if both A and B proccess try to find and create user we wil have duplicated key
-            let databaseUser = await UserModel.findOneAndUpdate(
+            const databaseUser = await UserModel.findOneAndUpdate(
                 { id: discordUser.id },
                 {
                     $setOnInsert: {
-                        id: discordUser.id as string,
+                        id: discordUser.id,
                         username: discordUser.username,
                     },
                 },
                 {
                     upsert: true,
                     new: true,
+                    setDefaultsOnInsert: true,
                 },
             );
+
             if (!databaseUser) {
-                throw new Error(`Failed to retrieve or create database user for ID ${discordUser.id}`);
+                throw new Error("User creation or retrieval returned null.");
             }
+
             return databaseUser;
         } catch (error) {
-            throw new Error(`Failed to fetch database user with ID ${discordUser.id}: ${error}`);
+            console.error(`Error retrieving or creating user ${discordUser.id}:`, error);
+            throw new Error(`Failed to retrieve or create user for ID ${discordUser.id}`);
         }
     }
 

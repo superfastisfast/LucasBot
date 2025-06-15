@@ -21,18 +21,16 @@ export class AppButton {
         AppButton.buttons.set(this.id, this);
     }
 
-    static createActionRow(buttons: Map<string, AppButton>, selected: string[]): ActionRowBuilder<ButtonBuilder>[] {
-        const selectedButtons = selected
-            .map((key) => buttons.get(key))
-            .filter((btn): btn is AppButton => btn !== undefined);
+    static createActionRow(buttons: AppButton[], perLine: number = 5): ActionRowBuilder<ButtonBuilder>[] {
+        const selectedButtons = Array.from(buttons).filter((btn): btn is AppButton => btn !== undefined);
 
-        if (selectedButtons.length === 0) {
-            throw new Error(`You must select between 1 and 25 buttons. Got: ${selectedButtons.length}`);
-        }
+        if (selectedButtons.length === 0)
+            console.warn(`You must select between 1 and 25 buttons, found: ${selectedButtons.length}`);
+        if (perLine < 1 || perLine > 5) throw new Error(`Per line must be between 1 and 5, found ${perLine}`);
 
         const rows: ActionRowBuilder<ButtonBuilder>[] = [];
-        for (let i = 0; i < selectedButtons.length; i += 5) {
-            const chunk = selectedButtons.slice(i, i + 5);
+        for (let i = 0; i < selectedButtons.length; i += perLine) {
+            const chunk = selectedButtons.slice(i, i + perLine);
             const row = new ActionRowBuilder<ButtonBuilder>().addComponents(...chunk.map((btn) => btn.builder));
             rows.push(row);
         }

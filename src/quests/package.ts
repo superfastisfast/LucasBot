@@ -1,18 +1,18 @@
-import { type Client, type ButtonInteraction, type Message, EmbedBuilder } from "discord.js";
+import { type ButtonInteraction, type Message, EmbedBuilder } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { Item } from "@/models/item";
 import { AppUser } from "@/user";
 
 export default class PackageQuest extends Quest.Base {
-    public override buttons: Map<string, AppButton> = new Map([
-        ["Open", new AppButton("Open it immediately", this.onPressOpen.bind(this))],
-        ["Owner", new AppButton("Find the owner", this.onPressOwner.bind(this))],
-        ["Sell", new AppButton("Sell it", this.onPressSell.bind(this))],
-    ]);
+    public override buttons: AppButton[] = [
+        new AppButton("Open it immediately", this.onPressOpen.bind(this)),
+        new AppButton("Find the owner", this.onPressOwner.bind(this)),
+        new AppButton("Sell it", this.onPressSell.bind(this)),
+    ];
 
     public override async start(): Promise<Message<true>> {
-        const actionRow = AppButton.createActionRow(this.buttons, ["Open", "Owner", "Sell"]);
+        const actionRow = AppButton.createActionRow(this.buttons);
 
         const embed = new EmbedBuilder()
             .setTitle("Mysterious Package")
@@ -21,8 +21,7 @@ export default class PackageQuest extends Quest.Base {
             .setImage(
                 "https://cdn.discordapp.com/attachments/1379101132743250082/1382015780383887360/MysteryBox.png?ex=68499dfe&is=68484c7e&hm=a0acba79ae199869576e87d66f3e834c31d389f707d6083a7199a1dd70100e60&",
             )
-            .setURL(Quest.link)
-            .toJSON();
+            .setURL(Quest.link);
 
         return await Quest.channel.send({
             embeds: [embed],

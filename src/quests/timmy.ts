@@ -1,19 +1,28 @@
-import type { Client, Message, ButtonInteraction } from "discord.js";
+import { Message, ButtonInteraction, EmbedBuilder } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
 
 export default class TimmyQuest extends Quest.Base {
-    public override buttons: Map<string, AppButton> = new Map([
-        ["Help", new AppButton("Help", this.onPressHelp)],
-        ["Kill", new AppButton("Kill", this.onPressKill)],
-    ]);
+    public override buttons: AppButton[] = [
+        new AppButton("Help", this.onPressHelp),
+        new AppButton("Kill", this.onPressKill),
+    ];
 
     public override async start(): Promise<Message<true>> {
-        const actionRow = AppButton.createActionRow(this.buttons, ["Help", "Kill"]);
+        const actionRow = AppButton.createActionRow(this.buttons);
+
+        const embed = new EmbedBuilder()
+            .setTitle("Timmy")
+            .setDescription("You walk in the woods and find a boy called Timmy, he askes you for help. What do you do?")
+            .setColor("#F5F5DC")
+            .setImage(
+                "https://cdn.discordapp.com/attachments/1379101132743250082/1383754297577312336/PQ.png?ex=684ff11d&is=684e9f9d&hm=369feadc4b3454614717544f60e6fa670a62e0ddc5f079be7d2655722d4edb58&",
+            )
+            .setURL(Quest.link);
 
         return await Quest.channel.send({
-            content: "You walk in the woods and find a boy called Timmy, he askes you for help. What do you do?",
+            embeds: [embed],
             components: actionRow,
         });
     }
@@ -21,10 +30,11 @@ export default class TimmyQuest extends Quest.Base {
     private async onPressHelp(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
 
-        user.database.stats.strength -= 3;
+        user.database.stats.strength -= 1;
+        user.database.stats.charisma -= 1;
         await user.save();
         interaction.reply({
-            content: `You helped but you also lost 3 strengh`,
+            content: `You helped but you also lost -1 strengh, -1 charisma`,
             flags: "Ephemeral",
         });
     }

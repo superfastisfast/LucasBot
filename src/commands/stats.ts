@@ -78,7 +78,7 @@ export default class StatsCommand extends Command.Base {
             inline: false,
         });
 
-        const userStatsEmbed = new EmbedBuilder().setTitle(`${appUser.discord.username}'s`).addFields(statFields);
+        const userStatsEmbed = new EmbedBuilder().setTitle(`${appUser.discord.displayName}'s`).addFields(statFields);
 
         const actionRows: ActionRowBuilder<ButtonBuilder>[] = [];
         let currentActionRow = new ActionRowBuilder<ButtonBuilder>();

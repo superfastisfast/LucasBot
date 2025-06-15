@@ -1,16 +1,14 @@
-import type { Client, ButtonInteraction, Message } from "discord.js";
+import { ButtonInteraction, Message } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 
 export default class TestQuest extends Quest.Base {
-    public override buttons: Map<string, AppButton> = new Map([
-        ["Test", new AppButton("Test Label", this.onPressTest.bind(this))],
-    ]);
+    public override buttons: AppButton[] = [new AppButton("Test Label", this.onPressTest.bind(this))];
 
     amount: number = 0;
 
     public override async start(): Promise<Message<true>> {
-        const actionRow = AppButton.createActionRow(this.buttons, ["Test"]);
+        const actionRow = AppButton.createActionRow(this.buttons);
 
         return await Quest.channel.send({
             content: "Test!!!",
