@@ -4,57 +4,52 @@ import { AppUser } from "../user";
 import { UserModel } from "@/models/user";
 
 export default class XpCommand extends Command.Base {
-    public override main: Command.Command = new Command.Command(
-        "xp",
-        "XP related stuff",
-        [],
-        this.onExecute.bind(this),
-    );
+    public override main: Command.Command = new Command.Command("xp", "XP related stuff", []);
     public override subs: Command.Command[] = [
-        new Command.Command("top", "Shows you the top 10 people based on xp", [], this.onTop.bind(this)),
+        // prettier-ignore
+        new Command.Command(
+            "top", 
+            "Shows you the top 10 people based on xp", 
+            [], 
+            this.onTop.bind(this)
+        ),
+        // prettier-ignore
         new Command.Command(
             "set",
             "Sets xp to a user",
-            [
-                {
-                    name: "user",
-                    description: "The user that you want to affect",
-                    type: ApplicationCommandOptionType.User,
-                    required: true,
-                },
-                {
-                    name: "amount",
-                    description: "The amount you want to set",
-                    type: ApplicationCommandOptionType.Number,
-                    required: true,
-                },
-            ],
+            [{
+                name: "user",
+                description: "The user that you want to affect",
+                type: ApplicationCommandOptionType.User,
+                required: true,
+            },
+            {
+                name: "amount",
+                description: "The amount you want to set",
+                type: ApplicationCommandOptionType.Number,
+                required: true,
+            }],
             this.onAdd.bind(this),
         ),
+        // prettier-ignore
         new Command.Command(
             "add",
             "Adds xp to a user",
-            [
-                {
-                    name: "user",
-                    description: "The user that you want to affect",
-                    type: ApplicationCommandOptionType.User,
-                    required: true,
-                },
-                {
-                    name: "amount",
-                    description: "The amount you want to give",
-                    type: ApplicationCommandOptionType.Number,
-                    required: true,
-                },
-            ],
+            [{
+                name: "user",
+                description: "The user that you want to affect",
+                type: ApplicationCommandOptionType.User,
+                required: true,
+            },
+            {
+                name: "amount",
+                description: "The amount you want to give",
+                type: ApplicationCommandOptionType.Number,
+                required: true,
+            }],
             this.onAdd.bind(this),
         ),
     ];
-
-    public async onExecute(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
-        return interaction.reply(`xp`);
-    }
 
     public async onTop(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
         const topUsers = await UserModel.find().sort({ xp: -1 }).limit(10).exec();

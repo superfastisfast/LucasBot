@@ -51,7 +51,12 @@ export namespace Command {
             name: string,
             description: string,
             options: Option[],
-            onExecute: (interaction: CommandInteraction) => Promise<InteractionResponse<boolean>>,
+            onExecute: (interaction: CommandInteraction) => Promise<InteractionResponse<boolean>> = (
+                interaction: CommandInteraction,
+            ) => {
+                return interaction.reply("");
+            },
+
             onAutocomplete: (interaction: AutocompleteInteraction) => Promise<void> = (
                 interaction: AutocompleteInteraction,
             ) => {
@@ -90,8 +95,6 @@ export namespace Command {
         console.log(`Loaded commands:`);
 
         for (const path of glob.scanSync(".")) {
-            const file = Bun.file(path);
-
             const { default: CommandClass } = await import(path.replace("src/commands/", "./commands/"));
             const command: Base = new CommandClass();
 
