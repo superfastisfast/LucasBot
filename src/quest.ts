@@ -4,7 +4,7 @@ import { client } from ".";
 
 export namespace Quest {
     export abstract class Base {
-        public abstract buttons: Map<string, AppButton>;
+        public abstract buttons: AppButton[];
 
         public message: Message<true> = undefined!;
         public name: string = undefined!;

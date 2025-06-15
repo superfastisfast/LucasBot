@@ -1,19 +1,19 @@
-import { type Client, Message, type ButtonInteraction, EmbedBuilder } from "discord.js";
+import { Message, type ButtonInteraction, EmbedBuilder } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
 
 export default class UnstablePortalQuest extends Quest.Base {
-    public override buttons: Map<string, AppButton> = new Map([
-        ["Enter", new AppButton("Enter", this.onPressEnter.bind(this))],
-        ["Destroy", new AppButton("Destroy", this.onPressDestroy.bind(this))],
-    ]);
+    public override buttons: AppButton[] = [
+        new AppButton("Enter", this.onPressEnter.bind(this)),
+        new AppButton("Destroy", this.onPressDestroy.bind(this)),
+    ];
 
     goldReward: number = 10;
     isDestroyed: boolean = false;
 
     public override async start(): Promise<Message<true>> {
-        const actionRow = AppButton.createActionRow(this.buttons, ["Enter", "Destroy"]);
+        const actionRow = AppButton.createActionRow(this.buttons);
         const embed = new EmbedBuilder()
             .setTitle("Unstable Portal")
             .setDescription(
@@ -23,8 +23,7 @@ export default class UnstablePortalQuest extends Quest.Base {
             .setImage(
                 "https://cdn.discordapp.com/attachments/1379101132743250082/1382031141577425076/WEQ4VWpwSE5RPQ.png?ex=6849ac4d&is=68485acd&hm=4cc8f7af4c76a4fd083f4eafb50935fc5e07dec05be3c742b0c25336f33aee8f&",
             )
-            .setURL(Quest.link)
-            .toJSON();
+            .setURL(Quest.link);
 
         return await Quest.channel.send({
             embeds: [embed],
@@ -52,12 +51,13 @@ export default class UnstablePortalQuest extends Quest.Base {
     }
 
     private async onPressDestroy(interaction: ButtonInteraction): Promise<void> {
+        this.isDestroyed = true;
+
         await interaction.reply({
             content: this.isDestroyed
                 ? "You can't destroy the portal anymore... someone destroyed it!"
                 : "You destroyed the portal!",
             flags: "Ephemeral",
         });
-        this.isDestroyed = true;
     }
 }

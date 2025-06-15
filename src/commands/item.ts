@@ -149,7 +149,7 @@ export default class ItemCommand extends Command.Base {
         switch (sub) {
             case "add": {
                 const nameOption = interaction.options.get("name")?.value as string;
-                const tagOption = interaction.options.get("name")?.value as string;
+                const tagOption = interaction.options.get("tag")?.value as string;
                 const costOption = interaction.options.get("cost")?.value as number;
                 const attributesOption = interaction.options.get("attributes")?.value as string;
 

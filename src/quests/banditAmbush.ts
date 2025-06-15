@@ -3,30 +3,30 @@ import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
 
-export default class RescueQuest extends Quest.Base {
-    public override buttons: AppButton[] = [new AppButton("Rescue the villager", this.onPressRescue.bind(this))];
+export default class BanditAmbushQuest extends Quest.Base {
+    public override buttons: AppButton[] = [new AppButton("Help", this.onPressHelp.bind(this))];
 
     players: string[] = [];
-    maxPlayers: number = 3;
+    maxPlayers: number = 5;
 
-    maxGoldReward: number = 300;
-    minGoldReward: number = 50;
+    maxGoldReward: number = 200;
+    minGoldReward: number = 25;
 
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);
         const embed = new EmbedBuilder()
-            .setTitle("Rescue Mission")
-            .setDescription("A local villager has been kidnapped by a fearsome beast!")
-            .setColor("#4CAF50")
+            .setTitle("Bandit Ambush")
+            .setDescription("A group of bandits is harassing travelers on the road")
+            .setColor("#e63946")
             .setImage(
-                "https://cdn.discordapp.com/attachments/1379101132743250082/1383443484333178931/iu.png?ex=684ecfa5&is=684d7e25&hm=b4d74322559c7db6d7a8c8ea90e8e567719ab7d203e5b9fbe1f6ab633d2ed5e5&",
+                "https://cdn.discordapp.com/attachments/1379101132743250082/1383750748856389672/anBn.png?ex=684fedcf&is=684e9c4f&hm=16b3cf162e3c32a459c47f9432bb0368739fb6b3583fb62ede305260600a7d00&",
             )
             .setURL(Quest.link);
 
         const lobby = new EmbedBuilder()
             .setTitle("Lobby")
             .setDescription(`0/${this.maxPlayers} players joined so far!`)
-            .setColor("#4CAF50")
+            .setColor("#e63946")
             .setURL(Quest.link);
 
         await Quest.channel.send({
@@ -47,38 +47,30 @@ export default class RescueQuest extends Quest.Base {
 
         users.forEach((user) => {
             const stats = user.database.stats;
-            playerStrength += stats.strength + stats.agility + stats.defense;
+            playerStrength += stats.charisma + stats.defense;
         });
 
-        const beastStrengh = Math.floor(Math.random() * playerStrength) + users.length * 25;
+        const banditsStrengh = Math.floor(Math.random() * playerStrength) + users.length * 25;
 
-        const playersWon = playerStrength > beastStrengh;
+        const playersWon = playerStrength > banditsStrengh;
+        const reward = Math.floor(Math.random() * this.maxGoldReward - this.minGoldReward) + this.minGoldReward;
 
-        if (playersWon)
-            users.forEach(
-                async (user) =>
-                    await user
-                        .addGold(
-                            Math.floor(Math.random() * (this.maxGoldReward - this.minGoldReward)) + this.minGoldReward,
-                        )
-                        .addXP(100)
-                        .save(),
-            );
+        if (playersWon) users.forEach(async (user) => await user.addGold(reward).addXP(reward).save());
         else
             users.forEach(async (user) => {
-                user.database.stats.strength = Math.max(0, user.database.stats.strength - 1);
-                await user.save();
+                user.database.stats.strength = Math.max(0, user.database.stats.charisma - 2);
+                await user.addGold(-reward).save();
             });
 
         const embed = new EmbedBuilder()
             .setTitle("Result")
             .setDescription(
                 playersWon
-                    ? `The players won over the beast!`
-                    : `The beast won over the players and ran away with the villager` +
-                          `\nBeast strengh: ${beastStrengh}, player strengh: ${playerStrength}`,
+                    ? `The players won over the bandits!`
+                    : `The bandits won over the players and ran away with the stolen gold` +
+                          `\nBndits strengh: ${banditsStrengh}, player strengh: ${playerStrength}`,
             )
-            .setColor("#4CAF50")
+            .setColor("#e63946")
             .setURL(Quest.link)
             .toJSON();
 
@@ -89,7 +81,7 @@ export default class RescueQuest extends Quest.Base {
         return Quest.end(this.name);
     }
 
-    private async onPressRescue(interaction: ButtonInteraction): Promise<void> {
+    private async onPressHelp(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
 
         for (const index in this.players) {

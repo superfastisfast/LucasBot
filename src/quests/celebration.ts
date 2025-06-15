@@ -1,4 +1,4 @@
-import { type Client, Message, type ButtonInteraction, EmbedBuilder } from "discord.js";
+import { Message, EmbedBuilder } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
@@ -28,7 +28,7 @@ export const celebrations: Celebration[] = [
 ];
 
 export default class CelebrationQuest extends Quest.Base {
-    public override buttons: Map<string, AppButton> = new Map([]);
+    public override buttons: AppButton[] = [];
 
     goldRewardAmount: number = 10;
 
@@ -46,8 +46,7 @@ export default class CelebrationQuest extends Quest.Base {
             .setDescription(celebration.descrition)
             .setColor("#e63946")
             .setImage(celebration.image)
-            .setURL(Quest.link)
-            .toJSON();
+            .setURL(Quest.link);
 
         this.goldRewardAmount = Math.floor(Math.random() * 5);
 

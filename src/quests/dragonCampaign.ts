@@ -1,18 +1,15 @@
-import { type Client, type ButtonInteraction, type Message, EmbedBuilder } from "discord.js";
+import { type ButtonInteraction, type Message, EmbedBuilder, ButtonStyle } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
-import type { StatsModel } from "@/models/user";
 
 export default class DragonCampaignQuest extends Quest.Base {
-    public override buttons: Map<string, AppButton> = new Map([
-        ["Join", new AppButton("Join", this.onPressJoin.bind(this))],
-    ]);
+    public override buttons: AppButton[] = [new AppButton("Join", this.onPressJoin.bind(this))];
 
     players: string[] = [];
 
     public override async start(): Promise<Message<true>> {
-        const actionRow = AppButton.createActionRow(this.buttons, ["Join"]);
+        const actionRow = AppButton.createActionRow(this.buttons);
 
         const embed = new EmbedBuilder()
             .setTitle("Dragon Campaign")
@@ -30,15 +27,13 @@ export default class DragonCampaignQuest extends Quest.Base {
             .setImage(
                 "https://cdn.discordapp.com/attachments/1379101132743250082/1381274300987867216/CoolDragon.jpg?ex=6846eb70&is=684599f0&hm=a901607a7f42b3970f60320d16dee2c04ce655201aa8df64ef123829d5e0bc47&",
             )
-            .setURL(Quest.link)
-            .toJSON();
+            .setURL(Quest.link);
 
         const lobby = new EmbedBuilder()
             .setTitle("Lobby")
             .setDescription("No players have joined yet!")
             .setColor("#FF4500")
-            .setURL(Quest.link)
-            .toJSON();
+            .setURL(Quest.link);
 
         await Quest.channel.send({
             embeds: [embed],

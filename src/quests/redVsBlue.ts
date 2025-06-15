@@ -1,20 +1,20 @@
-import { type Client, Message, type ButtonInteraction, EmbedBuilder } from "discord.js";
+import { Message, type ButtonInteraction, EmbedBuilder } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
 
 export default class SubscribePortalQuest extends Quest.Base {
-    public override buttons: Map<string, AppButton> = new Map([
-        ["Red", new AppButton("Red 🔴", this.onPressRed.bind(this))],
-        ["Blue", new AppButton("Blue 🔵", this.onPressBlue.bind(this))],
-    ]);
+    public override buttons: AppButton[] = [
+        new AppButton("Red 🔴", this.onPressRed.bind(this)),
+        new AppButton("Blue 🔵", this.onPressBlue.bind(this)),
+    ];
 
     bet: number = 5;
     teams: Map<string, string> = new Map();
     private winningTeam: "red" | "blue" | null = null;
 
     public override async start(): Promise<Message<true>> {
-        const actionRow = AppButton.createActionRow(this.buttons, ["Red", "Blue"]);
+        const actionRow = AppButton.createActionRow(this.buttons);
         const embed = new EmbedBuilder()
             .setTitle("Red vs Blue")
             .setDescription(`Pick a color costs ${this.bet} gold to participate. Winners split the won amount!`)
@@ -22,8 +22,7 @@ export default class SubscribePortalQuest extends Quest.Base {
             .setImage(
                 "https://cdn.discordapp.com/attachments/1379101132743250082/1382038199978688603/RedVsBlue.png?ex=6849b2df&is=6848615f&hm=bf4a2d2384a06f05254a556bc21afa61d7dc3ef327b0cb224dec387fb0650341&",
             )
-            .setURL(Quest.link)
-            .toJSON();
+            .setURL(Quest.link);
 
         return await Quest.channel.send({
             embeds: [embed],
