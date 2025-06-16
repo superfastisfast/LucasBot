@@ -7,7 +7,7 @@ import { Command } from "./commands";
 // Stats emoji
 // Global link AKA Lucas's yt
 export namespace Globals {
-    export const STATS = {
+    export const ATTRIBUTES = {
         strength: {
             name: "Strength",
             value: "strength",
@@ -42,6 +42,31 @@ export namespace Globals {
             name: "Charisma",
             value: "charisma",
             emoji: "🔥",
+        },
+        gold: {
+            name: "Charisma",
+            value: "charisma",
+            emoji: "💰",
+        },
+        xp: {
+            name: "Charisma",
+            value: "charisma",
+            emoji: "🌟",
+        },
+        skillpoint: {
+            name: "Charisma",
+            value: "charisma",
+            emoji: ":bulb:",
+        },
+        items: {
+            name: "Charisma",
+            value: "charisma",
+            emoji: "📦",
+        },
+        level: {
+            name: "Charisma",
+            value: "charisma",
+            emoji: ":arrow_up:",
         },
     };
 

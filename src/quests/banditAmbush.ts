@@ -67,8 +67,8 @@ export default class BanditAmbushQuest extends Quest.Base {
             .setTitle("Result")
             .setDescription(
                 playersWon
-                    ? `The players won over the bandits!\n All players recived: ${reward} 💰!`
-                    : `The bandits won over the players and stole ${reward}💰 From each player` +
+                    ? `The players won over the bandits!\n All players recived: ${reward} ${Globals.ATTRIBUTES.gold.emoji}!`
+                    : `The bandits won over the players and stole ${reward}${Globals.ATTRIBUTES.gold.emoji} From each player` +
                           `\n\nBndits strengh: ${banditsStrengh}, player strengh: ${playerStrength}`,
             )
             .setColor("#e63946")

@@ -6,6 +6,7 @@ import {
     ApplicationCommandOptionType,
     AutocompleteInteraction,
 } from "discord.js";
+import { Globals } from "..";
 
 export default class ItemCommand extends Command.Base {
     public override main: Command.Command = new Command.Command("item", "Item related stuff", []);
@@ -78,7 +79,7 @@ export default class ItemCommand extends Command.Base {
         newItem.save();
 
         return interaction.reply({
-            content: `Added item name: '${nameOpt}', tag: '${typeOpt}', cost: ${costOpt} gold, attr: '${attributesOpt}'`,
+            content: `Added item name: '${nameOpt}', tag: '${typeOpt}', cost: ${costOpt}  ${Globals.ATTRIBUTES.gold.emoji}, attr: '${attributesOpt}'`,
             flags: "Ephemeral",
         });
     }

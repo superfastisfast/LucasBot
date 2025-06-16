@@ -26,13 +26,13 @@ export default class ProfileCommand extends Command.Base {
     private async generateEmbed(user: AppUser): Promise<EmbedBuilder> {
         // prettier-ignore
         const statsData = [
-            { name: Globals.STATS.strength.name, value: user.database.stats.strength, emoji: Globals.STATS.strength.emoji },
-            { name: Globals.STATS.defense.name, value: user.database.stats.defense, emoji: Globals.STATS.defense.emoji },
-            { name: Globals.STATS.agility.name, value: user.database.stats.agility, emoji: Globals.STATS.agility.emoji },
-            { name: Globals.STATS.magicka.name, value: user.database.stats.magicka, emoji: Globals.STATS.magicka.emoji },
-            { name: Globals.STATS.vitality.name, value: user.database.stats.vitality, emoji: Globals.STATS.vitality.emoji },
-            { name: Globals.STATS.stamina.name, value: user.database.stats.stamina, emoji: Globals.STATS.stamina.emoji },
-            { name: Globals.STATS.charisma.name, value: user.database.stats.charisma, emoji: Globals.STATS.charisma.emoji },
+            { name: Globals.ATTRIBUTES.strength.name, value: user.database.stats.strength, emoji: Globals.ATTRIBUTES.strength.emoji },
+            { name: Globals.ATTRIBUTES.defense.name, value: user.database.stats.defense, emoji: Globals.ATTRIBUTES.defense.emoji },
+            { name: Globals.ATTRIBUTES.agility.name, value: user.database.stats.agility, emoji: Globals.ATTRIBUTES.agility.emoji },
+            { name: Globals.ATTRIBUTES.magicka.name, value: user.database.stats.magicka, emoji: Globals.ATTRIBUTES.magicka.emoji },
+            { name: Globals.ATTRIBUTES.vitality.name, value: user.database.stats.vitality, emoji: Globals.ATTRIBUTES.vitality.emoji },
+            { name: Globals.ATTRIBUTES.stamina.name, value: user.database.stats.stamina, emoji: Globals.ATTRIBUTES.stamina.emoji },
+            { name: Globals.ATTRIBUTES.charisma.name, value: user.database.stats.charisma, emoji: Globals.ATTRIBUTES.charisma.emoji },
         ];
 
         const maxNameLength = Math.max(...statsData.map((s) => s.name.length));

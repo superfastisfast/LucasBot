@@ -47,7 +47,7 @@ export default class UnstablePortalQuest extends Quest.Base {
         await interaction.reply({
             content: this.isDestroyed
                 ? "You can't enter the portal anymore... someone destroyed it!"
-                : `You ${successfullyEnterdPortal ? "successfully" : "unsuccessfully"} entered the portal${!successfullyEarnLoot ? "!" : ` and you got ${goldAmount} 💰`}`,
+                : `You ${successfullyEnterdPortal ? "successfully" : "unsuccessfully"} entered the portal${!successfullyEarnLoot ? "!" : ` and you got ${goldAmount} ${Globals.ATTRIBUTES.gold.emoji}`}`,
             flags: "Ephemeral",
         });
         if (destroyedPortal) this.end();

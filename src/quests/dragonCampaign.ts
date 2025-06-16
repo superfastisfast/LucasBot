@@ -64,20 +64,21 @@ export default class DragonCampaignQuest extends Quest.Base {
         const dragonStrength = Math.floor((Math.random() * (max - min + 1) + min) / 4);
 
         const playersWon = playerStrength > dragonStrength;
-
+        let msg = "The dragon won against the players";
         if (playersWon)
-            users.forEach(async (user) => {
-                await user
-                    .addSkillPoints(1)
-                    .addXP(10 * user.database.stats.charisma)
-                    .addGold(10 * user.database.stats.charisma)
-                    .save();
-            });
+            msg = `The players won over the dragon!\nRewards:\n1x${Globals.ATTRIBUTES.skillpoint.emoji}\n10${Globals.ATTRIBUTES.gold.emoji} * ${Globals.ATTRIBUTES.charisma.emoji}\n10${Globals.ATTRIBUTES.xp.emoji} * ${Globals.ATTRIBUTES.gold.emoji}`;
+        users.forEach(async (user) => {
+            await user
+                .addSkillPoints(1)
+                .addXP(10 * user.database.stats.charisma)
+                .addGold(10 * user.database.stats.charisma)
+                .save();
+        });
 
         const embed = new EmbedBuilder()
             .setTitle("Result")
             .setDescription(
-                `${playersWon ? "The players won over the dragon!\nRewards:\n1x💡\n10💰 * 🗣️\n10🌟 * 🗣️" : "The dragon won against the players"}\n
+                `${msg}\n
                 Player strengh was ${playerStrength}, dragon strengh was ${dragonStrength}`,
             )
             .setColor("#FF4500")

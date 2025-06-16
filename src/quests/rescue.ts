@@ -70,8 +70,8 @@ export default class RescueQuest extends Quest.Base {
             .setTitle("Result")
             .setDescription(
                 playersWon
-                    ? `The players won over the beast! and got rewarded\n1x⚔️\n${goldReward}💰\n${this.xpReward}🌟`
-                    : `The beast won over the players and ran away with the villager all players lost 1x⚔️` +
+                    ? `The players won over the beast! and got rewarded\n1x${Globals.ATTRIBUTES.strength.emoji}\n${goldReward}${Globals.ATTRIBUTES.gold.emoji}\n${this.xpReward}${Globals.ATTRIBUTES.xp.emoji}`
+                    : `The beast won over the players and ran away with the villager all players lost 1x${Globals.ATTRIBUTES.strength.emoji}` +
                           `\nBeast strengh: ${beastStrengh}, player strengh: ${playerStrength}`,
             )
             .setColor("#4CAF50")

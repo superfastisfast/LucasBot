@@ -49,7 +49,7 @@ export default class SubscribePortalQuest extends Quest.Base {
         }
         const embed = new EmbedBuilder()
             .setTitle(`Team ${winningTeamName} wins!`)
-            .setDescription(`Winners: ${formatedWinners}\nGot ${goldPerUser}💰 each!`)
+            .setDescription(`Winners: ${formatedWinners}\nGot ${goldPerUser}${Globals.ATTRIBUTES.gold.emoji} each!`)
             .setColor(winningTeamName === "red" ? "#FF0000" : "#0000FF")
             .setURL(Globals.LINK)
             .toJSON();

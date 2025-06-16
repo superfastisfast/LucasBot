@@ -42,7 +42,7 @@ export default class PackageQuest extends Quest.Base {
 
         const item = await ItemDB.getRandom();
         if (!item) return;
-        const itemInfo: string = `${item.name} worth ${item.cost} 💰`;
+        const itemInfo: string = `${item.name} worth ${item.cost} ${Globals.ATTRIBUTES.gold.emoji}`;
 
         await user.addItem(item).save();
 
@@ -75,7 +75,7 @@ export default class PackageQuest extends Quest.Base {
         const embed = new EmbedBuilder()
             .setTitle("Mysterious Package")
             .setDescription(
-                `${user.discord} found the owner of the package, and recived ${goldAmount.toFixed(2)} 💰 ${gainSkillPoint ? " And 1x💡" : ""}`,
+                `${user.discord} found the owner of the package, and received ${goldAmount.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji} ${gainSkillPoint ? ` And 1x${Globals.ATTRIBUTES.skillpoint.emoji}` : ""}`,
             )
             .setColor("#C1A471")
             .setURL(Globals.LINK)
@@ -97,7 +97,9 @@ export default class PackageQuest extends Quest.Base {
 
         const embed = new EmbedBuilder()
             .setTitle("Mysterious Package")
-            .setDescription(`${user.discord} found a buyer of the package, and recived ${goldAmount.toFixed(2)} 💰`)
+            .setDescription(
+                `${user.discord} found a buyer of the package, and recived ${goldAmount.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}`,
+            )
             .setColor("#C1A471")
             .setURL(Globals.LINK)
             .toJSON();
