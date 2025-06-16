@@ -23,41 +23,7 @@ export default class StatsCommand extends Command.Base {
     }
 
     private async generateStatsResponse(user: AppUser, isMainUser: boolean): Promise<any> {
-        const displayInfo = await user.getDisplayInfo();
-
-        let attributeString = "";
-        for (const [icon, attribute, value] of displayInfo.attributesArray) {
-            attributeString += `${icon}${attribute}: **${value}**\n`;
-        }
-
-        const statFields = [];
-        statFields.push({
-            name: "**Stats:**",
-            value: `💰 Gold: ${displayInfo.gold.toFixed(2) || 0}
-                🌟 XP: ${displayInfo.xp.toFixed(2) || 0}
-                ⬆️ Level: ${displayInfo.level || 0}
-                💡 Skill Points: ${displayInfo.skillPoints || 0}`,
-            inline: false,
-        });
-
-        statFields.push({
-            name: "**Attributes**",
-            value: attributeString,
-            inline: true,
-        });
-
-        statFields.push({
-            name: "\u200b",
-            value: displayInfo.items,
-            inline: false,
-        });
-        statFields.push({
-            name: "\u200b",
-            value: "\n\n\n",
-            inline: false,
-        });
-
-        const embed = new EmbedBuilder().setTitle(`${user.discord.displayName}'s`).addFields(statFields);
+        const embed = await user.getDisplayStatInfo();
 
         return { embed: [embed] };
     }
