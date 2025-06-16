@@ -69,9 +69,9 @@ export default class SubscribePortalQuest extends Quest.Base {
 
     private async onPressRed(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
-        if (user.database.inventory.gold < this.bet) {
+        if (user.inventory.gold < this.bet) {
             await interaction.reply({
-                content: `You do not have enough gold to participate, the required amount is ${this.bet} and you have ${user.database.inventory.gold}`,
+                content: `You do not have enough gold to participate, the required amount is ${this.bet} and you have ${user.inventory.gold}`,
                 flags: "Ephemeral",
             });
             return;
@@ -97,9 +97,9 @@ export default class SubscribePortalQuest extends Quest.Base {
 
     private async onPressBlue(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
-        if (user.database.inventory.gold < this.bet) {
+        if (user.inventory.gold < this.bet) {
             await interaction.reply({
-                content: `You do not have enough gold to participate, the required amount is ${this.bet} and you have ${user.database.inventory.gold}`,
+                content: `You do not have enough gold to participate, the required amount is ${this.bet} and you have ${user.inventory.gold}`,
                 flags: "Ephemeral",
             });
             return;
