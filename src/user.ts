@@ -145,6 +145,11 @@ export class AppUser {
         (this.database.stats as any)[attribute]++;
         return this;
     }
+    downgradeSkill(attribute: string): AppUser {
+        if ((this.database.stats as any)[attribute] < 0) return this;
+        (this.database.stats as any)[attribute]--;
+        return this;
+    }
 
     async save(): Promise<AppUser> {
         await this.level(this.database.xp);

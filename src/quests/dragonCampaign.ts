@@ -17,10 +17,8 @@ export default class DragonCampaignQuest extends Quest.Base {
                 `The ancient beast now haunts the skies of Lucamon\n
                 casting shadows over villages and scorching the land with fire\n\n
                 🛡️ Brave adventurers may answer the call\n
-                💎 Great rewards await those who succeed — but beware: you will take damage if unprepared\n\n
+                💎 Great rewards await those who succeed\n\n
                 ⚔️ Combine your party's Strength, Magic, Agility, and Defense to stand a chance. Your teamwork determines the outcome:\n
-                💀 Worst-case: All perish. No reward\n
-                🌟 Best-case: No one is harmed\n\n
                 Survivors gain legendary treasure. Dare to fight the beast — or watch Lucamon fall`,
             )
             .setColor("#FF4500")
@@ -70,15 +68,15 @@ export default class DragonCampaignQuest extends Quest.Base {
             users.forEach(async (user) => {
                 await user
                     .addSkillPoints(1)
-                    .addXP(Math.floor(Math.random() * 50 * user.database.stats.charisma))
-                    .addGold(Math.floor(Math.random() * 50 * user.database.stats.charisma))
+                    .addXP(10 * user.database.stats.charisma)
+                    .addGold(10 * user.database.stats.charisma)
                     .save();
             });
 
         const embed = new EmbedBuilder()
             .setTitle("Result")
             .setDescription(
-                `${playersWon ? "The players won over the dragon!" : "The dragon won against the players"}\n
+                `${playersWon ? "The players won over the dragon!\nRewards:\n1x💡\n10💰 * 🗣️\n10🌟 * 🗣️" : "The dragon won against the players"}\n
                 Player strengh was ${playerStrength}, dragon strengh was ${dragonStrength}`,
             )
             .setColor("#FF4500")

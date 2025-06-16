@@ -1,23 +1,24 @@
-import { Message, type ButtonInteraction, EmbedBuilder } from "discord.js";
+import { Message, type ButtonInteraction, EmbedBuilder, ButtonStyle } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
 
 export default class SubscribePortalQuest extends Quest.Base {
     public override buttons: AppButton[] = [
-        new AppButton("Red 🔴", this.onPressRed.bind(this)),
+        new AppButton("Red 🔴", this.onPressRed.bind(this), ButtonStyle.Danger),
         new AppButton("Blue 🔵", this.onPressBlue.bind(this)),
     ];
 
     bet: number = 5;
-    teams: Map<string, string> = new Map();
-    private winningTeam: "red" | "blue" | null = null;
+    teamRed: Array<string> = new Array();
+    teamBlue: Array<string> = new Array();
+    mainEmbed?: EmbedBuilder;
 
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);
-        const embed = new EmbedBuilder()
+        this.mainEmbed = new EmbedBuilder()
             .setTitle("Red vs Blue")
-            .setDescription(`Pick a color costs ${this.bet} gold to participate. Winners split the won amount!`)
+            .setDescription(`Pick a color costs ${this.bet} gold to participate. Winners split the amount!`)
             .setColor("#800080")
             .setImage(
                 "https://cdn.discordapp.com/attachments/1379101132743250082/1382038199978688603/RedVsBlue.png?ex=6849b2df&is=6848615f&hm=bf4a2d2384a06f05254a556bc21afa61d7dc3ef327b0cb224dec387fb0650341&",
@@ -25,38 +26,30 @@ export default class SubscribePortalQuest extends Quest.Base {
             .setURL(Quest.link);
 
         return await Quest.channel.send({
-            embeds: [embed],
+            embeds: [this.mainEmbed],
             components: actionRow,
         });
     }
 
     public override async end(): Promise<Quest.EndReturn> {
-        if (!this.winningTeam) this.winningTeam = Math.random() > 0.5 ? "red" : "blue";
-
-        let winTeam: string = "";
-        let loseTeam: string = "";
-
-        for (const teammate of this.teams) {
-            if (!teammate) {
-                console.warn(`Player with '${teammate?.[0]}' id in team '${teammate?.[1]}' is undefined`);
-                continue;
-            }
-
-            const user = await AppUser.fromID(teammate[0] || "");
-
-            if (teammate[1] === this.winningTeam) {
-                await user.addGold(this.bet).save();
-                winTeam += `${user.discord}, `;
-            } else {
-                await user.addGold(-this.bet).save();
-                loseTeam += `${user.discord}, `;
-            }
+        let winningTeam = this.teamRed;
+        let winningTeamName = "red";
+        if (Math.random() > 0.5) {
+            winningTeam = this.teamBlue;
+            winningTeamName = "blue";
         }
 
+        const goldPerUser = ((this.teamRed.length + this.teamBlue.length) * this.bet) / winningTeam.length;
+        let formatedWinners: string = "";
+        for (const teammate of winningTeam) {
+            const user = await AppUser.fromID(teammate);
+            user.addGold(goldPerUser).save();
+            formatedWinners += `${user.discord}, `;
+        }
         const embed = new EmbedBuilder()
-            .setTitle(`Team ${this.winningTeam} wins!`)
-            .setDescription(`Winning team: ${winTeam}\nLosing team: ${loseTeam}`)
-            .setColor(this.winningTeam === "red" ? "#FF0000" : "#0000FF")
+            .setTitle(`Team ${winningTeamName} wins!`)
+            .setDescription(`Winners: ${formatedWinners}\nGot ${goldPerUser}💰 each!`)
+            .setColor(winningTeamName === "red" ? "#FF0000" : "#0000FF")
             .setURL(Quest.link)
             .toJSON();
 
@@ -77,8 +70,7 @@ export default class SubscribePortalQuest extends Quest.Base {
             return;
         }
 
-        const currentUserTeam = this.teams.get(user.discord.id);
-
+        const currentUserTeam = this.teamRed.includes(user.discord.id) ? true : this.teamBlue.includes(user.discord.id);
         if (currentUserTeam) {
             await interaction.reply({
                 content: `You're already in team ${currentUserTeam}!`,
@@ -87,8 +79,8 @@ export default class SubscribePortalQuest extends Quest.Base {
             return;
         }
 
-        this.teams.set(user.discord.id, "red");
-
+        this.teamRed.push(user.discord.id);
+        user.addGold(-this.bet).save();
         await interaction.reply({
             content: `You joined team red!`,
             flags: "Ephemeral",
@@ -105,8 +97,7 @@ export default class SubscribePortalQuest extends Quest.Base {
             return;
         }
 
-        const currentUserTeam = this.teams.get(user.discord.id);
-
+        const currentUserTeam = this.teamBlue.includes(user.discord.id) ? true : this.teamRed.includes(user.discord.id);
         if (currentUserTeam) {
             await interaction.reply({
                 content: `You're already in team ${currentUserTeam}!`,
@@ -115,8 +106,8 @@ export default class SubscribePortalQuest extends Quest.Base {
             return;
         }
 
-        this.teams.set(user.discord.id, "blue");
-
+        this.teamBlue.push(user.discord.id);
+        user.addGold(-this.bet).save();
         await interaction.reply({
             content: `You joined team blue!`,
             flags: "Ephemeral",

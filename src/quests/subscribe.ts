@@ -8,6 +8,7 @@ export default class SubscribeQuest extends Quest.Base {
         new AppButton("Yes", this.onPressYes.bind(this)),
         new AppButton("No", this.onPressNo.bind(this)),
     ];
+    players: string[] = [];
 
     xpRewardAmount: number = 10;
 
@@ -30,7 +31,13 @@ export default class SubscribeQuest extends Quest.Base {
 
     private async onPressYes(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
-
+        if (this.hasPlayerReacted(user.discord.id)) {
+            await interaction.reply({
+                content: `you already gave your answer :]`,
+                flags: "Ephemeral",
+            });
+            return;
+        }
         await user.addXP(this.xpRewardAmount).save();
 
         await interaction.reply({
@@ -40,9 +47,22 @@ export default class SubscribeQuest extends Quest.Base {
     }
 
     private async onPressNo(interaction: ButtonInteraction): Promise<void> {
+        if (this.hasPlayerReacted(interaction.user.id)) {
+            await interaction.reply({
+                content: `you already gave your answer :]`,
+                flags: "Ephemeral",
+            });
+            return;
+        }
         await interaction.reply({
-            content: `WTF why are you here if you'r not even subscribed?!?!?`,
+            content: `What?... why are you here if you'r not even subscribed?!?!?`,
             flags: "Ephemeral",
         });
+    }
+
+    private hasPlayerReacted(playerID: string) {
+        if (this.players.includes(playerID)) return true;
+        this.players.push(playerID);
+        return false;
     }
 }

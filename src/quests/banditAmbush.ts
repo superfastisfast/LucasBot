@@ -9,8 +9,8 @@ export default class BanditAmbushQuest extends Quest.Base {
     players: string[] = [];
     maxPlayers: number = 5;
 
-    maxGoldReward: number = 200;
-    minGoldReward: number = 25;
+    maxGoldReward: number = 10;
+    minGoldReward: number = 1;
 
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);
@@ -19,7 +19,7 @@ export default class BanditAmbushQuest extends Quest.Base {
             .setDescription("A group of bandits is harassing travelers on the road")
             .setColor("#e63946")
             .setImage(
-                "https://cdn.discordapp.com/attachments/1379101132743250082/1383750748856389672/anBn.png?ex=684fedcf&is=684e9c4f&hm=16b3cf162e3c32a459c47f9432bb0368739fb6b3583fb62ede305260600a7d00&",
+                "https://cdn.discordapp.com/attachments/1379101132743250082/1384138103001714688/Banditss.jpg?ex=6851568f&is=6850050f&hm=5782b862522ef4944d259b633729c39bd027def90a81ddbd22ce54da9a0d9415&",
             )
             .setURL(Quest.link);
 
@@ -66,9 +66,9 @@ export default class BanditAmbushQuest extends Quest.Base {
             .setTitle("Result")
             .setDescription(
                 playersWon
-                    ? `The players won over the bandits!`
-                    : `The bandits won over the players and ran away with the stolen gold` +
-                          `\nBndits strengh: ${banditsStrengh}, player strengh: ${playerStrength}`,
+                    ? `The players won over the bandits!\n All players recived: ${reward} 💰!`
+                    : `The bandits won over the players and stole ${reward}💰 From each player` +
+                          `\n\nBndits strengh: ${banditsStrengh}, player strengh: ${playerStrength}`,
             )
             .setColor("#e63946")
             .setURL(Quest.link)

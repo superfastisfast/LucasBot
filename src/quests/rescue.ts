@@ -9,8 +9,9 @@ export default class RescueQuest extends Quest.Base {
     players: string[] = [];
     maxPlayers: number = 3;
 
-    maxGoldReward: number = 300;
-    minGoldReward: number = 50;
+    maxGoldReward: number = 10;
+    minGoldReward: number = 2;
+    xpReward: number = 2;
 
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);
@@ -53,29 +54,23 @@ export default class RescueQuest extends Quest.Base {
         const beastStrengh = Math.floor(Math.random() * playerStrength) + users.length * 25;
 
         const playersWon = playerStrength > beastStrengh;
+        const goldReward = Math.floor(Math.random() * (this.maxGoldReward - this.minGoldReward)) + this.minGoldReward;
 
         if (playersWon)
             users.forEach(
-                async (user) =>
-                    await user
-                        .addGold(
-                            Math.floor(Math.random() * (this.maxGoldReward - this.minGoldReward)) + this.minGoldReward,
-                        )
-                        .addXP(100)
-                        .save(),
+                async (user) => await user.addGold(goldReward).addXP(this.xpReward).upgradeSkill("strength").save(),
             );
         else
             users.forEach(async (user) => {
-                user.database.stats.strength = Math.max(0, user.database.stats.strength - 1);
-                await user.save();
+                await user.downgradeSkill("strength").save();
             });
 
         const embed = new EmbedBuilder()
             .setTitle("Result")
             .setDescription(
                 playersWon
-                    ? `The players won over the beast!`
-                    : `The beast won over the players and ran away with the villager` +
+                    ? `The players won over the beast! and got rewarded\n1x⚔️\n${goldReward}💰\n${this.xpReward}🌟`
+                    : `The beast won over the players and ran away with the villager all players lost 1x⚔️` +
                           `\nBeast strengh: ${beastStrengh}, player strengh: ${playerStrength}`,
             )
             .setColor("#4CAF50")

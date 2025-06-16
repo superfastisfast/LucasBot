@@ -11,6 +11,8 @@ export default class PackageQuest extends Quest.Base {
         new AppButton("Sell it", this.onPressSell.bind(this)),
     ];
 
+    maxGoldReward = 10;
+
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);
 
@@ -35,10 +37,11 @@ export default class PackageQuest extends Quest.Base {
 
     private async onPressOpen(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
+        await interaction.deferUpdate();
 
         const item = await Item.getRandom();
         if (!item) return;
-        const itemInfo: string = `${item.tag} worth ${item.cost} gold!`;
+        const itemInfo: string = `${item.tag} worth ${item.cost} 💰`;
 
         await user.equipItem(item).save();
 
@@ -58,13 +61,21 @@ export default class PackageQuest extends Quest.Base {
 
     private async onPressOwner(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
-        const goldAmount = Math.floor(Math.random() * 50) + 25;
+        await interaction.deferUpdate();
+        const goldAmount = Math.random() * this.maxGoldReward;
 
+        let gainSkillPoint = false;
+        if (user.database.stats.charisma * Math.random() > 0) {
+            gainSkillPoint = true;
+            user.addSkillPoints(1);
+        }
         await user.addGold(goldAmount).save();
 
         const embed = new EmbedBuilder()
             .setTitle("Mysterious Package")
-            .setDescription(`${user.discord} found the owner of the package, and recived ${goldAmount} gold`)
+            .setDescription(
+                `${user.discord} found the owner of the package, and recived ${goldAmount.toFixed(2)} 💰 ${gainSkillPoint ? " And 1x💡" : ""}`,
+            )
             .setColor("#C1A471")
             .setURL(Quest.link)
             .toJSON();
@@ -78,13 +89,14 @@ export default class PackageQuest extends Quest.Base {
 
     private async onPressSell(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
-        const goldAmount = Math.floor(Math.random() * 100) + 5;
+        await interaction.deferUpdate();
+        const goldAmount = Math.random() * this.maxGoldReward * 2;
 
         await user.addGold(goldAmount).save();
 
         const embed = new EmbedBuilder()
             .setTitle("Mysterious Package")
-            .setDescription(`${user.discord} found a buyer of the package, and recived ${goldAmount} gold`)
+            .setDescription(`${user.discord} found a buyer of the package, and recived ${goldAmount.toFixed(2)} 💰`)
             .setColor("#C1A471")
             .setURL(Quest.link)
             .toJSON();

@@ -13,7 +13,8 @@ export default class ButtonService extends Service.Base {
 
     private handleButton = async (interaction: Interaction) => {
         if (!interaction.isButton()) return;
-
-        AppButton.buttons.get(interaction.customId)?.onPress(interaction);
+        const button = AppButton.buttons.get(interaction.customId);
+        button!.onPress(interaction);
+        console.log(button!.builder.data.label);
     };
 }

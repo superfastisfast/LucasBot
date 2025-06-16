@@ -45,15 +45,14 @@ export default class QuestCommand extends Command.Base {
         const random: string | undefined = questKeys[Math.floor(Math.random() * questKeys.length)];
         const nameOpt: string | undefined = (interaction.options.get("name", false)?.value as string) || random;
 
-        await Quest.start(nameOpt!);
-
+        Quest.start(nameOpt!);
         return interaction.reply({ content: `Executing quest '${nameOpt}'`, flags: "Ephemeral" });
     }
 
     public async onEnd(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
         const nameOpt: string = interaction.options.get("name")?.value as string;
 
-        await Quest.end(nameOpt);
+        Quest.end(nameOpt);
 
         return interaction.reply({ content: `Ending quest '${nameOpt}'`, flags: "Ephemeral" });
     }
