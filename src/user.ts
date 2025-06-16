@@ -1,27 +1,21 @@
-import {
-    User,
-    Guild,
-    GuildMember,
-    Role,
-    PermissionsBitField,
-    DiscordAPIError,
-    TextChannel,
-    EmbedBuilder,
-} from "discord.js";
+import { User, Guild, GuildMember, Role, PermissionsBitField, DiscordAPIError, TextChannel, EmbedBuilder } from "discord.js";
 import { client } from ".";
 import { UserDB } from "./models/user";
 import { InventoryDB } from "./models/inventory";
 import { ItemDB } from "./models/item";
+import Fighter from "./commands/Fight/fighter";
 
 export class AppUser {
     discord: User;
     database: UserDB.Document;
+    fighter!: Fighter;
     inventory: InventoryDB.Document;
 
     private constructor(discordUser: User, databaseUser: UserDB.Document, inventory: InventoryDB.Document) {
         this.discord = discordUser;
         this.database = databaseUser;
         this.inventory = inventory;
+        this.fighter = new Fighter(this);
     }
 
     static async fromID(userId: string): Promise<AppUser> {
@@ -109,9 +103,7 @@ export class AppUser {
             if (!role) throw new Error(`Role '${name}' not found in guild '${guild.name}'`);
 
             if (role.position >= botMember.roles.highest.position)
-                throw new Error(
-                    `Cannot assign role '${role.name}' because it is equal to or higher than my highest role`,
-                );
+                throw new Error(`Cannot assign role '${role.name}' because it is equal to or higher than my highest role`);
 
             // Prevent assigning @everyone
             if (role.id === guild.id) return;
@@ -143,9 +135,7 @@ export class AppUser {
         if (amount > 0 && this.database.timeouts > 0) {
             const maxTimeoutsForReduction = 20;
             const minTimeoutsForReduction = 1;
-            let reductionFactor =
-                (this.database.timeouts - minTimeoutsForReduction) /
-                (maxTimeoutsForReduction - minTimeoutsForReduction);
+            let reductionFactor = (this.database.timeouts - minTimeoutsForReduction) / (maxTimeoutsForReduction - minTimeoutsForReduction);
             reductionFactor = Math.max(0, Math.min(1, reductionFactor));
             amount = amount * (1 - reductionFactor);
         }
@@ -188,15 +178,7 @@ export class AppUser {
     }
 
     async save(): Promise<AppUser> {
-        const stats = [
-            "strength",
-            "agility",
-            "charisma",
-            "magicka",
-            "stamina",
-            "defense",
-            "vitality",
-        ] as (keyof UserDB.StatDB.Document)[];
+        const stats = ["strength", "agility", "charisma", "magicka", "stamina", "defense", "vitality"] as (keyof UserDB.StatDB.Document)[];
 
         stats.forEach((stat) => {
             if ((this.database.stats[stat] as number) < 0) {

@@ -1,56 +1,30 @@
-import {
-    createCanvas,
-    Image,
-    loadImage,
-    type SKRSContext2D,
-} from "@napi-rs/canvas";
+import type Fighter from "@/commands/Fight/fighter";
+import type FightGame from "@/commands/Fight/fightGame";
+import type { AppUser } from "@/user";
+import { createCanvas, Image, loadImage, type SKRSContext2D } from "@napi-rs/canvas";
 import { AttachmentBuilder, EmbedBuilder } from "discord.js";
-import type Fighter from "./fighter";
-import type FightGame from "./fightGame";
 
 export const BLOCK_SIZE = 64;
 
-async function addPlayerToConext(
-    player: Fighter,
-    context: SKRSContext2D,
-    BorderImage: Image | undefined,
-) {
-    const playerAvatarUrl = player.imgeUrl;
+async function addPlayerToConext(appUser: AppUser, context: SKRSContext2D, BorderImage: Image | undefined) {
+    const playerAvatarUrl = appUser.discord.avatarURL()!;
+    const player: Fighter = appUser.fighter;
     let playerAvatar;
     try {
         playerAvatar = await loadImage(playerAvatarUrl);
-        context.drawImage(
-            playerAvatar,
-            player.posX * BLOCK_SIZE,
-            0,
-            BLOCK_SIZE,
-            BLOCK_SIZE,
-        );
+        context.drawImage(playerAvatar, player.posX * BLOCK_SIZE, 0, BLOCK_SIZE, BLOCK_SIZE);
         if (BorderImage !== undefined) {
-            context.drawImage(
-                BorderImage,
-                player.posX * BLOCK_SIZE,
-                0,
-                BLOCK_SIZE,
-                BLOCK_SIZE,
-            );
+            context.drawImage(BorderImage, player.posX * BLOCK_SIZE, 0, BLOCK_SIZE, BLOCK_SIZE);
         }
     } catch (error) {
-        console.error(
-            `Failed to load player 1 avatar from ${playerAvatarUrl}:`,
-            error,
-        );
+        console.error(`Failed to load player 1 avatar from ${playerAvatarUrl}:`, error);
         context.fillStyle = "red";
         context.fillRect(player.posX * BLOCK_SIZE, 0, BLOCK_SIZE, BLOCK_SIZE);
         context.font = `${BLOCK_SIZE / 8}px sans-serif`;
         context.fillStyle = "white";
         context.textAlign = "center";
         context.textBaseline = "middle";
-        context.fillText(
-            player.dbUser!.username,
-            player.posX * BLOCK_SIZE + BLOCK_SIZE / 2,
-            BLOCK_SIZE / 2,
-        );
+        context.fillText(appUser.database.username, player.posX * BLOCK_SIZE + BLOCK_SIZE / 2, BLOCK_SIZE / 2);
     }
 }
 
@@ -67,10 +41,7 @@ export async function getFieldImage(currentGame: FightGame) {
     try {
         defaultBlockImage = await loadImage(squareBlockImagePath);
     } catch (error) {
-        console.error(
-            `Failed to load square block image from ${squareBlockImagePath}:`,
-            error,
-        );
+        console.error(`Failed to load square block image from ${squareBlockImagePath}:`, error);
         context.fillStyle = "#CCCCCC";
     }
 
@@ -78,10 +49,7 @@ export async function getFieldImage(currentGame: FightGame) {
     try {
         BorderImage = await loadImage(borderImagePath);
     } catch (error) {
-        console.error(
-            `Failed to load square block image from ${borderImagePath}:`,
-            error,
-        );
+        console.error(`Failed to load square block image from ${borderImagePath}:`, error);
         context.fillStyle = "#BBBBBB";
     }
 
@@ -93,17 +61,9 @@ export async function getFieldImage(currentGame: FightGame) {
             context.fillRect(x, 0, BLOCK_SIZE, BLOCK_SIZE);
         }
     }
-    const players: Fighter[] = currentGame.getPlayers();
-    await addPlayerToConext(
-        players[0]!,
-        context,
-        currentGame.playerTurn === 1 ? BorderImage! : undefined,
-    );
-    await addPlayerToConext(
-        players[1]!,
-        context,
-        currentGame.playerTurn === 0 ? BorderImage! : undefined,
-    );
+    const players: AppUser[] = currentGame.appUsers;
+    await addPlayerToConext(players[0]!, context, currentGame.playerTurn === 1 ? BorderImage! : undefined);
+    await addPlayerToConext(players[1]!, context, currentGame.playerTurn === 0 ? BorderImage! : undefined);
     const buffer = await canvas.encode("png");
     const attachment = new AttachmentBuilder(buffer, {
         name: "game-field.png",
