@@ -1,194 +1,187 @@
-import { Command } from "@/command";
+import { Command } from "@/commands";
+import { ItemModel } from "@/models/item";
+import { Quest } from "@/quest";
 import {
-    InteractionContextType,
-    SlashCommandBuilder,
-    type Client,
-    type CommandInteraction,
-    type Interaction,
+    CommandInteraction,
+    InteractionResponse,
+    ApplicationCommandOptionType,
+    AutocompleteInteraction,
 } from "discord.js";
-import { ItemModel } from "../models/item";
-import { AutocompleteInteraction } from "discord.js";
 
 export default class ItemCommand extends Command.Base {
-    override get info(): any {
-        return new SlashCommandBuilder()
-            .setName("item")
-            .setDescription("Item related stuff")
-            .addSubcommand((sub) =>
-                sub
-                    .setName("add")
-                    .setDescription("Add an item")
-                    .addStringOption((opt) =>
-                        opt.setName("name").setDescription("User to give gold to").setRequired(true),
-                    )
-                    .addStringOption((opt) =>
-                        opt
-                            .setName("tag")
-                            .setDescription("The tag")
-                            .addChoices(
-                                { name: "Weapon", value: "weapon" },
-                                { name: "Helmet", value: "helmet" },
-                                { name: "Chestplate", value: "chestplate" },
-                                { name: "Leggings", value: "leggings" },
-                                { name: "Boots", value: "boots" },
-                                { name: "Shield", value: "shield" },
-                            )
-                            .setRequired(true),
-                    )
-                    .addIntegerOption((opt) => opt.setName("cost").setDescription("The item cost").setRequired(true))
-                    .addStringOption((opt) =>
-                        opt.setName("attributes").setDescription("Attributes").setAutocomplete(true).setRequired(true),
-                    ),
-            )
-            .addSubcommand((sub) =>
-                sub
-                    .setName("remove")
-                    .setDescription("Remove an item")
-                    .addStringOption((opt) =>
-                        opt
-                            .setName("name")
-                            .setDescription("User to give gold to")
-                            .setAutocomplete(true)
-                            .setRequired(true),
-                    ),
-            )
-            .setDefaultMemberPermissions(0n)
-            .setContexts(InteractionContextType.Guild)
-            .toJSON();
+    public override main: Command.Command = new Command.Command("item", "Item related stuff", []);
+    public override subs: Command.Command[] = [
+        // prettier-ignore
+        new Command.Command(
+            "add",
+            "Add an item",
+            [{
+                name: "name",
+                description: "The name of the new item",
+                type: ApplicationCommandOptionType.String,
+                required: true,
+            },
+            {
+                name: "tag",
+                description: "The item tag",
+                type: ApplicationCommandOptionType.String,
+                required: true,
+                autocomplete: true,
+            },
+            {
+                name: "cost",
+                description: "How much the item costs",
+                type: ApplicationCommandOptionType.Number,
+                required: true,
+            },
+            {
+                name: "modifiers",
+                description: "The items modifiers",
+                type: ApplicationCommandOptionType.String,
+                required: true,
+                autocomplete: true,
+            }],
+            this.onAdd,
+            this.onAddAutocomplete,
+        ),
+        // prettier-ignore
+        new Command.Command(
+            "remove",
+            "Remove an item",
+            [{
+                name: "name",
+                description: "The name of the item you want to remove",
+                type: ApplicationCommandOptionType.String,
+                required: true,
+                autocomplete: true,
+            }],
+            this.onRemove,
+            this.onRemoveAutocomplete,
+        ),
+    ];
+
+    public async onAdd(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
+        const nameOpt = interaction.options.get("name")?.value as string;
+        const tagOpt = interaction.options.get("tag")?.value as string;
+        const costOpt = interaction.options.get("cost")?.value as number;
+        const attributesOpt = interaction.options.get("attributes")?.value as string;
+
+        const attributes = ItemCommand.parseAttributes(new String(attributesOpt));
+
+        const newItem = await ItemModel.create({
+            name: nameOpt,
+            tag: tagOpt,
+            cost: costOpt,
+            flatStatModifiers: attributes.flatStatModifiers,
+            percentageStatModifiers: attributes.percentageStatModifiers,
+        });
+
+        newItem.save();
+
+        return interaction.reply({
+            content: `Added item name: '${nameOpt}', tag: '${tagOpt}', cost: ${costOpt} gold, attr: '${attributesOpt}'`,
+            flags: "Ephemeral",
+        });
     }
 
-    override async executeAutoComplete(client: Client, interaction: AutocompleteInteraction): Promise<void> {
-        const sub = interaction.options.getSubcommand();
+    public async onRemove(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
+        const nameOpt = interaction.options.get("name")?.value as string;
 
-        const rawInput = interaction.options.getFocused().toString();
-
-        switch (sub) {
-            case "add": {
-                const parts = rawInput.split(",").map((p) => p.trim());
-
-                const rawLast = parts.pop() ?? "";
-
-                // Checks if its a number
-                if (/\d$/.test(rawLast)) {
-                    const prefix = parts.length > 0 ? parts.join(", ") + ", " : "";
-                    const suggestionBase = prefix + rawLast;
-
-                    const suggestions = [
-                        {
-                            name: suggestionBase + ",",
-                            value: suggestionBase + ",",
-                        },
-                        {
-                            name: suggestionBase + "%,",
-                            value: suggestionBase + "%,",
-                        },
-                    ];
-
-                    await interaction.respond(suggestions);
-                    return;
-                }
-
-                let possibleStats = ["strength", "agility", "charisma", "magicka", "stamina", "defense", "vitality"];
-
-                for (const part of parts) {
-                    const cleanedPart = (part.split("=")[0] || "").replace(/[^a-z]/gi, "").toLowerCase();
-                    possibleStats = possibleStats.filter((stat) => stat.toLowerCase() !== cleanedPart);
-                }
-
-                const [keyPart, valuePart] = rawLast.split("=");
-
-                const filteredStats = possibleStats.filter((stat) =>
-                    stat.toLowerCase().startsWith((keyPart ?? "").toLowerCase()),
-                );
-
-                const suggestions = filteredStats.map((stat) => {
-                    const newInput = parts.length > 0 ? parts.join(", ") + ", " + stat + "=" : stat + "=";
-
-                    return {
-                        name: newInput,
-                        value: newInput,
-                    };
-                });
-
-                if (rawInput.trim() === "") {
-                    const allStats = possibleStats.map((stat) => ({
-                        name: stat + "=",
-                        value: stat + "=",
-                    }));
-                    await interaction.respond(allStats.slice(0, 25));
-                    return;
-                }
-
-                await interaction.respond(suggestions.slice(0, 25));
-                return;
-            }
-            case "remove": {
-                // Search the DB using case-insensitive regex match
-                const matchingThings = await ItemModel.find({
-                    name: { $regex: new RegExp(rawInput, "i") },
-                })
-                    .sort({ name: 1 })
-                    .limit(25);
-
-                const suggestions = matchingThings.map((item) => ({
-                    name: item.name,
-                    value: item.name,
-                }));
-
-                await interaction.respond(suggestions.slice(0, 25));
-                return;
-            }
-            default:
-                return;
-        }
+        await ItemModel.findOneAndDelete({ name: nameOpt });
+        return interaction.reply({
+            content: `Removed item '${nameOpt}'`,
+            flags: "Ephemeral",
+        });
     }
 
-    override async executeCommand(client: Client, interaction: CommandInteraction<any>): Promise<void> {
-        const sub = (interaction.options as any).getSubcommand();
+    public async onAddAutocomplete(interaction: AutocompleteInteraction): Promise<void> {
+        const focused = interaction.options.getFocused(true);
 
-        switch (sub) {
-            case "add": {
-                const nameOption = interaction.options.get("name")?.value as string;
-                const tagOption = interaction.options.get("tag")?.value as string;
-                const costOption = interaction.options.get("cost")?.value as number;
-                const attributesOption = interaction.options.get("attributes")?.value as string;
+        if (focused.name === "tag")
+            return interaction.respond([
+                { name: "weapon", value: "weapon" },
+                { name: "helmet", value: "helmet" },
+                { name: "chestplate", value: "chestplate" },
+                { name: "leggings", value: "leggings" },
+                { name: "boots", value: "boots" },
+                { name: "shield", value: "shield" },
+            ]);
 
-                const attributes = ItemCommand.parseAttributes(new String(attributesOption));
+        const parts = focused.value
+            .toString()
+            .split(",")
+            .map((p) => p.trim());
 
-                const newItem = await ItemModel.create({
-                    name: nameOption,
-                    tag: tagOption,
-                    cost: costOption,
-                    flatStatModifiers: attributes.flatStatModifiers,
-                    percentageStatModifiers: attributes.percentageStatModifiers,
-                });
+        const rawLast = parts.pop() ?? "";
 
-                newItem.save();
+        // Checks if its a number
+        if (/\d$/.test(rawLast)) {
+            const prefix = parts.length > 0 ? parts.join(", ") + ", " : "";
+            const suggestionBase = prefix + rawLast;
 
-                interaction.reply({
-                    content: `${interaction.user} added item name: '${nameOption}', tag: '${tagOption}', cost: ${costOption} gold, attr: '${attributesOption}'`,
-                    flags: "Ephemeral",
-                });
+            const suggestions = [
+                {
+                    name: suggestionBase + ",",
+                    value: suggestionBase + ",",
+                },
+                {
+                    name: suggestionBase + "%,",
+                    value: suggestionBase + "%,",
+                },
+            ];
 
-                break;
-            }
-            case "remove": {
-                const nameOption = interaction.options.get("name")?.value as string;
-
-                await ItemModel.findOneAndDelete({ name: nameOption });
-                interaction.reply({
-                    content: `${interaction.user} removed item '${nameOption}'`,
-                    flags: "Ephemeral",
-                });
-
-                break;
-            }
-            default:
-                interaction.reply({
-                    content: "You do not have permission to do this!",
-                    flags: "Ephemeral",
-                });
+            await interaction.respond(suggestions);
+            return;
         }
+
+        let possibleStats = ["strength", "agility", "charisma", "magicka", "stamina", "defense", "vitality"];
+
+        for (const part of parts) {
+            const cleanedPart = (part.split("=")[0] || "").replace(/[^a-z]/gi, "").toLowerCase();
+            possibleStats = possibleStats.filter((stat) => stat.toLowerCase() !== cleanedPart);
+        }
+
+        const [keyPart, valuePart] = rawLast.split("=");
+
+        const filteredStats = possibleStats.filter((stat) =>
+            stat.toLowerCase().startsWith((keyPart ?? "").toLowerCase()),
+        );
+
+        const suggestions = filteredStats.map((stat) => {
+            const newInput = parts.length > 0 ? parts.join(", ") + ", " + stat + "=" : stat + "=";
+
+            return {
+                name: newInput,
+                value: newInput,
+            };
+        });
+
+        if (focused.value.toString().trim() === "") {
+            const allStats = possibleStats.map((stat) => ({
+                name: stat + "=",
+                value: stat + "=",
+            }));
+            return await interaction.respond(allStats.slice(0, 25));
+        }
+
+        return await interaction.respond(suggestions.slice(0, 25));
+    }
+
+    public async onRemoveAutocomplete(interaction: AutocompleteInteraction): Promise<void> {
+        const focused = interaction.options.getFocused().toString();
+
+        const matchingThings = await ItemModel.find({
+            name: { $regex: new RegExp(focused.toString(), "i") },
+        })
+            .sort({ name: 1 })
+            .limit(25);
+
+        const suggestions = matchingThings.map((item) => ({
+            name: item.name,
+            value: item.name,
+        }));
+
+        await interaction.respond(suggestions.slice(0, 25));
     }
 
     static parseAttributes(attributes: String) {

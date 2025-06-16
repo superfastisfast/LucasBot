@@ -1,111 +1,95 @@
-import { Command } from "@/command";
-import {
-    EmbedBuilder,
-    InteractionContextType,
-    SlashCommandBuilder,
-    User,
-    type Client,
-    type CommandInteraction,
-} from "discord.js";
-import { UserModel } from "../models/user";
-import { AppUser } from "@/user";
+import { Command } from "@/commands";
+import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
+import { AppUser } from "../user";
+import { UserModel } from "@/models/user";
 
 export default class XpCommand extends Command.Base {
-    override get info(): any {
-        const targetDesc = "Users XP that gets viewed";
-        const amountDesc = "Amount of XP";
+    public override main: Command.Command = new Command.Command("xp", "XP related stuff", []);
+    public override subs: Command.Command[] = [
+        // prettier-ignore
+        new Command.Command(
+            "top", 
+            "Shows you the top 10 people based on xp", 
+            [], 
+            this.onTop
+        ),
+        // prettier-ignore
+        new Command.Command(
+            "set",
+            "Sets xp to a user",
+            [{
+                name: "user",
+                description: "The user that you want to affect",
+                type: ApplicationCommandOptionType.User,
+                required: true,
+            },
+            {
+                name: "amount",
+                description: "The amount you want to set",
+                type: ApplicationCommandOptionType.Number,
+                required: true,
+            }],
+            this.onAdd,
+        ),
+        // prettier-ignore
+        new Command.Command(
+            "add",
+            "Adds xp to a user",
+            [{
+                name: "user",
+                description: "The user that you want to affect",
+                type: ApplicationCommandOptionType.User,
+                required: true,
+            },
+            {
+                name: "amount",
+                description: "The amount you want to give",
+                type: ApplicationCommandOptionType.Number,
+                required: true,
+            }],
+            this.onAdd,
+        ),
+    ];
 
-        return new SlashCommandBuilder()
-            .setName("xp")
-            .setDescription("XP related stuff")
-            .addSubcommand((sub) =>
-                sub
-                    .setName("view")
-                    .setDescription("View the XP of a user")
-                    .addUserOption((opt) => opt.setName("target").setDescription(targetDesc).setRequired(true)),
-            )
-            .addSubcommand((sub) => sub.setName("top").setDescription("Show 10 people with the most XP"))
-            .addSubcommand((sub) =>
-                sub
-                    .setName("add")
-                    .setDescription("Add XP to a user")
-                    .addUserOption((opt) => opt.setName("target").setDescription(targetDesc).setRequired(true))
-                    .addIntegerOption((opt) => opt.setName("amount").setDescription(amountDesc).setRequired(true)),
-            )
-            .addSubcommand((sub) =>
-                sub
-                    .setName("set")
-                    .setDescription("Set a users XP to a value")
-                    .addUserOption((opt) => opt.setName("target").setDescription(targetDesc).setRequired(true))
-                    .addIntegerOption((opt) => opt.setName("amount").setDescription(amountDesc).setRequired(true)),
-            )
-            .setDefaultMemberPermissions(0n)
-            .setContexts(InteractionContextType.Guild)
-            .toJSON();
+    public async onTop(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
+        const topUsers = await UserModel.find().sort({ xp: -1 }).limit(10).exec();
+
+        if (topUsers.length === 0) return await interaction.reply("No users found in the leaderboard.");
+
+        const lines = await Promise.all(
+            topUsers.map(async (user, index) => {
+                const name = (await AppUser.fromID(user.id)).discord.displayName;
+                return `**${index + 1}.** ${name} — ${user.xp} XP`;
+            }),
+        );
+        const description = lines.join("\n");
+
+        const embed = new EmbedBuilder().setTitle("🏆 XP Leaderboard").setDescription(description).setColor("#FFD700");
+
+        return await interaction.reply({ embeds: [embed] });
     }
 
-    override async executeCommand(client: Client, interaction: CommandInteraction<any>): Promise<void> {
-        const sub = (interaction.options as any).getSubcommand();
-        const target = await AppUser.fromID((interaction.options.get("target")?.user || interaction.user).id);
+    public async onSet(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
+        const userOpt = interaction.options.get("user")?.user;
+        const amountOpt = interaction.options.get("amount")?.value as number;
+        if (!userOpt) return interaction.reply(`Failed to get user option`);
 
-        switch (sub) {
-            case "view": {
-                interaction.reply(`${target.discord} has ${target.database.xp || "no"} XP`);
-                break;
-            }
-            case "top": {
-                const topUsers = await UserModel.find().sort({ xp: -1 }).limit(10).exec();
+        const user = await AppUser.fromID(userOpt.id);
 
-                if (topUsers.length === 0) {
-                    await interaction.reply("No users found in the leaderboard.");
-                    return;
-                }
+        await user.addXP(amountOpt).save();
 
-                const lines = await Promise.all(
-                    topUsers.map(async (user, index) => {
-                        const name = user.username;
-                        return `**${index + 1}.** ${name} — ${user.xp} XP`;
-                    }),
-                );
-                const description = lines.join("\n");
+        return interaction.reply(`Set ${amountOpt} xp to ${user.discord}`);
+    }
 
-                const embed = new EmbedBuilder()
-                    .setTitle("🏆 XP Leaderboard")
-                    .setDescription(description)
-                    .setColor(0xffd700);
+    public async onAdd(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
+        const userOpt = interaction.options.get("user")?.user;
+        const amountOpt = interaction.options.get("amount")?.value as number;
+        if (!userOpt) return interaction.reply(`Failed to get user option`);
 
-                await interaction.reply({ embeds: [embed] });
+        const user = await AppUser.fromID(userOpt.id);
 
-                break;
-            }
-            case "add": {
-                if (!interaction.memberPermissions?.has("Administrator")) break;
+        await user.addXP(amountOpt).save();
 
-                const amount = interaction.options.get("amount")?.value as number;
-
-                await target.addXP(amount).save();
-                interaction.reply({
-                    content: `${interaction.user} added ${amount} XP to ${target.discord}, new total is ${target.database.xp}`,
-                    flags: "Ephemeral",
-                });
-
-                break;
-            }
-            case "set": {
-                if (!interaction.memberPermissions?.has("Administrator")) break;
-
-                const amount = interaction.options.get("amount")?.value as number;
-
-                await target.setXP(amount).save();
-                interaction.reply({
-                    content: `${interaction.user} set ${target.discord}'s XP to ${amount}`,
-                    flags: "Ephemeral",
-                });
-
-                break;
-            }
-            default:
-                interaction.reply("You do not have permission to do this!");
-        }
+        return interaction.reply(`Added ${amountOpt} xp to ${user.discord}`);
     }
 }
