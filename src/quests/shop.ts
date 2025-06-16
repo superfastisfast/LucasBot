@@ -3,6 +3,7 @@ import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
 import { ItemDB } from "@/models/item";
+import { Globals } from "..";
 
 export default class ShopQuest extends Quest.Base {
     public override buttons: AppButton[] = [];
@@ -19,13 +20,13 @@ export default class ShopQuest extends Quest.Base {
             .setImage(
                 "https://cdn.discordapp.com/attachments/1379101132743250082/1383456027084718122/iu.png?ex=684edb54&is=684d89d4&hm=ff0c3a78138fbd296021b6cbc72c973ba9e4ff7e7d213c277694fce1726ac129&",
             )
-            .setURL(Quest.link);
+            .setURL(Globals.LINK);
 
         const store = new EmbedBuilder()
             .setTitle("Items")
             .setDescription("The item's that are for sale today!")
             .setColor("#A6F7CB")
-            .setURL(Quest.link);
+            .setURL(Globals.LINK);
 
         this.stock = Math.floor(Math.random() * (this.maxStock - this.minStock)) + this.minStock;
 
@@ -33,7 +34,7 @@ export default class ShopQuest extends Quest.Base {
             const item: ItemDB.Document = (await ItemDB.getRandom())!;
             if (!item) {
                 console.warn("Item is null");
-                return Quest.channel.send("Something went wrong... concult a Adam");
+                return Globals.CHANNEL.send("Something went wrong... concult a Adam");
             }
 
             let modifiers: string = "";
@@ -69,11 +70,11 @@ export default class ShopQuest extends Quest.Base {
 
         const actionRow = AppButton.createActionRow(this.buttons, 3);
 
-        await Quest.channel.send({
+        await Globals.CHANNEL.send({
             embeds: [embed],
         });
 
-        return await Quest.channel.send({
+        return await Globals.CHANNEL.send({
             embeds: [store],
             components: actionRow,
         });
@@ -102,7 +103,7 @@ export default class ShopQuest extends Quest.Base {
                     : `${user.inventory.gold} gold is not enough to buy ${article} ${item.name} for ${item.cost} gold`,
             )
             .setColor(canBuy ? "#A6F7CB" : "#e63946")
-            .setURL(Quest.link);
+            .setURL(Globals.LINK);
 
         await interaction.reply({
             embeds: [embed],

@@ -2,6 +2,7 @@ import { Message, type ButtonInteraction, EmbedBuilder } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
+import { Globals } from "..";
 
 export default class UnstablePortalQuest extends Quest.Base {
     public override buttons: AppButton[] = [
@@ -23,9 +24,9 @@ export default class UnstablePortalQuest extends Quest.Base {
             .setImage(
                 "https://cdn.discordapp.com/attachments/1379101132743250082/1382031141577425076/WEQ4VWpwSE5RPQ.png?ex=6849ac4d&is=68485acd&hm=4cc8f7af4c76a4fd083f4eafb50935fc5e07dec05be3c742b0c25336f33aee8f&",
             )
-            .setURL(Quest.link);
+            .setURL(Globals.LINK);
 
-        return await Quest.channel.send({
+        return await Globals.CHANNEL.send({
             embeds: [embed],
             components: actionRow,
         });
