@@ -3,6 +3,7 @@ import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { ItemDB } from "@/models/item";
 import { AppUser } from "@/user";
+import { Globals } from "..";
 
 export default class PackageQuest extends Quest.Base {
     public override buttons: AppButton[] = [
@@ -21,9 +22,9 @@ export default class PackageQuest extends Quest.Base {
             .setImage(
                 "https://cdn.discordapp.com/attachments/1379101132743250082/1382015780383887360/MysteryBox.png?ex=68499dfe&is=68484c7e&hm=a0acba79ae199869576e87d66f3e834c31d389f707d6083a7199a1dd70100e60&",
             )
-            .setURL(Quest.link);
+            .setURL(Globals.LINK);
 
-        return await Quest.channel.send({
+        return await Globals.CHANNEL.send({
             embeds: [embed],
             components: actionRow,
         });
@@ -46,7 +47,7 @@ export default class PackageQuest extends Quest.Base {
             .setTitle("Mysterious Package")
             .setDescription(`${user.discord} opened the package and found a ${itemInfo}`)
             .setColor("#C1A471")
-            .setURL(Quest.link)
+            .setURL(Globals.LINK)
             .toJSON();
 
         this.message.edit({
@@ -66,7 +67,7 @@ export default class PackageQuest extends Quest.Base {
             .setTitle("Mysterious Package")
             .setDescription(`${user.discord} found the owner of the package, and recived ${goldAmount} gold`)
             .setColor("#C1A471")
-            .setURL(Quest.link)
+            .setURL(Globals.LINK)
             .toJSON();
 
         this.message.edit({
@@ -86,7 +87,7 @@ export default class PackageQuest extends Quest.Base {
             .setTitle("Mysterious Package")
             .setDescription(`${user.discord} found a buyer of the package, and recived ${goldAmount} gold`)
             .setColor("#C1A471")
-            .setURL(Quest.link)
+            .setURL(Globals.LINK)
             .toJSON();
 
         this.message.edit({

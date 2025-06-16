@@ -2,6 +2,7 @@ import { Message, EmbedBuilder } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
+import { Globals } from "..";
 
 export interface Celebration {
     title: string;
@@ -39,7 +40,7 @@ export default class CelebrationQuest extends Quest.Base {
         if (!celebration) {
             const msg = `Failed to get random celebration: ${randomIndex}`;
             console.warn(msg);
-            return await Quest.channel.send(msg);
+            return await Globals.CHANNEL.send(msg);
         }
 
         const embed = new EmbedBuilder()
@@ -47,15 +48,15 @@ export default class CelebrationQuest extends Quest.Base {
             .setDescription(celebration.descrition)
             .setColor("#e63946")
             .setImage(celebration.image)
-            .setURL(Quest.link);
+            .setURL(Globals.LINK);
 
         this.goldRewardAmount = Math.floor(Math.random() * 5);
 
-        (await Quest.channel.guild.members.fetch()).forEach(async (member) =>
+        (await Globals.CHANNEL.guild.members.fetch()).forEach(async (member) =>
             (await AppUser.fromID(member.id)).addGold(this.goldRewardAmount).save(),
         );
 
-        return await Quest.channel.send({
+        return await Globals.CHANNEL.send({
             embeds: [embed],
         });
     }
