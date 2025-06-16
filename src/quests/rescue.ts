@@ -2,6 +2,7 @@ import { Message, type ButtonInteraction, EmbedBuilder } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
+import { Globals } from "..";
 
 export default class RescueQuest extends Quest.Base {
     public override buttons: AppButton[] = [new AppButton("Rescue the villager", this.onPressRescue.bind(this))];
@@ -22,19 +23,19 @@ export default class RescueQuest extends Quest.Base {
             .setImage(
                 "https://cdn.discordapp.com/attachments/1379101132743250082/1383443484333178931/iu.png?ex=684ecfa5&is=684d7e25&hm=b4d74322559c7db6d7a8c8ea90e8e567719ab7d203e5b9fbe1f6ab633d2ed5e5&",
             )
-            .setURL(Quest.link);
+            .setURL(Globals.LINK);
 
         const lobby = new EmbedBuilder()
             .setTitle("Lobby")
             .setDescription(`0/${this.maxPlayers} players joined so far!`)
             .setColor("#4CAF50")
-            .setURL(Quest.link);
+            .setURL(Globals.LINK);
 
-        await Quest.channel.send({
+        await Globals.CHANNEL.send({
             embeds: [embed],
         });
 
-        return await Quest.channel.send({
+        return await Globals.CHANNEL.send({
             embeds: [lobby],
             components: actionRow,
         });
@@ -74,7 +75,7 @@ export default class RescueQuest extends Quest.Base {
                           `\nBeast strengh: ${beastStrengh}, player strengh: ${playerStrength}`,
             )
             .setColor("#4CAF50")
-            .setURL(Quest.link)
+            .setURL(Globals.LINK)
             .toJSON();
 
         this.message.edit({
@@ -108,7 +109,7 @@ export default class RescueQuest extends Quest.Base {
             .setTitle("Lobby")
             .setDescription(`${this.players.length}/${this.maxPlayers} players joined so far!`)
             .setColor("#4CAF50")
-            .setURL(Quest.link)
+            .setURL(Globals.LINK)
             .toJSON();
 
         this.message.edit({

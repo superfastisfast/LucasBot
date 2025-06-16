@@ -2,6 +2,7 @@ import { Message, type ButtonInteraction, EmbedBuilder } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
+import { Globals } from "..";
 
 export default class SubscribeQuest extends Quest.Base {
     public override buttons: AppButton[] = [
@@ -21,9 +22,9 @@ export default class SubscribeQuest extends Quest.Base {
             .setImage(
                 "https://cdn.discordapp.com/attachments/1379101132743250082/1379101169892327434/subscribe-7403560_1280.png?ex=683f038d&is=683db20d&hm=6e7deb8d64bc3a019f13547c0c16191322469c463211f937dd0486783c1c9529&",
             )
-            .setURL(Quest.link);
+            .setURL(Globals.LINK);
 
-        return await Quest.channel.send({
+        return await Globals.CHANNEL.send({
             embeds: [embed],
             components: actionRow,
         });

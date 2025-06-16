@@ -2,6 +2,7 @@ import { Message, type ButtonInteraction, EmbedBuilder, ButtonStyle } from "disc
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
+import { Globals } from "..";
 
 export default class SubscribePortalQuest extends Quest.Base {
     public override buttons: AppButton[] = [
@@ -23,9 +24,9 @@ export default class SubscribePortalQuest extends Quest.Base {
             .setImage(
                 "https://cdn.discordapp.com/attachments/1379101132743250082/1382038199978688603/RedVsBlue.png?ex=6849b2df&is=6848615f&hm=bf4a2d2384a06f05254a556bc21afa61d7dc3ef327b0cb224dec387fb0650341&",
             )
-            .setURL(Quest.link);
+            .setURL(Globals.LINK);
 
-        return await Quest.channel.send({
+        return await Globals.CHANNEL.send({
             embeds: [this.mainEmbed],
             components: actionRow,
         });
@@ -50,7 +51,7 @@ export default class SubscribePortalQuest extends Quest.Base {
             .setTitle(`Team ${winningTeamName} wins!`)
             .setDescription(`Winners: ${formatedWinners}\nGot ${goldPerUser}💰 each!`)
             .setColor(winningTeamName === "red" ? "#FF0000" : "#0000FF")
-            .setURL(Quest.link)
+            .setURL(Globals.LINK)
             .toJSON();
 
         this.message.edit({
@@ -62,9 +63,9 @@ export default class SubscribePortalQuest extends Quest.Base {
 
     private async onPressRed(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
-        if (user.database.inventory.gold < this.bet) {
+        if (user.inventory.gold < this.bet) {
             await interaction.reply({
-                content: `You do not have enough gold to participate, the required amount is ${this.bet} and you have ${user.database.inventory.gold}`,
+                content: `You do not have enough gold to participate, the required amount is ${this.bet} and you have ${user.inventory.gold}`,
                 flags: "Ephemeral",
             });
             return;
@@ -89,9 +90,9 @@ export default class SubscribePortalQuest extends Quest.Base {
 
     private async onPressBlue(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
-        if (user.database.inventory.gold < this.bet) {
+        if (user.inventory.gold < this.bet) {
             await interaction.reply({
-                content: `You do not have enough gold to participate, the required amount is ${this.bet} and you have ${user.database.inventory.gold}`,
+                content: `You do not have enough gold to participate, the required amount is ${this.bet} and you have ${user.inventory.gold}`,
                 flags: "Ephemeral",
             });
             return;

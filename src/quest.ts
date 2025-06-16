@@ -27,19 +27,12 @@ export namespace Quest {
 
     export const quests: Map<string, Base> = new Map();
     export const active: Map<string, Base> = new Map();
-    export let channel: TextChannel;
-    export const link: string = "https://www.youtube.com/@LucasDevelop";
 
     export async function load() {
-        if (!process.env.QUEST_CHANNEL_ID) throw new Error("QUEST_CHANNEL_ID is not defined in .env");
-        channel = (await client.channels.fetch(process.env.QUEST_CHANNEL_ID)) as TextChannel;
-
         const glob = new Bun.Glob("src/quests/*.ts");
         console.log(`Loaded quests:`);
 
         for (const path of glob.scanSync(".")) {
-            const file = Bun.file(path);
-
             const { default: QuestClass } = await import(path.replace("src/quests/", "./quests/"));
             const quest: Base = new QuestClass();
 

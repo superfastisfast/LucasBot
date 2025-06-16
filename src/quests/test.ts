@@ -1,6 +1,7 @@
 import { ButtonInteraction, Message } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
+import { Globals } from "..";
 
 export default class TestQuest extends Quest.Base {
     public override buttons: AppButton[] = [new AppButton("Test Label", this.onPressTest.bind(this))];
@@ -10,7 +11,7 @@ export default class TestQuest extends Quest.Base {
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);
 
-        return await Quest.channel.send({
+        return await Globals.CHANNEL.send({
             content: "Test!!!",
             components: actionRow,
         });

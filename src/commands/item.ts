@@ -1,6 +1,5 @@
 import { Command } from "@/commands";
-import { ItemModel } from "@/models/item";
-import { Quest } from "@/quest";
+import { ItemDB } from "@/models/item";
 import {
     CommandInteraction,
     InteractionResponse,
@@ -22,8 +21,8 @@ export default class ItemCommand extends Command.Base {
                 required: true,
             },
             {
-                name: "tag",
-                description: "The item tag",
+                name: "type",
+                description: "The item type",
                 type: ApplicationCommandOptionType.String,
                 required: true,
                 autocomplete: true,
@@ -62,24 +61,24 @@ export default class ItemCommand extends Command.Base {
 
     public async onAdd(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
         const nameOpt = interaction.options.get("name")?.value as string;
-        const tagOpt = interaction.options.get("tag")?.value as string;
+        const typeOpt = interaction.options.get("type")?.value as string;
         const costOpt = interaction.options.get("cost")?.value as number;
         const attributesOpt = interaction.options.get("attributes")?.value as string;
 
-        const attributes = ItemCommand.parseAttributes(new String(attributesOpt));
+        const modifiers = ItemCommand.parseModifiers(new String(attributesOpt));
 
-        const newItem = await ItemModel.create({
+        const newItem = await ItemDB.Model.create({
             name: nameOpt,
-            tag: tagOpt,
+            type: typeOpt,
             cost: costOpt,
-            flatStatModifiers: attributes.flatStatModifiers,
-            percentageStatModifiers: attributes.percentageStatModifiers,
+            flatStatModifiers: modifiers.flatStatModifiers,
+            percentageStatModifiers: modifiers.percentageStatModifiers,
         });
 
         newItem.save();
 
         return interaction.reply({
-            content: `Added item name: '${nameOpt}', tag: '${tagOpt}', cost: ${costOpt} gold, attr: '${attributesOpt}'`,
+            content: `Added item name: '${nameOpt}', tag: '${typeOpt}', cost: ${costOpt} gold, attr: '${attributesOpt}'`,
             flags: "Ephemeral",
         });
     }
@@ -87,7 +86,7 @@ export default class ItemCommand extends Command.Base {
     public async onRemove(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
         const nameOpt = interaction.options.get("name")?.value as string;
 
-        await ItemModel.findOneAndDelete({ name: nameOpt });
+        await ItemDB.Model.findOneAndDelete({ name: nameOpt });
         return interaction.reply({
             content: `Removed item '${nameOpt}'`,
             flags: "Ephemeral",
@@ -97,15 +96,15 @@ export default class ItemCommand extends Command.Base {
     public async onAddAutocomplete(interaction: AutocompleteInteraction): Promise<void> {
         const focused = interaction.options.getFocused(true);
 
-        if (focused.name === "tag")
-            return interaction.respond([
-                { name: "weapon", value: "weapon" },
-                { name: "helmet", value: "helmet" },
-                { name: "chestplate", value: "chestplate" },
-                { name: "leggings", value: "leggings" },
-                { name: "boots", value: "boots" },
-                { name: "shield", value: "shield" },
-            ]);
+        if (focused.name === "type") {
+            let types: { name: string; value: string }[] = [];
+
+            ItemDB.Types.forEach((type) => {
+                types.push({ name: type, value: type });
+            });
+
+            return interaction.respond(types);
+        }
 
         const parts = focused.value
             .toString()
@@ -170,7 +169,7 @@ export default class ItemCommand extends Command.Base {
     public async onRemoveAutocomplete(interaction: AutocompleteInteraction): Promise<void> {
         const focused = interaction.options.getFocused().toString();
 
-        const matchingThings = await ItemModel.find({
+        const matchingThings = await ItemDB.Model.find({
             name: { $regex: new RegExp(focused.toString(), "i") },
         })
             .sort({ name: 1 })
@@ -184,13 +183,11 @@ export default class ItemCommand extends Command.Base {
         await interaction.respond(suggestions.slice(0, 25));
     }
 
-    static parseAttributes(attributes: String) {
-        let flatStatModifiers = new Map<string, number>();
-        let percentageStatModifiers = new Map<string, number>();
+    static parseModifiers(modifiers: String): any {
+        let flatModifiers = new Map<string, number>();
+        let percentageModifiers = new Map<string, number>();
 
-        const modifiers = attributes.split(",");
-
-        for (const modifier of modifiers) {
+        for (const modifier of modifiers.split(",")) {
             const parts = modifier.split("=");
 
             const key = parts[0]?.trim();
@@ -201,15 +198,15 @@ export default class ItemCommand extends Command.Base {
             if (isNaN(value)) continue; // skip invalid numbers
 
             if (rawValue.endsWith("%")) {
-                percentageStatModifiers.set(key, value);
+                percentageModifiers.set(key, value);
             } else {
-                flatStatModifiers.set(key, value);
+                flatModifiers.set(key, value);
             }
         }
 
         return {
-            flatStatModifiers: flatStatModifiers,
-            percentageStatModifiers: percentageStatModifiers,
+            flatStatModifiers: flatModifiers,
+            percentageStatModifiers: percentageModifiers,
         };
     }
 }

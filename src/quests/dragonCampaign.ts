@@ -2,6 +2,7 @@ import { type ButtonInteraction, type Message, EmbedBuilder, ButtonStyle } from 
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
+import { Globals } from "..";
 
 export default class DragonCampaignQuest extends Quest.Base {
     public override buttons: AppButton[] = [new AppButton("Join", this.onPressJoin.bind(this))];
@@ -25,18 +26,18 @@ export default class DragonCampaignQuest extends Quest.Base {
             .setImage(
                 "https://cdn.discordapp.com/attachments/1379101132743250082/1381274300987867216/CoolDragon.jpg?ex=6846eb70&is=684599f0&hm=a901607a7f42b3970f60320d16dee2c04ce655201aa8df64ef123829d5e0bc47&",
             )
-            .setURL(Quest.link);
+            .setURL(Globals.LINK);
 
         const lobby = new EmbedBuilder()
             .setTitle("Lobby")
             .setDescription("No players have joined yet!")
             .setColor("#FF4500")
-            .setURL(Quest.link);
+            .setURL(Globals.LINK);
 
-        await Quest.channel.send({
+        await Globals.CHANNEL.send({
             embeds: [embed],
         });
-        return await Quest.channel.send({
+        return await Globals.CHANNEL.send({
             embeds: [lobby],
             components: actionRow,
         });
@@ -80,7 +81,7 @@ export default class DragonCampaignQuest extends Quest.Base {
                 Player strengh was ${playerStrength}, dragon strengh was ${dragonStrength}`,
             )
             .setColor("#FF4500")
-            .setURL(Quest.link)
+            .setURL(Globals.LINK)
             .toJSON();
 
         this.message.edit({
@@ -118,7 +119,7 @@ export default class DragonCampaignQuest extends Quest.Base {
             .setTitle("Lobby")
             .setDescription(`Players: ${joinedPlayerString}`)
             .setColor("#FF4500")
-            .setURL(Quest.link)
+            .setURL(Globals.LINK)
             .toJSON();
 
         this.message.edit({
