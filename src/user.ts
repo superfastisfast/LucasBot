@@ -255,7 +255,6 @@ export class AppUser {
 
         const guildId = levelChannel.guild.id;
         const guild: Guild | undefined = await client.guilds.fetch(guildId);
-        const members = await guild.members.fetch();
 
         const rank = rankFromLevel(level) || "";
         if (rank === "") return;
@@ -266,27 +265,27 @@ export class AppUser {
 
 const xpThresholds: number[] = [
     //  XP           Level
-    0, //     0
-    1, //     1
-    50, //     2
-    100, //     3
-    250, //     4
-    500, //     5
-    1000, //     6
-    1750, //     7
-    2750, //     8
-    4000, //     9
-    5000, //    10
-    7500, //    11
-    9500, //    12
-    10250, //    13
-    15250, //    14
-    20000, //    15
+    0, //              0
+    1, //              1
+    50, //             2
+    100, //            3
+    250, //            4
+    500, //            5
+    1000, //           6
+    1750, //           7
+    2750, //           8
+    4000, //           9
+    5000, //          10
+    7500, //          11
+    9500, //          12
+    10250, //         13
+    15250, //         14
+    20000, //         15
 ];
 
 function calculateLevel(xp: number): number {
     for (let i = xpThresholds.length - 1; i >= 0; i--) {
-        if (xp >= xpThresholds[i]!) return i;
+        if (xp >= (xpThresholds[i] || xpThresholds[xpThresholds.length - 1]! * 2)) return i;
     }
     return 0;
 }
