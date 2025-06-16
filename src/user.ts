@@ -1,36 +1,49 @@
-import { User, Guild, GuildMember, Role, PermissionsBitField, DiscordAPIError, TextChannel } from "discord.js";
-import { StatsModel, UserModel, type IInventory, type UserDocument } from "./models/user";
+import {
+    User,
+    Guild,
+    GuildMember,
+    Role,
+    PermissionsBitField,
+    DiscordAPIError,
+    TextChannel,
+    EmbedBuilder,
+} from "discord.js";
 import { client } from ".";
-import { Item, type ItemDocument } from "./models/item";
+import { UserDB } from "./models/user";
+import { InventoryDB } from "./models/inventory";
+import { ItemDB } from "./models/item";
 
 export class AppUser {
     discord: User;
-    database: UserDocument;
+    database: UserDB.Document;
+    inventory: InventoryDB.Document;
 
-    private constructor(discordUser: User, databaseUser: UserDocument) {
+    private constructor(discordUser: User, databaseUser: UserDB.Document, inventory: InventoryDB.Document) {
         this.discord = discordUser;
         this.database = databaseUser;
+        this.inventory = inventory;
     }
 
     static async fromID(userId: string): Promise<AppUser> {
         try {
-            const discordUser = await client.users.fetch(userId);
-            const databaseUser = await AppUser.getDatabaseUser(discordUser);
-            return new AppUser(discordUser, databaseUser);
+            const discord = await client.users.fetch(userId);
+            const database = await AppUser.getDatabase(discord);
+            const inventory = await AppUser.getInventory(discord);
+            return new AppUser(discord, database, inventory);
         } catch (error: any) {
             console.warn(`Failed to fetch user ${userId}: ${error}`);
             throw new Error(`Failed to fetch user`);
         }
     }
 
-    private static async getDatabaseUser(discordUser: User): Promise<UserDocument> {
+    private static async getDatabase(user: User): Promise<UserDB.Document> {
         try {
-            const databaseUser = await UserModel.findOneAndUpdate(
-                { id: discordUser.id },
+            const database = await UserDB.Model.findOneAndUpdate(
+                { id: user.id },
                 {
                     $setOnInsert: {
-                        id: discordUser.id,
-                        username: discordUser.username,
+                        id: user.id,
+                        username: user.username,
                     },
                 },
                 {
@@ -40,14 +53,37 @@ export class AppUser {
                 },
             );
 
-            if (!databaseUser) {
-                throw new Error("User creation or retrieval returned null.");
-            }
+            if (!database) throw new Error("Database user creation or retrieval returned null");
 
-            return databaseUser;
+            return database;
         } catch (error) {
-            console.error(`Error retrieving or creating user ${discordUser.id}:`, error);
-            throw new Error(`Failed to retrieve or create user for ID ${discordUser.id}`);
+            console.error(`Error retrieving or creating user ${user.id}:`, error);
+            throw new Error(`Failed to retrieve or create user for ID ${user.id}`);
+        }
+    }
+
+    private static async getInventory(user: User): Promise<InventoryDB.Document> {
+        try {
+            const inventory = await InventoryDB.Model.findOneAndUpdate(
+                { id: user.id },
+                {
+                    $setOnInsert: {
+                        id: user.id,
+                    },
+                },
+                {
+                    upsert: true,
+                    new: true,
+                    setDefaultsOnInsert: true,
+                },
+            );
+
+            if (!inventory) throw new Error("Inventory creation or retrieval returned null");
+
+            return inventory;
+        } catch (error) {
+            console.error(`Error retrieving or creating inventory ${user.id}:`, error);
+            throw new Error(`Failed to retrieve or create inventory for ID ${user.id}`);
         }
     }
 
@@ -123,13 +159,13 @@ export class AppUser {
     }
 
     setGold(amount: number): AppUser {
-        this.database.inventory.gold = Math.max(-1000, amount);
+        this.inventory.gold = Math.max(-1000, amount);
 
         return this;
     }
 
     addGold(amount: number): AppUser {
-        return this.setGold(this.database.inventory.gold + amount);
+        return this.setGold(this.inventory.gold + amount);
     }
 
     setSkillPoints(amount: number): AppUser {
@@ -147,79 +183,64 @@ export class AppUser {
     }
 
     async save(): Promise<AppUser> {
+        const stats = [
+            "strength",
+            "agility",
+            "charisma",
+            "magicka",
+            "stamina",
+            "defense",
+            "vitality",
+        ] as (keyof UserDB.StatDB.Document)[];
+
+        stats.forEach((stat) => {
+            if ((this.database.stats[stat] as number) < 0) {
+                (this.database.stats[stat] as number) = 0;
+            }
+        });
+
         await this.level(this.database.xp);
+        await this.inventory.save();
         await this.database.save();
+        return this;
+    }
+
+    /////////////////////////////////////////////////////////
+    ///                     Inventory                      //
+    /////////////////////////////////////////////////////////
+    async getItems(): Promise<[boolean, string][]> {
+        try {
+            const inventory = await InventoryDB.Model.findOne({ id: this.discord.id }).exec();
+            return inventory?.items ?? [];
+        } catch (error) {
+            console.error(`Failed to get items for user ${this.discord.id}:`, error);
+            return [];
+        }
+    }
+
+    addItem(item: ItemDB.Document): AppUser {
+        this.inventory.items.push([false, item.name]);
+        return this;
+    }
+
+    equipItem(from: number, to: number): AppUser {
+        if (!this.inventory.items[from]) {
+            console.warn(`Inventory item at index ${from} does not exist`);
+            return this;
+        }
+        if (!this.inventory.items[to]) {
+            console.warn(`Inventory item at index ${to} does not exist`);
+            return this;
+        }
+
+        if (this.inventory.items[from][0]) this.inventory.items[from][0] = false;
+        if (this.inventory.items[to][0]) this.inventory.items[to][0] = true;
         return this;
     }
 
     /////////////////////////////////////////////////////////
     ///                      OTHER                         //
     /////////////////////////////////////////////////////////
-    equipItem(item: ItemDocument): AppUser {
-        const equipmentSlots: Array<keyof IInventory> = [
-            "weapon",
-            "helmet",
-            "chestplate",
-            "leggings",
-            "boots",
-            "shield",
-        ];
-        if (equipmentSlots.includes(item.tag as keyof IInventory))
-            (this.database.inventory as any)[item.tag] = item.name;
-        else console.warn(`Failed to applied ${item.name} to ${this.discord.username}'s ${item.tag} slot`);
-
-        return this;
-    }
-
-    async getItems(): Promise<ItemDocument[]> {
-        const itemNames: string[] = [
-            this.database?.inventory.helmet,
-            this.database?.inventory.chestplate,
-            this.database?.inventory.weapon,
-            this.database?.inventory.leggings,
-            this.database?.inventory.boots,
-            this.database?.inventory.shield,
-        ];
-        let items: Array<ItemDocument> = [];
-        for (const itemName of itemNames) {
-            const item = await Item.getFromName(itemName);
-            if (item) {
-                items.push(item);
-            }
-        }
-        return items;
-    }
-
-    static rollRandomDice(minVal: number, val: number): number {
-        return Math.max(minVal, val * Math.random());
-    }
-
-    static getDisplayStats(stats: StatsModel): [string, string, number][] {
-        const attributesArray: [string, string, number][] = [
-            ["⚔️", "Strength", stats.strength],
-            ["🛡️", "Defense", stats.defense],
-            ["🏃", "Agility", stats.agility],
-            ["✨", "Magicka", stats.magicka],
-            ["🔋", "Vitality", stats.vitality],
-            ["🏃‍♂️", "Stamina", stats.stamina],
-            ["🗣️", "Charisma", stats.charisma],
-        ];
-        return attributesArray;
-    }
-
-    async getDisplayInfo(): Promise<any> {
-        const itemsDisplay = Item.getStringCollection(await this.getItems());
-        const attributesArray = AppUser.getDisplayStats(this.database.stats);
-        return {
-            gold: this.database.inventory.gold,
-            xp: this.database.xp,
-            level: this.database.level,
-            skillPoints: this.database.skillPoints,
-            attributesArray: attributesArray,
-            items: `📦 Items: \n${itemsDisplay}`,
-        };
-    }
-
     async level(xp: number): Promise<void> {
         if (!process.env.QUEST_CHANNEL_ID) throw new Error("QUEST_CHANNEL_ID is not defined in .env");
         const levelChannel = (await client.channels.fetch(process.env.QUEST_CHANNEL_ID)) as TextChannel;

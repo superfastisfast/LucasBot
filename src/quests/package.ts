@@ -1,7 +1,7 @@
 import { type ButtonInteraction, type Message, EmbedBuilder } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
-import { Item } from "@/models/item";
+import { ItemDB } from "@/models/item";
 import { AppUser } from "@/user";
 
 export default class PackageQuest extends Quest.Base {
@@ -36,11 +36,11 @@ export default class PackageQuest extends Quest.Base {
     private async onPressOpen(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
 
-        const item = await Item.getRandom();
+        const item = await ItemDB.getRandom();
         if (!item) return;
-        const itemInfo: string = `${item.tag} worth ${item.cost} gold!`;
+        const itemInfo: string = `${item.name} worth ${item.cost} gold!`;
 
-        await user.equipItem(item).save();
+        await user.addItem(item).save();
 
         const embed = new EmbedBuilder()
             .setTitle("Mysterious Package")
