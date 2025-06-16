@@ -1,5 +1,14 @@
-import { User, Guild, GuildMember, Role, PermissionsBitField, DiscordAPIError, TextChannel } from "discord.js";
-import { StatsModel, UserModel, type IInventory, type UserDocument } from "./models/user";
+import {
+    User,
+    Guild,
+    GuildMember,
+    Role,
+    PermissionsBitField,
+    DiscordAPIError,
+    TextChannel,
+    EmbedBuilder,
+} from "discord.js";
+import { StatsModel, UserModel, type IInventory, type IStats, type UserDocument } from "./models/user";
 import { client } from ".";
 import { Item, type ItemDocument } from "./models/item";
 
@@ -147,6 +156,22 @@ export class AppUser {
     }
 
     async save(): Promise<AppUser> {
+        const stats = [
+            "strength",
+            "agility",
+            "charisma",
+            "magicka",
+            "stamina",
+            "defense",
+            "vitality",
+        ] as (keyof IStats)[];
+
+        stats.forEach((stat) => {
+            if ((this.database.stats[stat] as number) < 0) {
+                (this.database.stats[stat] as number) = 0;
+            }
+        });
+
         await this.level(this.database.xp);
         await this.database.save();
         return this;
@@ -194,31 +219,51 @@ export class AppUser {
         return Math.max(minVal, val * Math.random());
     }
 
-    static getDisplayStats(stats: StatsModel): [string, string, number][] {
-        const attributesArray: [string, string, number][] = [
-            ["⚔️", "Strength", stats.strength],
-            ["🛡️", "Defense", stats.defense],
-            ["🏃", "Agility", stats.agility],
-            ["✨", "Magicka", stats.magicka],
-            ["🔋", "Vitality", stats.vitality],
-            ["🏃‍♂️", "Stamina", stats.stamina],
-            ["🗣️", "Charisma", stats.charisma],
+    async getDisplayStatInfo(): Promise<EmbedBuilder> {
+        const statKeys: [keyof IStats, string][] = [
+            ["strength", "⚔️"],
+            ["agility", "🏃"],
+            ["charisma", "🗣️"],
+            ["magicka", "✨"],
+            ["stamina", "🔋"],
+            ["defense", "🛡️"],
+            ["vitality", "⛑️"],
         ];
-        return attributesArray;
+
+        const maxKeyLength = Math.max(...statKeys.map(([key]) => key.length));
+        const maxValueLength = Math.max(...statKeys.map(([key]) => String(this.database.stats[key]).length));
+
+        let statsDisplay = "```";
+        for (const [name, emoji] of statKeys) {
+            const value = this.database.stats[name];
+            const paddedName = `${name}:`.padEnd(maxKeyLength + 2);
+            const paddedValue = String(value).padStart(maxValueLength);
+            statsDisplay += `\n${emoji} ${paddedName} ${paddedValue}`;
+        }
+        statsDisplay += "\n```";
+
+        const color = this.discord.accentColor ?? 0x4f545c;
+
+        return new EmbedBuilder()
+            .setTitle(`${this.discord.displayName} Stats`)
+            .setColor(color)
+            .setDescription(statsDisplay)
+            .setURL("https://www.youtube.com/@LucasDevelop")
+            .setThumbnail(this.discord.avatarURL({}));
     }
 
-    async getDisplayInfo(): Promise<any> {
-        const itemsDisplay = Item.getStringCollection(await this.getItems());
-        const attributesArray = AppUser.getDisplayStats(this.database.stats);
-        return {
-            gold: this.database.inventory.gold,
-            xp: this.database.xp,
-            level: this.database.level,
-            skillPoints: this.database.skillPoints,
-            attributesArray: attributesArray,
-            items: `📦 Items: \n${itemsDisplay}`,
-        };
-    }
+    // async getDisplayInfo(): Promise<any> {
+    //     const itemsDisplay = Item.getStringCollection(await this.getItems());
+    //     const attributesArray = AppUser.getDisplayStats(this.database.stats);
+    //     return {
+    //         gold: this.database.inventory.gold,
+    //         xp: this.database.xp,
+    //         level: this.database.level,
+    //         skillPoints: this.database.skillPoints,
+    //         attributesArray: attributesArray,
+    //         items: `📦 Items: \n${itemsDisplay}`,
+    //     };
+    // }
 
     async level(xp: number): Promise<void> {
         if (!process.env.QUEST_CHANNEL_ID) throw new Error("QUEST_CHANNEL_ID is not defined in .env");
@@ -234,7 +279,6 @@ export class AppUser {
 
         const guildId = levelChannel.guild.id;
         const guild: Guild | undefined = await client.guilds.fetch(guildId);
-        const members = await guild.members.fetch();
 
         const rank = rankFromLevel(level) || "";
         if (rank === "") return;
@@ -245,27 +289,27 @@ export class AppUser {
 
 const xpThresholds: number[] = [
     //  XP           Level
-    0, //     0
-    1, //     1
-    50, //     2
-    100, //     3
-    250, //     4
-    500, //     5
-    1000, //     6
-    1750, //     7
-    2750, //     8
-    4000, //     9
-    5000, //    10
-    7500, //    11
-    9500, //    12
-    10250, //    13
-    15250, //    14
-    20000, //    15
+    0, //              0
+    1, //              1
+    50, //             2
+    100, //            3
+    250, //            4
+    500, //            5
+    1000, //           6
+    1750, //           7
+    2750, //           8
+    4000, //           9
+    5000, //          10
+    7500, //          11
+    9500, //          12
+    10250, //         13
+    15250, //         14
+    20000, //         15
 ];
 
 function calculateLevel(xp: number): number {
     for (let i = xpThresholds.length - 1; i >= 0; i--) {
-        if (xp >= xpThresholds[i]!) return i;
+        if (xp >= (xpThresholds[i] || xpThresholds[xpThresholds.length - 1]! * 2)) return i;
     }
     return 0;
 }
