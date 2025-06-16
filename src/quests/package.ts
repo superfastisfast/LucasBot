@@ -96,37 +96,3 @@ export default class PackageQuest extends Quest.Base {
         this.end();
     }
 }
-
-//             `#${this.generateUniqueButtonID()}_findOwner`
-//         ) {
-//             await interaction.reply({
-//                 content:
-//                     "**" +
-//                     interaction.member?.user.username +
-//                     "**\n" +
-//                     `You found the owner of the package, and recived 50 gold`,
-//                 flags: "Ephemeral",
-//             });
-//             const user = await AppUser.fromID(interaction.user.id);
-//             await user.addGold(50).save();
-//             this.interactedPlayerId = interaction.user.id;
-//             return true;
-//         } else if (
-//             interaction.customId === `#${this.generateUniqueButtonID()}_sell`
-//         ) {
-//             await interaction.reply({
-//                 content:
-//                     "**" +
-//                     interaction.member?.user.username +
-//                     "**\n" +
-//                     `You sold the package, and recived 50 gold`,
-//                 flags: "Ephemeral",
-//             });
-//             const user = await AppUser.fromID(interaction.user.id);
-//             await user.addGold(50).save();
-//             this.interactedPlayerId = interaction.user.id;
-//             return true;
-//         }
-
-//         return false;
-//     }

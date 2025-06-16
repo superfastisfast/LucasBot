@@ -1,84 +1,70 @@
-import { Command } from "@/command";
-import { InteractionContextType, SlashCommandBuilder, User, type Client, type CommandInteraction } from "discord.js";
-import { AppUser } from "@/user";
+import { Command } from "@/commands";
+import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
+import { AppUser } from "../user";
+import { UserModel } from "@/models/user";
 
-export default class GoldCommand extends Command.Base {
-    override get info(): any {
-        return new SlashCommandBuilder()
-            .setName("gold")
-            .setDescription("Gold related stuff")
-            .addSubcommand((sub) =>
-                sub
-                    .setName("view")
-                    .setDescription("View how much gold a user has")
-                    .addUserOption((opt) =>
-                        opt.setName("target").setDescription("Users gold that gets viewed").setRequired(true),
-                    ),
-            )
-            .addSubcommand((sub) =>
-                sub
-                    .setName("add")
-                    .setDescription("Add gold to a user")
-                    .addUserOption((opt) =>
-                        opt.setName("target").setDescription("User to give gold to").setRequired(true),
-                    )
-                    .addIntegerOption((opt) =>
-                        opt.setName("amount").setDescription("Amount of gold").setRequired(true),
-                    ),
-            )
-            .addSubcommand((sub) =>
-                sub
-                    .setName("set")
-                    .setDescription("Set a users gold to a value")
-                    .addUserOption((opt) =>
-                        opt.setName("target").setDescription("User to set gold to").setRequired(true),
-                    )
-                    .addIntegerOption((opt) =>
-                        opt.setName("amount").setDescription("Amount of gold").setRequired(true),
-                    ),
-            )
-            .setDefaultMemberPermissions(0n)
-            .setContexts(InteractionContextType.Guild)
-            .toJSON();
+export default class XpCommand extends Command.Base {
+    public override main: Command.Command = new Command.Command("gold", "Gold related stuff", []);
+    public override subs: Command.Command[] = [
+        // prettier-ignore
+        new Command.Command(
+            "set",
+            "Set a users gold to a value",
+            [{
+                name: "user",
+                description: "The user that you want to affect",
+                type: ApplicationCommandOptionType.User,
+                required: true,
+            },
+            {
+                name: "amount",
+                description: "The amount you want to set",
+                type: ApplicationCommandOptionType.Number,
+                required: true,
+            }],
+            this.onAdd,
+        ),
+        // prettier-ignore
+        new Command.Command(
+            "add",
+            "Add gold to a user",
+            [{
+                name: "user",
+                description: "The user that you want to affect",
+                type: ApplicationCommandOptionType.User,
+                required: true,
+            },
+            {
+                name: "amount",
+                description: "The amount you want to give",
+                type: ApplicationCommandOptionType.Number,
+                required: true,
+            }],
+            this.onAdd,
+        ),
+    ];
+
+    public async onSet(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
+        const userOpt = interaction.options.get("user")?.user;
+        const amountOpt = interaction.options.get("amount")?.value as number;
+        if (!userOpt) return interaction.reply(`Failed to get user option`);
+
+        const user = await AppUser.fromID(userOpt.id);
+
+        await user.setGold(amountOpt).save();
+
+        return interaction.reply(`Set ${amountOpt} gold to ${user.discord}`);
     }
 
-    override async executeCommand(client: Client, interaction: CommandInteraction<any>): Promise<void> {
-        const sub = (interaction.options as any).getSubcommand();
-        const target = await AppUser.fromID((interaction.options.get("target")?.user || interaction.user).id);
+    public async onAdd(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
+        const userOpt = interaction.options.get("user")?.user;
+        const amountOpt = interaction.options.get("amount")?.value as number;
+        if (!userOpt) return interaction.reply(`Failed to get user option`);
 
-        switch (sub) {
-            case "view": {
-                interaction.reply(`${target.discord} has ${target.database.inventory.gold || "no"} gold`);
-                break;
-            }
-            case "add": {
-                if (!interaction.memberPermissions?.has("Administrator")) break;
+        const user = await AppUser.fromID(userOpt.id);
 
-                const amount = interaction.options.get("amount")?.value as number;
+        await user.addGold(amountOpt).save();
 
-                await target.addGold(amount).save();
-                interaction.reply({
-                    content: `${interaction.user} added ${amount} gold to ${target.discord}, new total is ${target.database.inventory.gold}`,
-                    flags: "Ephemeral",
-                });
-
-                break;
-            }
-            case "set": {
-                if (!interaction.memberPermissions?.has("Administrator")) break;
-
-                const amount = interaction.options.get("amount")?.value as number;
-
-                await target.setGold(amount).save();
-                interaction.reply({
-                    content: `${interaction.user} set ${target.discord}'s gold to ${amount}`,
-                    flags: "Ephemeral",
-                });
-
-                break;
-            }
-            default:
-                interaction.reply("You do not have permission to do this!");
-        }
+        return interaction.reply(`Added ${amountOpt} gold to ${user.discord}`);
     }
 }

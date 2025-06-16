@@ -1,8 +1,8 @@
-import { Command } from "@/command";
 import { Service } from "@/service";
 import { Client, GatewayIntentBits, Partials, Events, ActivityType } from "discord.js";
 import mongoose from "mongoose";
 import { Quest } from "./quest";
+import { Command } from "./commands";
 
 export const client = new Client({
     intents: [
@@ -32,23 +32,9 @@ client.once(Events.ClientReady, async (readyClient) => {
     (async () => {
         await Service.load(client);
         await Service.start(client);
-        await Command.register(client);
         await Quest.load();
+        await Command.load();
     })();
-
-    client.on(Events.InteractionCreate, async (interaction) => {
-        if (interaction.isCommand()) {
-            await Command.handleInteraction(client, interaction);
-        } else if (interaction.isAutocomplete()) {
-            await Command.handleAutocompleteInteraction(client, interaction);
-        } else if (interaction.isButton()) {
-            await Command.handleButtonInteraction(client, interaction);
-        }
-    });
-
-    client.on(Events.MessageCreate, async (message) => {
-        await Command.handleMessageCreate(message);
-    });
 
     await Service.stop(client);
 });

@@ -1,48 +1,64 @@
-import { Command } from "@/command";
+import { Command } from "@/commands";
 import { Quest } from "@/quest";
 import {
+    CommandInteraction,
+    InteractionResponse,
+    ApplicationCommandOptionType,
     AutocompleteInteraction,
-    InteractionContextType,
-    SlashCommandBuilder,
-    type Client,
-    type CommandInteraction,
 } from "discord.js";
 
 export default class QuestCommand extends Command.Base {
-    override get info(): any {
-        return new SlashCommandBuilder()
-            .setName("quest")
-            .setDescription("Execute a quest")
-            .addSubcommand((opt) =>
-                opt
-                    .setName("execute")
-                    .setDescription("Executes a quest")
-                    .addStringOption((opt) =>
-                        opt
-                            .setName("name")
-                            .setDescription("The name of the quest you want to execute")
-                            .setAutocomplete(true)
-                            .setRequired(true),
-                    ),
-            )
-            .addSubcommand((opt) =>
-                opt
-                    .setName("end")
-                    .setDescription("Ends a quest")
-                    .addStringOption((opt) =>
-                        opt
-                            .setName("name")
-                            .setDescription("The name of the quest you want to execute")
-                            .setAutocomplete(true)
-                            .setRequired(true),
-                    ),
-            )
-            .setDefaultMemberPermissions(0n)
-            .setContexts(InteractionContextType.Guild)
-            .toJSON();
+    public override main: Command.Command = new Command.Command("quest", "Quest related stuff", []);
+    public override subs: Command.Command[] = [
+        // prettier-ignore
+        new Command.Command(
+            "execute",
+            "Executes a quest",
+            [{
+                name: "name",
+                description: "The name of the quest you want to execute",
+                type: ApplicationCommandOptionType.String,
+                required: false,
+                autocomplete: true,
+            }],
+            this.onExecute,
+            this.onAutocomplete,
+        ),
+        // prettier-ignore
+        new Command.Command(
+            "end",
+            "Ends a quest",
+            [{
+                name: "name",
+                description: "The name of the quest you want to end",
+                type: ApplicationCommandOptionType.String,
+                required: true,
+                autocomplete: true,
+            }],
+            this.onEnd,
+            this.onAutocomplete,
+        ),
+    ];
+
+    public async onExecute(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
+        const questKeys = [...Quest.quests.keys()];
+        const random: string | undefined = questKeys[Math.floor(Math.random() * questKeys.length)];
+        const nameOpt: string | undefined = (interaction.options.get("name", false)?.value as string) || random;
+
+        await Quest.start(nameOpt!);
+
+        return interaction.reply({ content: `Executing quest '${nameOpt}'`, flags: "Ephemeral" });
     }
 
-    override async executeAutoComplete(client: Client, interaction: AutocompleteInteraction): Promise<void> {
+    public async onEnd(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
+        const nameOpt: string = interaction.options.get("name")?.value as string;
+
+        await Quest.end(nameOpt);
+
+        return interaction.reply({ content: `Ending quest '${nameOpt}'`, flags: "Ephemeral" });
+    }
+
+    public async onAutocomplete(interaction: AutocompleteInteraction): Promise<void> {
         const sub = (interaction.options as any).getSubcommand();
         const quests = sub === "execute" ? Quest.quests : Quest.active;
 
@@ -52,45 +68,5 @@ export default class QuestCommand extends Command.Base {
         }));
 
         await interaction.respond(options);
-    }
-
-    override async executeCommand(client: Client, interaction: CommandInteraction): Promise<void> {
-        const sub = (interaction.options as any).getSubcommand();
-        const nameOption = interaction.options.get("name", true).value as string;
-
-        const quest = Quest.quests.get(nameOption);
-
-        if (!quest) {
-            await interaction.reply({
-                content: `Quest '${quest!.name}' not found`,
-                flags: "Ephemeral",
-            });
-            return;
-        }
-
-        const handlers: Record<string, () => void> = {
-            execute: async () => {
-                await interaction.reply({
-                    content: `Executing quest: ${quest.name}`,
-                    flags: "Ephemeral",
-                });
-
-                await Quest.start(quest.name);
-                return;
-            },
-            end: async () => {
-                await interaction.reply({
-                    content: `Ending quest: ${quest.name}`,
-                    flags: "Ephemeral",
-                });
-
-                await Quest.end(quest.name);
-                return;
-            },
-        };
-
-        const handler = handlers[sub];
-        if (handler) handler();
-        else await interaction.reply(`Invalid sub command ${sub}`);
     }
 }
