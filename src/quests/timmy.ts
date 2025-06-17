@@ -5,10 +5,8 @@ import { AppUser } from "@/user";
 import { Globals } from "..";
 
 export default class TimmyQuest extends Quest.Base {
-    public override buttons: AppButton[] = [
-        new AppButton("Help", this.onPressHelp),
-        new AppButton("Kill", this.onPressKill),
-    ];
+    public override buttons: AppButton[] = [new AppButton("Help", this.onPressHelp), new AppButton("Kill", this.onPressKill)];
+    goldReward: number = 10;
 
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);
@@ -43,10 +41,10 @@ export default class TimmyQuest extends Quest.Base {
     private async onPressKill(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
 
-        await user.addGold(100).save();
+        await user.addGold(this.goldReward).save();
 
         await interaction.reply({
-            content: `Bastard, but you gain 100 gold`,
+            content: `Bastard, but you gain ${this.goldReward} gold`,
             flags: "Ephemeral",
         });
     }

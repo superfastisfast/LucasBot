@@ -1,5 +1,3 @@
-import { type ItemDocument } from "@/models/item";
-import { StatsModel, type UserDocument } from "@/models/user";
 import { AppUser } from "@/user";
 
 export default class Fighter {
@@ -11,11 +9,7 @@ export default class Fighter {
     items: Array<ItemDocument> = [];
     fighterStats: StatsModel = 0 as any;
 
-    static async create(
-        dbUser: UserDocument,
-        startPosition: number,
-        imgUrl: string,
-    ): Promise<Fighter> {
+    static async create(dbUser: UserDocument, startPosition: number, imgUrl: string): Promise<Fighter> {
         let self = new Fighter(dbUser, startPosition, imgUrl);
         const user = await AppUser.fromID(dbUser.id);
         self.items = await user.getItems();
@@ -27,11 +21,7 @@ export default class Fighter {
         return self;
     }
 
-    private constructor(
-        dbUser: UserDocument,
-        startPosition: number,
-        imgUrl: string,
-    ) {
+    private constructor(dbUser: UserDocument, startPosition: number, imgUrl: string) {
         this.dbUser = dbUser;
         this.posX = startPosition;
         this.imgeUrl = imgUrl;
@@ -52,10 +42,7 @@ export default class Fighter {
                 for (const [key, value] of item.flatStatModifiers.entries()) {
                     this.fighterStats[key as keyof StatsModel] += value;
                 }
-                for (const [
-                    key,
-                    value,
-                ] of item.percentageStatModifiers.entries()) {
+                for (const [key, value] of item.percentageStatModifiers.entries()) {
                     this.fighterStats[key as keyof StatsModel] *= 1 + value;
                 }
             }
@@ -84,26 +71,15 @@ export default class Fighter {
             }
         }
         this.currentHealth = Math.max(0, this.currentHealth - damage);
-        return (
-            this.dbUser!.username +
-            ": Received " +
-            damage.toFixed(2) +
-            " damage!"
-        );
+        return this.dbUser!.username + ": Received " + damage.toFixed(2) + " damage!";
     }
 
     gainHealth(amount: number) {
-        this.currentHealth = Math.min(
-            this.getMaxHealthStats(),
-            this.currentHealth + amount,
-        );
+        this.currentHealth = Math.min(this.getMaxHealthStats(), this.currentHealth + amount);
     }
 
     gainMana(amount: number) {
-        this.currentMana = Math.min(
-            this.getMaxManaStats(),
-            this.currentMana + amount,
-        );
+        this.currentMana = Math.min(this.getMaxManaStats(), this.currentMana + amount);
     }
 
     drainMana(amount: number): boolean {

@@ -55,18 +55,12 @@ export default class XpService extends Service.Base {
         await this.rewardXp(author, -2);
     };
 
-    private handleReactionAdd = async (
-        reaction: MessageReaction | PartialMessageReaction,
-        user: User | PartialUser,
-    ): Promise<void> => {
+    private handleReactionAdd = async (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser): Promise<void> => {
         this.rewardXp(reaction.message.author!, 1);
         this.rewardXp(user, 1);
     };
 
-    private handleReactionRemove = async (
-        reaction: MessageReaction | PartialMessageReaction,
-        user: User | PartialUser,
-    ): Promise<void> => {
+    private handleReactionRemove = async (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser): Promise<void> => {
         this.rewardXp(user, -1);
     };
 

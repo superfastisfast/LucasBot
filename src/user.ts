@@ -2,7 +2,6 @@ import { User, Guild, GuildMember, Role, PermissionsBitField, DiscordAPIError, T
 import { client } from ".";
 import { UserDB } from "./models/user";
 import { InventoryDB } from "./models/inventory";
-import { ItemDB } from "./models/item";
 import Fighter from "./commands/Fight/fighter";
 
 export class AppUser {

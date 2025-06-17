@@ -91,5 +91,3 @@ export namespace Item {
 
     export const manager = new Item.Manager();
 }
-
-export const ItemDB = undefined;

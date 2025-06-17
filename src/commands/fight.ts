@@ -25,7 +25,14 @@ export default class FightCommand extends Command.Base {
         ],
         this.onExecute.bind(this),
     );
-    games: Map<number, FightGame> = new Map<number, FightGame>();
+    static games: Map<number, FightGame> = new Map<number, FightGame>();
+    static endGameByID(ID: number) {
+        const game = FightCommand.games.get(ID);
+        if (game) {
+            game.gameOver();
+            FightCommand.games.delete(ID);
+        }
+    }
 
     public async onExecute(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
         const opponentOpt = interaction.options.get("opponent", true).user;
@@ -44,12 +51,12 @@ export default class FightCommand extends Command.Base {
 
         let newGame = new FightGame(currentUser, opponentUser, betOpt);
         newGame.sendInviteMessage();
-        this.games.set(newGame.id, newGame);
+        FightCommand.games.set(newGame.id, newGame);
         return reply;
     }
 
     isUserPartOfFight(userId: string) {
-        for (const [id, game] of this.games!) {
+        for (const [id, game] of FightCommand.games!) {
             if (game.getAppUserByID(userId) !== undefined) {
                 return game;
             }
