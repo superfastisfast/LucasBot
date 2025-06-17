@@ -10,7 +10,6 @@ import { AttachmentBuilder, EmbedBuilder, type InteractionUpdateOptions } from "
 export const BLOCK_SIZE = 64;
 
 async function addPlayerToConext(appUser: AppUser, context: SKRSContext2D, BorderImage: Image | undefined) {
-    console.log("interaction ID: " + appUser.discord);
     const playerAvatarUrl = appUser.discord.displayAvatarURL({
         extension: "png",
         size: BLOCK_SIZE,
@@ -111,17 +110,16 @@ export async function getPlayerDisplay(player: Fighter, healthbar: string, manaB
     items.forEach((item, i) => {
         const flatModifiers = Object.entries(item.flatModifiers ?? {})
             .filter(([_, v]) => v !== 0)
-            .map(([k, v]) => `${k} ${v > 0 ? "+" : ""}${v}`)
+            .map(([k, v]) => `${Globals.ATTRIBUTES[k as keyof typeof Globals.ATTRIBUTES].emoji} ${v > 0 ? "+" : ""}${v}`)
             .join("\n");
 
         const percentageModifiers = Object.entries(item.percentageModifiers ?? {})
             .filter(([_, v]) => v !== 0)
-            .map(([k, v]) => `${k} ${v > 0 ? "+" : ""}${v * 100}%`)
+            .map(([k, v]) => `${Globals.ATTRIBUTES[k as keyof typeof Globals.ATTRIBUTES].emoji} ${v > 0 ? "+" : ""}${v * 100}%`)
             .join("\n");
-
         const modifiers = [flatModifiers, percentageModifiers].filter(Boolean).join("\n");
 
-        itemsDisplay += `**${item.name}**\nType: ${item.type ?? "???"}${modifiers ? `\nModifiers:\n${modifiers}` : ""}\n\n`;
+        itemsDisplay += `**${item.name}**\nType: ${item.type ?? "???"}${modifiers ? `\n${modifiers}` : ""}\n\n`;
     });
 
     return {

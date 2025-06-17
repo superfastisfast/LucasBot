@@ -102,8 +102,6 @@ export default class GlobglogabgelabCommand extends Command.Base {
     }
 
     public async onAutocomplete(interaction: AutocompleteInteraction): Promise<void> {
-        console.log("ROOOOOOOOOOOOOOOOO");
-
         const rawInput = interaction.options.getFocused().toString();
         const focusedValue = rawInput.toLowerCase().replace(/[^a-z\s]/g, "");
 

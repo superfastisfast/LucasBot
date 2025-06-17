@@ -16,18 +16,19 @@ import { Item } from "@/models/item";
 export default class ShopCommand extends Command.Base {
     public override main: Command.Command = new Command.Command("shop", "Buy some cool items", [], this.onExecute.bind(this));
 
-    stock: number = 3;
-
+    endTime: number = new Date().getTime();
+    stock: number = 4;
     items: Item.Base[] = [];
 
     public async onExecute(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
-        for (let i = 0; i < this.stock; i++) {
-            const item = await Item.manager.getRandom();
-            if (!item) {
-                await interaction.reply({ content: "No items found", flags: "Ephemeral" });
-                continue;
+        if (this.endTime < new Date().getTime()) {
+            this.items = [];
+            for (let i = 0; i < this.stock; i++) {
+                const item = await Item.manager.getRandom();
+                if (!item) return await interaction.reply({ content: "No items found", flags: "Ephemeral" });
+                this.items.push(item);
             }
-            this.items.push(item);
+            this.endTime = new Date().getTime() + 1000 * 60 * 15;
         }
 
         const embed = await this.generateEmbed(await AppUser.fromID(interaction.user.id));
@@ -105,19 +106,19 @@ export default class ShopCommand extends Command.Base {
         this.items.forEach((item, i) => {
             const flatModifiers = Object.entries(item.flatModifiers ?? {})
                 .filter(([_, v]) => v !== 0)
-                .map(([k, v]) => `${k} ${v > 0 ? "+" : ""}${v}`)
-                .join(", ");
+                .map(([k, v]) => `${Globals.ATTRIBUTES[k as keyof typeof Globals.ATTRIBUTES].emoji} ${v > 0 ? "+" : ""}${v}`)
+                .join("\n");
 
             const percentageModifiers = Object.entries(item.percentageModifiers ?? {})
                 .filter(([_, v]) => v !== 0)
-                .map(([k, v]) => `${k} ${v > 0 ? "+" : ""}${v * 100}%`)
-                .join(", ");
+                .map(([k, v]) => `${Globals.ATTRIBUTES[k as keyof typeof Globals.ATTRIBUTES].emoji} ${v > 0 ? "+" : ""}${v * 100}%`)
+                .join("\n");
 
-            const modifiers = [flatModifiers, percentageModifiers].filter(Boolean).join(", ");
+            const modifiers = [flatModifiers, percentageModifiers].filter(Boolean).join("\n");
 
             fields.push({
                 name: item.name.slice(0, 23),
-                value: `\`\`\`Cost: ${item.cost} ${Globals.ATTRIBUTES.gold.emoji}, Type: ${item.type ?? "???"}${modifiers ? `, Modifiers: ${modifiers}` : ""}\`\`\``,
+                value: `\`\`\`Cost: ${item.cost} ${Globals.ATTRIBUTES.gold.emoji}\nType: ${item.type ?? "???"}${modifiers ? `\n\n${modifiers}` : "\n\n"}\`\`\``,
                 inline: true,
             });
 

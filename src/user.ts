@@ -2,7 +2,7 @@ import { User, Guild, GuildMember, Role, PermissionsBitField, DiscordAPIError, T
 import { client } from ".";
 import { UserDB } from "./models/user";
 import { InventoryDB } from "./models/inventory";
-import { Item, ItemDB } from "./models/item";
+import { Item } from "./models/item";
 import Fighter from "./commands/Fight/fighter";
 
 export class AppUser {
@@ -235,7 +235,6 @@ export class AppUser {
         let percent: number = 1;
 
         for (const [_, itemName] of this.inventory.items.filter(([bool, _]) => bool)) {
-            console.log("Item : " + itemName);
             const item = Item.manager.findByName(itemName);
             if (!item) continue;
 

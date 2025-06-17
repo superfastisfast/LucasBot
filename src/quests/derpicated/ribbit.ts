@@ -6,10 +6,7 @@ import { AppUser } from "@/user";
  * TODO: Fix this quest, it doesnt work idk man its stupid, It might be because we arent storing the members or shit but I dont have the patiens for that ¯\_(ツ)_/¯
  */
 export default class RibbitQuest extends Quest.Base {
-    public override buttons: AppButton[] = [
-        new AppButton("Steal", this.onPressSteal),
-        new AppButton("Help", this.onPressHelp),
-    ];
+    public override buttons: AppButton[] = [new AppButton("Steal", this.onPressSteal), new AppButton("Help", this.onPressHelp)];
 
     ribbit: string = undefined!;
 
@@ -50,10 +47,8 @@ export default class RibbitQuest extends Quest.Base {
     private async onPressSteal(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
         const ribbit = await AppUser.fromID(this.ribbit);
-        console.log(ribbit);
 
-        const stealReward: number =
-            Math.floor(Math.random() * (this.maxStealReward - this.minStealReward)) + this.minStealReward;
+        const stealReward: number = Math.floor(Math.random() * (this.maxStealReward - this.minStealReward)) + this.minStealReward;
 
         await ribbit.addGold(-stealReward).save();
         await user.addGold(stealReward).save();

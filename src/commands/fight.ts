@@ -4,24 +4,24 @@ import { AppUser } from "../user";
 import FightGame from "./Fight/fightGame";
 
 export default class FightCommand extends Command.Base {
-    // prettier-ignore
     public override main: Command.Command = new Command.Command(
-        "fight", "Fight a player", 
+        "fight",
+        "Fight a player",
         [
             {
                 name: "opponent",
                 description: "The opponent to fight",
                 type: ApplicationCommandOptionType.User,
-                required:true
+                required: true,
             },
             {
                 name: "bet",
                 description: "how much money to bet (both players must be able to afford)",
                 type: ApplicationCommandOptionType.Number,
-                required:true,
+                required: true,
                 min_value: 0,
-                max_value: 100
-            }
+                max_value: 100,
+            },
         ],
         this.onExecute.bind(this),
     );

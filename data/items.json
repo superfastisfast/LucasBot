@@ -23,7 +23,7 @@
     {
         "name": "Banana Hammer",
         "cost": 120,
-        "tag": "weapon",
+        "type": "weapon",
         "flatModifiers": {
             "strength": 1.2
         },
@@ -267,7 +267,7 @@
     {
         "name": "Crocs",
         "cost": 500,
-        "tag": "boots",
+        "type": "boots",
         "flatModifiers": {
             "defense": 1
         },
