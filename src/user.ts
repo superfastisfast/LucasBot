@@ -2,7 +2,7 @@ import { User, Guild, GuildMember, Role, PermissionsBitField, DiscordAPIError, T
 import { client } from ".";
 import { UserDB } from "./models/user";
 import { InventoryDB } from "./models/inventory";
-import { ItemDB } from "./models/item";
+import { Item, ItemDB } from "./models/item";
 import Fighter from "./commands/Fight/fighter";
 
 export class AppUser {
@@ -178,11 +178,18 @@ export class AppUser {
     }
 
     async save(): Promise<AppUser> {
-        const stats = ["strength", "agility", "charisma", "magicka", "stamina", "defense", "vitality"] as (keyof UserDB.StatDB.Document)[];
-
-        stats.forEach((stat) => {
+        UserDB.StatDB.keys.forEach((stat) => {
             if ((this.database.stats[stat] as number) < 0) {
                 (this.database.stats[stat] as number) = 0;
+            }
+        });
+
+        this.inventory.items.forEach(([active, name], i) => {
+            if (active) {
+                const item = Item.manager.findByName(name)!;
+                if (!item) {
+                    this.inventory.items.splice(1);
+                }
             }
         });
 
@@ -205,24 +212,47 @@ export class AppUser {
         }
     }
 
-    addItem(item: ItemDB.Document): AppUser {
+    async getEquippedItems(): Promise<[boolean, string][]> {
+        try {
+            const inventory = await InventoryDB.Model.findOne({ id: this.discord.id }).exec();
+            if (!inventory) return [];
+
+            return (inventory.items ?? []).filter(([isEquipped]) => isEquipped === true);
+        } catch (error) {
+            console.error(`Failed to get items for user ${this.discord.id}:`, error);
+            return [];
+        }
+    }
+
+    addItem(item: Item.Base): AppUser {
         this.inventory.items.push([false, item.name]);
         return this;
     }
 
-    equipItem(from: number, to: number): AppUser {
-        if (!this.inventory.items[from]) {
-            console.warn(`Inventory item at index ${from} does not exist`);
-            return this;
-        }
-        if (!this.inventory.items[to]) {
-            console.warn(`Inventory item at index ${to} does not exist`);
-            return this;
-        }
+    getStat(name: string | UserDB.StatDB.Type): number {
+        const key = name as UserDB.StatDB.Type;
 
-        if (this.inventory.items[from][0]) this.inventory.items[from][0] = false;
-        if (this.inventory.items[to][0]) this.inventory.items[to][0] = true;
-        return this;
+        let value: number = this.database.stats[key];
+        let flat: number = 0;
+        let percent: number = 0;
+
+        this.inventory.items.forEach(([active, name]) => {
+            if (active) {
+                const item = Item.manager.findByName(name)!;
+
+                Object.entries(item.flatModifiers ?? {})
+                    .filter(([_, v]) => v !== 0)
+                    .map(([k, v]) => (flat += v))
+                    .join(", ");
+
+                Object.entries(item.percentageModifiers ?? {})
+                    .filter(([_, v]) => v !== 0)
+                    .map(([k, v]) => (percent += v))
+                    .join(", ");
+            }
+        });
+
+        return (value + flat) * percent;
     }
 
     /////////////////////////////////////////////////////////
