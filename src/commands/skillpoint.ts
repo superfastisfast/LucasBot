@@ -5,18 +5,20 @@ import { Globals } from "..";
 import { UserDB } from "@/models/user";
 
 export default class SkillpointCommand extends Command.Base {
-    // prettier-ignore
     public override main: Command.Command = new Command.Command(
-        "skillpoint", "Display your profile", 
-        [{ 
-            name: "skill", 
-            description: "What skill you want to upgrade", 
-            type: ApplicationCommandOptionType.String, 
-            required: true, 
-            autocomplete: true 
-        }],
-        this.onExecute.bind(this),
-        this.onAutocomplete.bind(this),
+        "skillpoint",
+        "Display your profile",
+        [
+            {
+                name: "skill",
+                description: "What skill you want to upgrade",
+                type: ApplicationCommandOptionType.String,
+                required: true,
+                autocomplete: true,
+            },
+        ],
+        this.onExecute,
+        this.onAutocomplete,
     );
 
     public async onExecute(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
