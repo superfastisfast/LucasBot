@@ -5,13 +5,13 @@ import { AppUser } from "@/user";
 import { Globals } from "..";
 
 export default class SubscribeQuest extends Quest.Base {
-    public override buttons: AppButton[] = [
-        new AppButton("Yes", this.onPressYes.bind(this)),
-        new AppButton("No", this.onPressNo.bind(this)),
-    ];
+    public override buttons: AppButton[] = [new AppButton("Yes", this.onPressYes.bind(this)), new AppButton("No", this.onPressNo.bind(this))];
+
+    public override maxTimeActiveMS: number = 1000 * 60 * 60;
+
     players: string[] = [];
 
-    xpRewardAmount: number = 10;
+    reward: number = 10;
 
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);
@@ -39,10 +39,10 @@ export default class SubscribeQuest extends Quest.Base {
             });
             return;
         }
-        await user.addXP(this.xpRewardAmount).save();
+        await user.addXP(this.reward).save();
 
         await interaction.reply({
-            content: `**Good 😊** You gained ${this.xpRewardAmount} XP! Now tell a friend?`,
+            content: `**Good 😊** You gained ${this.reward} ${Globals.ATTRIBUTES.xp.emoji}! Now tell a friend?`,
             flags: "Ephemeral",
         });
     }
@@ -55,8 +55,9 @@ export default class SubscribeQuest extends Quest.Base {
             });
             return;
         }
+
         await interaction.reply({
-            content: `What?... why are you here if you'r not even subscribed?!?!?`,
+            content: `What?... 😡 why are you here if you'r not even subscribed?!?!?`,
             flags: "Ephemeral",
         });
     }

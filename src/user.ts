@@ -1,4 +1,4 @@
-import { User, Guild, GuildMember, Role, PermissionsBitField, DiscordAPIError, TextChannel, EmbedBuilder } from "discord.js";
+import { User, Guild, GuildMember, Role, PermissionsBitField, DiscordAPIError, TextChannel } from "discord.js";
 import { client } from ".";
 import { UserDB } from "./models/user";
 import { InventoryDB } from "./models/inventory";
@@ -229,28 +229,30 @@ export class AppUser {
         return this;
     }
 
-    getStat(name: string | UserDB.StatDB.Type): number {
-        const key = name as UserDB.StatDB.Type;
-
+    getStat(key: UserDB.StatDB.Type): number {
         let value: number = this.database.stats[key];
         let flat: number = 0;
-        let percent: number = 0;
+        let percent: number = 1;
 
-        this.inventory.items.forEach(([active, name]) => {
-            if (active) {
-                const item = Item.manager.findByName(name)!;
+        for (const [_, itemName] of this.inventory.items) {
+            const item = Item.manager.findByName(itemName);
+            if (!item) continue;
 
-                Object.entries(item.flatModifiers ?? {})
-                    .filter(([_, v]) => v !== 0)
-                    .map(([k, v]) => (flat += v))
-                    .join(", ");
+            const flatEntries = Object.entries(item.flatModifiers ?? {});
+            const percentEntries = Object.entries(item.percentageModifiers ?? {});
 
-                Object.entries(item.percentageModifiers ?? {})
-                    .filter(([_, v]) => v !== 0)
-                    .map(([k, v]) => (percent += v))
-                    .join(", ");
-            }
-        });
+            const merged = [...flatEntries, ...percentEntries];
+
+            merged.forEach(([modKey, value], i) => {
+                if (modKey === key) {
+                    if (i < flatEntries.length) {
+                        flat += value;
+                    } else {
+                        percent += value;
+                    }
+                }
+            });
+        }
 
         return (value + flat) * percent;
     }

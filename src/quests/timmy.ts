@@ -6,7 +6,7 @@ import { Globals } from "..";
 
 export default class TimmyQuest extends Quest.Base {
     public override buttons: AppButton[] = [new AppButton("Help", this.onPressHelp), new AppButton("Kill", this.onPressKill)];
-    goldReward: number = 10;
+    reward: number = 10;
 
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);
@@ -33,7 +33,7 @@ export default class TimmyQuest extends Quest.Base {
         user.database.stats.charisma -= 1;
         await user.save();
         interaction.reply({
-            content: `You helped but you also lost -1 strengh, -1 charisma`,
+            content: `You helped litle Timmy\n-1 strengh ${Globals.ATTRIBUTES.strength.emoji}, -1 charisma ${Globals.ATTRIBUTES.charisma.emoji}`,
             flags: "Ephemeral",
         });
     }
@@ -41,10 +41,10 @@ export default class TimmyQuest extends Quest.Base {
     private async onPressKill(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
 
-        await user.addGold(this.goldReward).save();
+        await user.addGold(this.reward).save();
 
         await interaction.reply({
-            content: `Bastard, but you gain ${this.goldReward} gold`,
+            content: `Bastard, but you gain ${this.reward} ${Globals.ATTRIBUTES.gold.emoji}`,
             flags: "Ephemeral",
         });
     }

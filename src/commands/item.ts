@@ -7,50 +7,52 @@ import { UserDB } from "@/models/user";
 export default class ItemCommand extends Command.Base {
     public override main: Command.Command = new Command.Command("item", "Item related stuff", []);
     public override subs: Command.Command[] = [
-        // prettier-ignore
         new Command.Command(
             "add",
             "Add an item",
-            [{
-                name: "name",
-                description: "The name of the new item",
-                type: ApplicationCommandOptionType.String,
-                required: true,
-            },
-            {
-                name: "type",
-                description: "The item type",
-                type: ApplicationCommandOptionType.String,
-                required: true,
-                autocomplete: true,
-            },
-            {
-                name: "cost",
-                description: "How much the item costs",
-                type: ApplicationCommandOptionType.Number,
-                required: true,
-            },
-            {
-                name: "modifiers",
-                description: "The items modifiers",
-                type: ApplicationCommandOptionType.String,
-                required: true,
-                autocomplete: true,
-            }],
+            [
+                {
+                    name: "name",
+                    description: "The name of the new item",
+                    type: ApplicationCommandOptionType.String,
+                    required: true,
+                },
+                {
+                    name: "type",
+                    description: "The item type",
+                    type: ApplicationCommandOptionType.String,
+                    required: true,
+                    autocomplete: true,
+                },
+                {
+                    name: "cost",
+                    description: "How much the item costs",
+                    type: ApplicationCommandOptionType.Number,
+                    required: true,
+                },
+                {
+                    name: "modifiers",
+                    description: "The items modifiers",
+                    type: ApplicationCommandOptionType.String,
+                    required: true,
+                    autocomplete: true,
+                },
+            ],
             this.onAdd,
             this.onAddAutocomplete,
         ),
-        // prettier-ignore
         new Command.Command(
             "remove",
             "Remove an item",
-            [{
-                name: "name",
-                description: "The name of the item you want to remove",
-                type: ApplicationCommandOptionType.String,
-                required: true,
-                autocomplete: true,
-            }],
+            [
+                {
+                    name: "name",
+                    description: "The name of the item you want to remove",
+                    type: ApplicationCommandOptionType.String,
+                    required: true,
+                    autocomplete: true,
+                },
+            ],
             this.onRemove,
             this.onRemoveAutocomplete,
         ),
@@ -189,12 +191,18 @@ export default class ItemCommand extends Command.Base {
             const parts = modifier.split("=");
             const key = parts[0]?.trim();
             const rawValue = parts[1]?.trim() ?? "0";
-            const value = Number(rawValue.slice(0, rawValue.length - 1));
 
             if (!key) continue;
+
+            const isPercentage = rawValue.endsWith("%");
+
+            const numericPart = isPercentage ? rawValue.slice(0, -1) : rawValue;
+
+            const value = parseFloat(numericPart);
+
             if (isNaN(value)) continue;
 
-            (rawValue.endsWith("%") ? percentageModifiers : flatModifiers).set(key, value);
+            (isPercentage ? percentageModifiers : flatModifiers).set(key, value);
         }
 
         return {

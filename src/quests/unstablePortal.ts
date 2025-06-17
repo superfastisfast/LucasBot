@@ -10,7 +10,7 @@ export default class UnstablePortalQuest extends Quest.Base {
         new AppButton("Destroy", this.onPressDestroy.bind(this)),
     ];
 
-    goldReward: number = 10;
+    reward: number = Globals.random(0, 10);
     isDestroyed: boolean = false;
 
     public override async start(): Promise<Message<true>> {
@@ -35,19 +35,16 @@ export default class UnstablePortalQuest extends Quest.Base {
     private async onPressEnter(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
 
-        const successfullyEnterdPortal: boolean =
-            Math.floor(Math.random() * 100 - user.database.stats.magicka * 0.01) > 99;
+        const successfullyEnterdPortal: boolean = Math.floor(Math.random() * 100 - user.database.stats.magicka * 0.01) > 99;
         const successfullyEarnLoot: boolean = Math.random() > 0.5;
         const destroyedPortal: boolean = Math.random() > 0.6;
 
-        const goldAmount = Math.floor(Math.random() * this.goldReward);
-
-        if (successfullyEarnLoot) await user.addGold(goldAmount).save();
+        if (successfullyEarnLoot) await user.addGold(this.reward).save();
 
         await interaction.reply({
             content: this.isDestroyed
                 ? "You can't enter the portal anymore... someone destroyed it!"
-                : `You ${successfullyEnterdPortal ? "successfully" : "unsuccessfully"} entered the portal${!successfullyEarnLoot ? "!" : ` and you got ${goldAmount} ${Globals.ATTRIBUTES.gold.emoji}`}`,
+                : `You ${successfullyEnterdPortal ? "successfully" : "unsuccessfully"} entered the portal${!successfullyEarnLoot ? "!" : ` and you got ${this.reward} ${Globals.ATTRIBUTES.gold.emoji}`}`,
             flags: "Ephemeral",
         });
         if (destroyedPortal) this.end();
@@ -55,9 +52,7 @@ export default class UnstablePortalQuest extends Quest.Base {
 
     private async onPressDestroy(interaction: ButtonInteraction): Promise<void> {
         await interaction.reply({
-            content: this.isDestroyed
-                ? "You can't destroy the portal anymore... someone destroyed it!"
-                : "You destroyed the portal!",
+            content: this.isDestroyed ? "You can't destroy the portal anymore... someone destroyed it!" : "You destroyed the portal!",
             flags: "Ephemeral",
         });
         if (this.isDestroyed == false) this.end();

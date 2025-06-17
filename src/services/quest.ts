@@ -38,13 +38,5 @@ export default class QuestService extends Service.Base {
                 return;
             }
         }
-        // const quests = Array.from(Quest.quests);
-        // const randomQuestIndex = Math.floor(Math.random() * quests.length);
-        // [...quests.slice(randomQuestIndex), ...quests.slice(0, randomQuestIndex)].forEach((quest) => {
-        //     if (quest && quest[1].isActive === false) {
-        //         Quest.start(quest[0]);
-        //         return;
-        //     }
-        // });
     }
 }
