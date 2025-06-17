@@ -2,6 +2,9 @@ import mongoose, { Document as MDocument, Schema } from "mongoose";
 
 export namespace UserDB {
     export namespace StatDB {
+        export const keys = ["strength", "agility", "charisma", "magicka", "stamina", "defense", "vitality"] as const;
+        export const keyArray = ["strength", "agility", "charisma", "magicka", "stamina", "defense", "vitality"];
+
         export const schema = new Schema(
             {
                 strength: { type: Number, default: 3.0 },

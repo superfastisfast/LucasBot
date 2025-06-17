@@ -1,12 +1,8 @@
 import { Command } from "@/commands";
-import { ItemDB } from "@/models/item";
-import {
-    CommandInteraction,
-    InteractionResponse,
-    ApplicationCommandOptionType,
-    AutocompleteInteraction,
-} from "discord.js";
+import { Item } from "@/models/item";
+import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType, AutocompleteInteraction, User } from "discord.js";
 import { Globals } from "..";
+import { UserDB } from "@/models/user";
 
 export default class ItemCommand extends Command.Base {
     public override main: Command.Command = new Command.Command("item", "Item related stuff", []);
@@ -64,22 +60,22 @@ export default class ItemCommand extends Command.Base {
         const nameOpt = interaction.options.get("name")?.value as string;
         const typeOpt = interaction.options.get("type")?.value as string;
         const costOpt = interaction.options.get("cost")?.value as number;
-        const attributesOpt = interaction.options.get("attributes")?.value as string;
+        const modifiersOpt = interaction.options.get("modifiers")?.value as string;
 
-        const modifiers = ItemCommand.parseModifiers(new String(attributesOpt));
+        const modifiers = ItemCommand.parseModifiers(modifiersOpt);
 
-        const newItem = await ItemDB.Model.create({
-            name: nameOpt,
-            type: typeOpt,
-            cost: costOpt,
-            flatStatModifiers: modifiers.flatStatModifiers,
-            percentageStatModifiers: modifiers.percentageStatModifiers,
-        });
-
-        newItem.save();
+        Item.manager
+            .create({
+                name: nameOpt,
+                type: typeOpt,
+                cost: costOpt,
+                flatModifiers: modifiers.flatModifiers,
+                percentageModifiers: modifiers.percentageModifiers,
+            })
+            .save();
 
         return interaction.reply({
-            content: `Added item name: '${nameOpt}', tag: '${typeOpt}', cost: ${costOpt}  ${Globals.ATTRIBUTES.gold.emoji}, attr: '${attributesOpt}'`,
+            content: `Added item name: '${nameOpt}', type: '${typeOpt}', cost: ${costOpt} ${Globals.ATTRIBUTES.gold.emoji}, modifiers: '${modifiersOpt}'`,
             flags: "Ephemeral",
         });
     }
@@ -87,7 +83,7 @@ export default class ItemCommand extends Command.Base {
     public async onRemove(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
         const nameOpt = interaction.options.get("name")?.value as string;
 
-        await ItemDB.Model.findOneAndDelete({ name: nameOpt });
+        const item = Item.manager.delete(nameOpt);
         return interaction.reply({
             content: `Removed item '${nameOpt}'`,
             flags: "Ephemeral",
@@ -100,7 +96,7 @@ export default class ItemCommand extends Command.Base {
         if (focused.name === "type") {
             let types: { name: string; value: string }[] = [];
 
-            ItemDB.Types.forEach((type) => {
+            Item.Types.forEach((type) => {
                 types.push({ name: type, value: type });
             });
 
@@ -134,7 +130,7 @@ export default class ItemCommand extends Command.Base {
             return;
         }
 
-        let possibleStats = ["strength", "agility", "charisma", "magicka", "stamina", "defense", "vitality"];
+        let possibleStats = UserDB.StatDB.keyArray;
 
         for (const part of parts) {
             const cleanedPart = (part.split("=")[0] || "").replace(/[^a-z]/gi, "").toLowerCase();
@@ -143,9 +139,7 @@ export default class ItemCommand extends Command.Base {
 
         const [keyPart, valuePart] = rawLast.split("=");
 
-        const filteredStats = possibleStats.filter((stat) =>
-            stat.toLowerCase().startsWith((keyPart ?? "").toLowerCase()),
-        );
+        const filteredStats = possibleStats.filter((stat) => stat.toLowerCase().startsWith((keyPart ?? "").toLowerCase()));
 
         const suggestions = filteredStats.map((stat) => {
             const newInput = parts.length > 0 ? parts.join(", ") + ", " + stat + "=" : stat + "=";
@@ -170,11 +164,13 @@ export default class ItemCommand extends Command.Base {
     public async onRemoveAutocomplete(interaction: AutocompleteInteraction): Promise<void> {
         const focused = interaction.options.getFocused().toString();
 
-        const matchingThings = await ItemDB.Model.find({
-            name: { $regex: new RegExp(focused.toString(), "i") },
-        })
-            .sort({ name: 1 })
-            .limit(25);
+        const matchingThings = Item.manager
+            .find({})
+            .filter((item) => {
+                $regex: new RegExp(focused.toString(), "i");
+            })
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .slice(0, 25);
 
         const suggestions = matchingThings.map((item) => ({
             name: item.name,
@@ -184,30 +180,25 @@ export default class ItemCommand extends Command.Base {
         await interaction.respond(suggestions.slice(0, 25));
     }
 
-    static parseModifiers(modifiers: String): any {
-        let flatModifiers = new Map<string, number>();
-        let percentageModifiers = new Map<string, number>();
+    static parseModifiers(modifiers: string): any {
+        const flatModifiers = new Map<string, number>();
+        const percentageModifiers = new Map<string, number>();
 
         for (const modifier of modifiers.split(",")) {
             const parts = modifier.split("=");
-
             const key = parts[0]?.trim();
             const rawValue = parts[1]?.trim() ?? "0";
             const value = Number(rawValue.slice(0, rawValue.length - 1));
 
-            if (!key) continue; // skip empty keys
-            if (isNaN(value)) continue; // skip invalid numbers
+            if (!key) continue;
+            if (isNaN(value)) continue;
 
-            if (rawValue.endsWith("%")) {
-                percentageModifiers.set(key, value);
-            } else {
-                flatModifiers.set(key, value);
-            }
+            (rawValue.endsWith("%") ? percentageModifiers : flatModifiers).set(key, value);
         }
 
         return {
-            flatStatModifiers: flatModifiers,
-            percentageStatModifiers: percentageModifiers,
+            flatModifiers: Object.fromEntries(flatModifiers),
+            percentageModifiers: Object.fromEntries(percentageModifiers),
         };
     }
 }

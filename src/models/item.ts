@@ -1,81 +1,95 @@
-import mongoose, { type Document as MDocument, Schema } from "mongoose";
+import fs from "fs";
+import path from "path";
 
-export namespace ItemDB {
+export namespace Item {
     export const Types = ["weapon", "shield", "helmet", "chestplate", "leggings", "boots", "item"] as const;
 
-    export const schema = new Schema({
-        name: { type: String, required: true },
-        cost: { type: Number, required: true },
-        type: { type: String, required: true },
-        flatModifiers: {
-            type: Map,
-            of: Number,
-            default: new Map(),
-        },
-        percentageModifiers: {
-            type: Map,
-            of: Number,
-            default: new Map(),
-        },
-    });
-
-    export interface Document extends MDocument {
+    export interface Base {
         name: string;
         cost: number;
-        type: string; // renamed here too
-        flatModifiers: Map<string, number>;
-        percentageModifiers: Map<string, number>;
+        type: string;
+        flatModifiers: Record<string, number>;
+        percentageModifiers: Record<string, number>;
     }
 
-    export type ModelType = mongoose.Model<Document>;
-    export const Model = mongoose.model<Document>("Item", schema);
+    export class Manager {
+        private items: Base[] = [];
+        private readonly filePath: string = path.resolve(__dirname, "../../data/items.json");
+        private loaded: boolean = false;
 
-    export async function getFromName(name: string): Promise<Document | null> {
-        try {
-            return await Model.findOne({ name }).exec();
-        } catch (error) {
-            console.error(`[Item.getFromName] Failed to fetch item "${name}":`, error);
-            return null;
+        constructor() {
+            this.loadItems();
+        }
+
+        private loadItems() {
+            if (this.loaded) return;
+            try {
+                const rawData = fs.readFileSync(this.filePath, "utf-8");
+                this.items = JSON.parse(rawData);
+                this.loaded = true;
+            } catch (err) {
+                console.error("Failed to load items:", err);
+                this.items = [];
+            }
+        }
+
+        findByName(name: string): Base | undefined {
+            return this.items.find((item) => item.name.toLowerCase() === name.toLowerCase());
+        }
+
+        create(newItem: Base): this {
+            const index = this.items.findIndex((item) => item.name === newItem.name);
+            if (index !== -1) {
+                this.items[index] = newItem;
+            } else {
+                this.items.push(newItem);
+            }
+            return this;
+        }
+
+        delete(name: string): boolean {
+            const index = this.items.findIndex((item) => item.name.toLowerCase() === name.toLowerCase());
+            if (index === -1) return false;
+            this.items.splice(index, 1);
+            return true;
+        }
+
+        save(): void {
+            try {
+                fs.writeFileSync(this.filePath, JSON.stringify(this.items, null, 2));
+            } catch (err) {
+                console.error("Failed to save items:", err);
+            }
+        }
+
+        getAll(): Base[] {
+            return this.items;
+        }
+
+        find(query: Partial<Base>): Base[] {
+            return this.items.filter((item) => {
+                return Object.entries(query).every(([key, value]) => {
+                    if (typeof value === "object" && value !== null) {
+                        const subObj = (item as any)[key];
+                        if (typeof subObj !== "object" || subObj === null) return false;
+
+                        return Object.entries(value).every(([subKey, subValue]) => {
+                            return subObj[subKey] === subValue;
+                        });
+                    }
+                    return (item as any)[key] === value;
+                });
+            });
+        }
+
+        getRandom(): Base | undefined {
+            if (this.items.length === 0) return undefined;
+            const randomIndex = Math.floor(Math.random() * this.items.length);
+            return this.items[randomIndex];
         }
     }
 
-    export async function getRandom(): Promise<Document | null> {
-        try {
-            const randomItems = await Model.aggregate<Document>([{ $sample: { size: 1 } }]);
-            return randomItems.length > 0 ? randomItems[0]! : null;
-        } catch (error) {
-            console.error("[Item.getRandom] Failed to fetch random item:", error);
-            return null;
-        }
-    }
-
-    export function getStringCollection(items: Array<Document>): string {
-        if (items.length === 0) return "None";
-
-        return items
-            .map((item) => {
-                let itemDetails = `**${item.name}**`;
-
-                const flatStatsParts: string[] = [];
-                for (const [statName, amplifier] of item.flatModifiers.entries()) {
-                    flatStatsParts.push(`${statName}: ${amplifier}`);
-                }
-                if (flatStatsParts.length > 0) {
-                    itemDetails += `\n${flatStatsParts.join(", ")}`;
-                }
-
-                const percentageStatsParts: string[] = [];
-                for (const [statName, amplifier] of item.percentageModifiers.entries()) {
-                    percentageStatsParts.push(`${statName}: ${(amplifier * 100).toFixed(0)}%`);
-                }
-                if (percentageStatsParts.length > 0) {
-                    itemDetails += `\n${percentageStatsParts.join(", ")}`;
-                }
-
-                return itemDetails;
-            })
-            .join("\n");
-    }
+    export const manager = new Item.Manager();
 }
 
-export const Item = undefined;
+export const ItemDB = undefined;

@@ -2,7 +2,7 @@ import { Message, type ButtonInteraction, EmbedBuilder } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
-import { ItemDB } from "@/models/item";
+import { Item } from "@/models/item";
 import { Globals } from "..";
 
 export default class ShopQuest extends Quest.Base {
@@ -31,14 +31,17 @@ export default class ShopQuest extends Quest.Base {
         this.stock = Math.floor(Math.random() * (this.maxStock - this.minStock)) + this.minStock;
 
         for (let i: number = 0; i < this.stock; i++) {
-            const item: ItemDB.Document = (await ItemDB.getRandom())!;
+            const item = Item.Manager.getRandom();
             if (!item) {
-                console.warn("Item is null");
+                console.warn("Item is undefined");
                 return Globals.CHANNEL.send("Something went wrong... concult a Adam");
             }
 
             let modifiers: string = "";
-            if (item.flatModifiers.size! + item.percentageModifiers.size! !== 0) {
+            const flatValues = item.flatModifiers ? [...item.flatModifiers.values()] : [];
+            const percentValues = item.percentageModifiers ? [...item.percentageModifiers.values()] : [];
+
+            if (flatValues.length + percentValues.length !== 0) {
                 modifiers = "Modifiers:\n";
                 for (const [key, value] of Object.entries(item.flatModifiers ?? {})) {
                     if (value > 0) modifiers += `${key} **+${value}**,\n`;
