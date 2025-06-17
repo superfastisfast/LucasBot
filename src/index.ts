@@ -72,6 +72,7 @@ export namespace Globals {
 
     export const LINK: string = "https://www.youtube.com/@LucasDevelop";
     export let CHANNEL: TextChannel;
+    export const MISSING_PERMS = "You don't have the right permissions to execute this command";
 
     export function random(max: number, min: number = 0): number {
         return Math.floor(Math.random() * (max - min) + min);

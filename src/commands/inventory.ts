@@ -1,5 +1,4 @@
 import { Command } from "@/commands";
-import { InventoryDB } from "@/models/inventory";
 import { Item } from "@/models/item";
 import { AppUser } from "@/user";
 import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType, AutocompleteInteraction } from "discord.js";
@@ -58,6 +57,7 @@ export default class QuestCommand extends Command.Base {
             ],
             this.onAdd,
             this.onAutocomplete,
+            true,
         ),
         new Command.Command(
             "clear",
@@ -70,6 +70,8 @@ export default class QuestCommand extends Command.Base {
                 },
             ],
             this.onClear,
+            undefined,
+            true,
         ),
     ];
 
@@ -110,9 +112,6 @@ export default class QuestCommand extends Command.Base {
     }
 
     public async onAdd(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
-        if (!interaction.memberPermissions?.has("Administrator"))
-            return interaction.reply({ content: "You don't have the right permissions to execute this command", flags: "Ephemeral" });
-
         const userOpt = (interaction.options.get("user") || interaction).user;
         if (!userOpt) return interaction.reply(`Failed to get user option`);
         const itemNameOpt = interaction.options.get("item")?.value as string;
@@ -150,9 +149,6 @@ export default class QuestCommand extends Command.Base {
     }
 
     public async onClear(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
-        if (!interaction.memberPermissions?.has("Administrator"))
-            return interaction.reply({ content: "You don't have the right permissions to execute this command", flags: "Ephemeral" });
-
         const userOpt = (interaction.options.get("user") || interaction).user;
         if (!userOpt) return interaction.reply(`Failed to get user option`);
         const user = await AppUser.fromID(userOpt.id);
