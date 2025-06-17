@@ -5,32 +5,34 @@ import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType, 
 export default class QuestCommand extends Command.Base {
     public override main: Command.Command = new Command.Command("quest", "Quest related stuff", []);
     public override subs: Command.Command[] = [
-        // prettier-ignore
         new Command.Command(
             "execute",
             "Executes a quest",
-            [{
-                name: "name",
-                description: "The name of the quest you want to execute",
-                type: ApplicationCommandOptionType.String,
-                required: false,
-                autocomplete: true,
-            }],
+            [
+                {
+                    name: "name",
+                    description: "The name of the quest you want to execute",
+                    type: ApplicationCommandOptionType.String,
+                    required: false,
+                    autocomplete: true,
+                },
+            ],
             this.onExecute,
             this.onAutocomplete,
             true,
         ),
-        // prettier-ignore
         new Command.Command(
             "end",
             "Ends a quest",
-            [{
-                name: "name",
-                description: "The name of the quest you want to end",
-                type: ApplicationCommandOptionType.String,
-                required: true,
-                autocomplete: true,
-            }],
+            [
+                {
+                    name: "name",
+                    description: "The name of the quest you want to end",
+                    type: ApplicationCommandOptionType.String,
+                    required: true,
+                    autocomplete: true,
+                },
+            ],
             this.onEnd,
             this.onAutocomplete,
             true,

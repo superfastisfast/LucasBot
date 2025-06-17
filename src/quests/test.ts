@@ -7,6 +7,7 @@ export default class TestQuest extends Quest.Base {
     public override buttons: AppButton[] = [new AppButton("Test Label", this.onPressTest.bind(this))];
 
     amount: number = 0;
+    public override maxTimeActiveMS: number = 1000 * 60 * 10;
 
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);

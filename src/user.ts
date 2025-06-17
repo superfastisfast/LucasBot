@@ -1,4 +1,4 @@
-import { User, Guild, GuildMember, Role, PermissionsBitField, DiscordAPIError, TextChannel, EmbedBuilder } from "discord.js";
+import { User, Guild, GuildMember, Role, PermissionsBitField, DiscordAPIError, TextChannel } from "discord.js";
 import { client } from ".";
 import { UserDB } from "./models/user";
 import { InventoryDB } from "./models/inventory";
@@ -229,9 +229,7 @@ export class AppUser {
         return this;
     }
 
-    getStat(name: string | UserDB.StatDB.Type): number {
-        const key = name as UserDB.StatDB.Type;
-
+    getStat(key: UserDB.StatDB.Type): number {
         let value: number = this.database.stats[key];
         let flat: number = 0;
         let percent: number = 0;
@@ -252,7 +250,7 @@ export class AppUser {
             }
         });
 
-        return (value + flat) * percent;
+        return (value + flat) * (1 + percent / 100);
     }
 
     /////////////////////////////////////////////////////////

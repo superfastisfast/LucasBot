@@ -1,18 +1,12 @@
 import { Command } from "@/commands";
 import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
 import { AppUser } from "../user";
-import { UserDB, UserModel } from "@/models/user";
+import { UserDB } from "@/models/user";
 
 export default class XpCommand extends Command.Base {
     public override main: Command.Command = new Command.Command("xp", "XP related stuff", []);
     public override subs: Command.Command[] = [
-        // prettier-ignore
-        new Command.Command(
-            "top", 
-            "Shows you the top 10 people based on xp", 
-            [], 
-            this.onTop
-        ),
+        new Command.Command("top", "Shows you the top 10 people based on xp", [], this.onTop),
         new Command.Command(
             "set",
             "Sets xp to a user",

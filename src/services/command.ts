@@ -1,6 +1,6 @@
 import { Command } from "@/commands";
 import { Service } from "@/service";
-import { AutocompleteInteraction, Client, Events, type Interaction, MessageFlags } from "discord.js";
+import { AutocompleteInteraction, Client, Events, type Interaction } from "discord.js";
 import { Globals } from "..";
 
 export default class CommandService extends Service.Base {

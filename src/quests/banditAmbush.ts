@@ -10,8 +10,7 @@ export default class BanditAmbushQuest extends Quest.Base {
     players: string[] = [];
     maxPlayers: number = 5;
 
-    maxGoldReward: number = 10;
-    minGoldReward: number = 1;
+    reward: number = Globals.random(10, 1);
 
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);
@@ -54,21 +53,20 @@ export default class BanditAmbushQuest extends Quest.Base {
         const banditsStrengh = Math.floor(Math.random() * playerStrength) + users.length * 25;
 
         const playersWon = playerStrength > banditsStrengh;
-        const reward = Math.floor(Math.random() * this.maxGoldReward - this.minGoldReward) + this.minGoldReward;
 
-        if (playersWon) users.forEach(async (user) => await user.addGold(reward).addXP(reward).save());
+        if (playersWon) users.forEach(async (user) => await user.addGold(this.reward).addXP(this.reward).save());
         else
             users.forEach(async (user) => {
                 user.database.stats.strength = Math.max(0, user.database.stats.charisma - 2);
-                await user.addGold(-reward).save();
+                await user.addGold(-this.reward).save();
             });
 
         const embed = new EmbedBuilder()
             .setTitle("Result")
             .setDescription(
                 playersWon
-                    ? `The players won over the bandits!\n All players recived: ${reward} ${Globals.ATTRIBUTES.gold.emoji}!`
-                    : `The bandits won over the players and stole ${reward}${Globals.ATTRIBUTES.gold.emoji} From each player` +
+                    ? `The players won over the bandits!\n All players recived: ${this.reward} ${Globals.ATTRIBUTES.gold.emoji}!`
+                    : `The bandits won over the players and stole ${this.reward}${Globals.ATTRIBUTES.gold.emoji} From each player` +
                           `\n\nBndits strengh: ${banditsStrengh}, player strengh: ${playerStrength}`,
             )
             .setColor("#e63946")
