@@ -1,7 +1,7 @@
 import { Command } from "@/commands";
 import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
 import { AppUser } from "../user";
-import { UserModel } from "@/models/user";
+import { UserDB, UserModel } from "@/models/user";
 
 export default class XpCommand extends Command.Base {
     public override main: Command.Command = new Command.Command("xp", "XP related stuff", []);
@@ -13,46 +13,48 @@ export default class XpCommand extends Command.Base {
             [], 
             this.onTop
         ),
-        // prettier-ignore
         new Command.Command(
             "set",
             "Sets xp to a user",
-            [{
-                name: "user",
-                description: "The user that you want to affect",
-                type: ApplicationCommandOptionType.User,
-                required: true,
-            },
-            {
-                name: "amount",
-                description: "The amount you want to set",
-                type: ApplicationCommandOptionType.Number,
-                required: true,
-            }],
+            [
+                {
+                    name: "user",
+                    description: "The user that you want to affect",
+                    type: ApplicationCommandOptionType.User,
+                    required: true,
+                },
+                {
+                    name: "amount",
+                    description: "The amount you want to set",
+                    type: ApplicationCommandOptionType.Number,
+                    required: true,
+                },
+            ],
             this.onAdd,
         ),
-        // prettier-ignore
         new Command.Command(
             "add",
             "Adds xp to a user",
-            [{
-                name: "user",
-                description: "The user that you want to affect",
-                type: ApplicationCommandOptionType.User,
-                required: true,
-            },
-            {
-                name: "amount",
-                description: "The amount you want to give",
-                type: ApplicationCommandOptionType.Number,
-                required: true,
-            }],
+            [
+                {
+                    name: "user",
+                    description: "The user that you want to affect",
+                    type: ApplicationCommandOptionType.User,
+                    required: true,
+                },
+                {
+                    name: "amount",
+                    description: "The amount you want to give",
+                    type: ApplicationCommandOptionType.Number,
+                    required: true,
+                },
+            ],
             this.onAdd,
         ),
     ];
 
     public async onTop(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
-        const topUsers = await UserModel.find().sort({ xp: -1 }).limit(10).exec();
+        const topUsers = await UserDB.Model.find().sort({ xp: -1 }).limit(10).exec();
 
         if (topUsers.length === 0) return await interaction.reply("No users found in the leaderboard.");
 
