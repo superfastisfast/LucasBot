@@ -16,7 +16,7 @@ import { Item } from "@/models/item";
 export default class ShopCommand extends Command.Base {
     public override main: Command.Command = new Command.Command("shop", "Buy some cool items", [], this.onExecute.bind(this));
 
-    stock: number = 10;
+    stock: number = 3;
 
     items: Item.Base[] = [];
 
@@ -30,7 +30,7 @@ export default class ShopCommand extends Command.Base {
             this.items.push(item);
         }
 
-        const embed = await this.generateEmbed();
+        const embed = await this.generateEmbed(await AppUser.fromID(interaction.user.id));
         const actionRow = await this.handleItemOptions();
 
         return interaction.reply({
@@ -99,7 +99,7 @@ export default class ShopCommand extends Command.Base {
         return new ActionRowBuilder().addComponents(select).toJSON();
     }
 
-    private async generateEmbed(): Promise<EmbedBuilder> {
+    private async generateEmbed(user: AppUser): Promise<EmbedBuilder> {
         let fields: APIEmbedField[] = [];
 
         this.items.forEach((item, i) => {
@@ -110,7 +110,7 @@ export default class ShopCommand extends Command.Base {
 
             const percentageModifiers = Object.entries(item.percentageModifiers ?? {})
                 .filter(([_, v]) => v !== 0)
-                .map(([k, v]) => `${k} ${v > 0 ? "+" : ""}${v}%`)
+                .map(([k, v]) => `${k} ${v > 0 ? "+" : ""}${v * 100}%`)
                 .join(", ");
 
             const modifiers = [flatModifiers, percentageModifiers].filter(Boolean).join(", ");
@@ -126,7 +126,7 @@ export default class ShopCommand extends Command.Base {
 
         return new EmbedBuilder()
             .setTitle("Shop")
-            .setDescription("Items for sale!")
+            .setDescription(`Items for sale!\nYou have ${user.inventory.gold} ${Globals.ATTRIBUTES.gold.emoji}`)
             .setColor("#A6F7CB")
             .setURL(Globals.LINK)
             .setFooter({ text: "Shop opened" })
