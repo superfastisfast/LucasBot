@@ -90,25 +90,6 @@ export async function createStatBar(current: number, max: number, length: number
 }
 
 export async function getPlayerDisplay(player: Fighter, healthbar: string, manaBar: string) {
-    const playerEquipedItems: string[] = (await player.appUser.getEquippedItems()).map(([bool, name]) => name);
-    let items: Item.Base[] = Item.manager.findManyByNames(playerEquipedItems);
-    let itemsDisplay = "";
-    items.forEach((item, i) => {
-        const flatModifiers = Object.entries(item.flatModifiers ?? {})
-            .filter(([_, v]) => v !== 0)
-            .map(([k, v]) => `${k} ${v > 0 ? "+" : ""}${v}`)
-            .join("\n");
-
-        const percentageModifiers = Object.entries(item.percentageModifiers ?? {})
-            .filter(([_, v]) => v !== 0)
-            .map(([k, v]) => `${k} ${v > 0 ? "+" : ""}${v}%`)
-            .join("\n");
-
-        const modifiers = [flatModifiers, percentageModifiers].filter(Boolean).join("\n");
-
-        itemsDisplay += `**${item.name}**\nType: ${item.type ?? "???"}${modifiers ? `\nModifiers:\n${modifiers}` : ""}\n\n`;
-    });
-
     const statsData = UserDB.StatDB.keys.map((key) => ({
         name: Globals.ATTRIBUTES[key].name,
         emoji: Globals.ATTRIBUTES[key].emoji,
@@ -120,9 +101,28 @@ export async function getPlayerDisplay(player: Fighter, healthbar: string, manaB
     const statString = statsData
         .map((stat) => {
             const padded = stat.name.padEnd(maxNameLength, " ");
-            return `${stat.emoji} ${padded}: ${stat.value} + ${player.appUser.getStat(stat.name.toLowerCase())}`;
+            return `${stat.emoji} ${padded}: ${stat.value} + ${(player.appUser.getStat(stat.name.toLowerCase() as UserDB.StatDB.Type) - stat.value).toFixed(2)}`;
         })
         .join("\n");
+
+    const playerEquipedItems: string[] = (await player.appUser.getEquippedItems()).map(([bool, name]) => name);
+    let items: Item.Base[] = Item.manager.findManyByNames(playerEquipedItems);
+    let itemsDisplay = "";
+    items.forEach((item, i) => {
+        const flatModifiers = Object.entries(item.flatModifiers ?? {})
+            .filter(([_, v]) => v !== 0)
+            .map(([k, v]) => `${k} ${v > 0 ? "+" : ""}${v}`)
+            .join("\n");
+
+        const percentageModifiers = Object.entries(item.percentageModifiers ?? {})
+            .filter(([_, v]) => v !== 0)
+            .map(([k, v]) => `${k} ${v > 0 ? "+" : ""}${v * 100}%`)
+            .join("\n");
+
+        const modifiers = [flatModifiers, percentageModifiers].filter(Boolean).join("\n");
+
+        itemsDisplay += `**${item.name}**\nType: ${item.type ?? "???"}${modifiers ? `\nModifiers:\n${modifiers}` : ""}\n\n`;
+    });
 
     return {
         name: `${player.appUser.discord.displayName}'s Status`,

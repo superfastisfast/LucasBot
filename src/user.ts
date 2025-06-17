@@ -234,23 +234,19 @@ export class AppUser {
         let flat: number = 0;
         let percent: number = 1;
 
-        for (const [_, itemName] of this.inventory.items) {
+        for (const [_, itemName] of this.inventory.items.filter(([bool, _]) => bool)) {
+            console.log("Item : " + itemName);
             const item = Item.manager.findByName(itemName);
             if (!item) continue;
 
             const flatEntries = Object.entries(item.flatModifiers ?? {});
             const percentEntries = Object.entries(item.percentageModifiers ?? {});
 
-            const merged = [...flatEntries, ...percentEntries];
-
-            merged.forEach(([modKey, value], i) => {
-                if (modKey === key) {
-                    if (i < flatEntries.length) {
-                        flat += value;
-                    } else {
-                        percent += value;
-                    }
-                }
+            flatEntries.forEach(([modKey, value]) => {
+                if (modKey === key) flat += value;
+            });
+            percentEntries.forEach(([modKey, value]) => {
+                if (modKey === key) percent += value;
             });
         }
 

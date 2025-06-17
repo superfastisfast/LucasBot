@@ -52,7 +52,7 @@
       "defense": 1
     },
     "percentageModifiers": {
-      "charisma": 10
+      "charisma": 0.1
     }
   },
   {
