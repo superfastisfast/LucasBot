@@ -1,0 +1,60 @@
+[
+    {
+        "name": "Crocs",
+        "cost": 350,
+        "tag": "boots",
+        "flatModifiers": {
+            "defense": 4
+        },
+        "percentageModifiers": {
+            "agility": 3
+        }
+    },
+    {
+        "name": "Banana Hammer",
+        "cost": 120,
+        "tag": "weapon",
+        "flatModifiers": {
+            "strength": 2,
+            "dexterity": 1
+        },
+        "percentageModifiers": {
+            "criticalChance": 5
+        }
+    },
+    {
+        "name": "Hello darkness My friend",
+        "type": "chestplate",
+        "cost": 69,
+        "flatModifiers": {},
+        "percentageModifiers": {}
+    },
+    {
+        "name": "Hello",
+        "type": "chestplate",
+        "cost": 99,
+        "flatModifiers": {},
+        "percentageModifiers": {}
+    },
+    {
+        "name": "Lucas",
+        "type": "item",
+        "cost": -35,
+        "flatModifiers": {},
+        "percentageModifiers": {
+            "charisma": -8
+        }
+    },
+    {
+        "name": "AK-47",
+        "type": "weapon",
+        "cost": 18000,
+        "flatModifiers": {
+            "strength": 10,
+            "defense": 1
+        },
+        "percentageModifiers": {
+            "charisma": 10
+        }
+    }
+]

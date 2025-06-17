@@ -44,29 +44,29 @@ export namespace Globals {
             emoji: "🔥",
         },
         gold: {
-            name: "Charisma",
-            value: "charisma",
+            name: "Gold",
+            value: "gold",
             emoji: "💰",
         },
         xp: {
-            name: "Charisma",
-            value: "charisma",
+            name: "XP",
+            value: "xp",
             emoji: "🌟",
         },
         skillpoint: {
-            name: "Charisma",
-            value: "charisma",
+            name: "Skillpoint",
+            value: "skillpoint",
             emoji: ":bulb:",
         },
         items: {
-            name: "Charisma",
-            value: "charisma",
+            name: "Items",
+            value: "items",
             emoji: "📦",
         },
         level: {
-            name: "Charisma",
-            value: "charisma",
-            emoji: ":arrow_up:",
+            name: "Level",
+            value: "level",
+            emoji: "⬆️",
         },
     };
 
