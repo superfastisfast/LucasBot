@@ -47,7 +47,7 @@ export default class FightCommand extends Command.Base {
         if (opponentUser.inventory.gold < betOpt || currentUser.inventory.gold < betOpt)
             return interaction.reply({ content: `One of the players cant afford the bet`, flags: "Ephemeral" });
 
-        const reply = await interaction.reply(`${interaction.user} Fight invite sent to ${opponentUser.discord}`);
+        const reply = await interaction.reply({ content: `${interaction.user} Fight invite sent to ${opponentUser.discord}`, flags: "Ephemeral" });
 
         let newGame = new FightGame(currentUser, opponentUser, betOpt);
         newGame.sendInviteMessage();

@@ -10,6 +10,7 @@ export namespace Item {
         type: string;
         flatModifiers: Record<string, number>;
         percentageModifiers: Record<string, number>;
+        image_url: string;
     }
 
     export class Manager {

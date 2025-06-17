@@ -54,7 +54,8 @@
             "defense": 1
         },
         "percentageModifiers": {
-            "charisma": 10
+            "charisma": 10,
+            "strength": 300
         }
     }
 ]

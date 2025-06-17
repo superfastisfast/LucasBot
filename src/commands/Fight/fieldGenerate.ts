@@ -2,6 +2,7 @@ import type Fighter from "@/commands/Fight/fighter";
 import type FightGame from "@/commands/Fight/fightGame";
 import { Globals } from "@/index";
 import { Item } from "@/models/item";
+import { UserDB } from "@/models/user";
 import type { AppUser } from "@/user";
 import { createCanvas, Image, loadImage, type SKRSContext2D } from "@napi-rs/canvas";
 import { AttachmentBuilder, EmbedBuilder, type InteractionUpdateOptions } from "discord.js";
@@ -93,35 +94,39 @@ export async function getPlayerDisplay(player: Fighter, healthbar: string, manaB
     let items: Item.Base[] = Item.manager.findManyByNames(playerEquipedItems);
     let itemsDisplay = "";
     items.forEach((item, i) => {
-        console.log("Item: " + item.name);
         const flatModifiers = Object.entries(item.flatModifiers ?? {})
             .filter(([_, v]) => v !== 0)
             .map(([k, v]) => `${k} ${v > 0 ? "+" : ""}${v}`)
-            .join(", ");
+            .join("\n");
 
         const percentageModifiers = Object.entries(item.percentageModifiers ?? {})
             .filter(([_, v]) => v !== 0)
             .map(([k, v]) => `${k} ${v > 0 ? "+" : ""}${v}%`)
-            .join(", ");
+            .join("\n");
 
-        const modifiers = [flatModifiers, percentageModifiers].filter(Boolean).join(", ");
+        const modifiers = [flatModifiers, percentageModifiers].filter(Boolean).join("\n");
 
-        itemsDisplay += `Cost: ${item.cost} ${Globals.ATTRIBUTES.gold.emoji}, Type: ${item.type ?? "???"}${modifiers ? `, Modifiers: ${modifiers}` : ""}`;
+        itemsDisplay += `**${item.name}**\nType: ${item.type ?? "???"}${modifiers ? `\nModifiers:\n${modifiers}` : ""}\n\n`;
     });
 
+    const statsData = UserDB.StatDB.keys.map((key) => ({
+        name: Globals.ATTRIBUTES[key].name,
+        emoji: Globals.ATTRIBUTES[key].emoji,
+        value: player.appUser.database.stats[key],
+    }));
+
+    const maxNameLength = Math.max(...statsData.map((stat) => stat.name.length));
+
+    const statString = statsData
+        .map((stat) => {
+            const padded = stat.name.padEnd(maxNameLength, " ");
+            return `${stat.emoji} ${padded}: ${stat.value} + ${player.appUser.getStat(stat.name.toLowerCase())}`;
+        })
+        .join("\n");
+
     return {
-        name: `${player.appUser.discord}'s Status`,
-        value:
-            `❤️ Health: ${healthbar}\n` +
-            `🔵 Mana: ${manaBar}\n` +
-            `⚔️ Strength: **${player.appUser.database.stats.strength}**\n` +
-            `🛡️ Defense: **${player.appUser.database.stats.defense}**\n` +
-            `🏃 Agility: **${player.appUser.database.stats.agility}** \n` +
-            `✨ Magicka: **${player.appUser.database.stats.magicka}**\n` +
-            `🔋 Vitality: **${player.appUser.database.stats.vitality}**\n` +
-            `🏃‍♂️ Stamina: **${player.appUser.database.stats.stamina}**\n` +
-            `🗣️ Charisma: **${player.appUser.database.stats.charisma}**\n` +
-            `📦 Items: \n${itemsDisplay}`,
+        name: `${player.appUser.discord.displayName}'s Status`,
+        value: `❤️ Health: ${healthbar}\n` + `🔵 Mana: ${manaBar}\n` + statString + "\n" + `📦 Items: \n${itemsDisplay}`,
         inline: true,
     };
 }
@@ -141,14 +146,14 @@ export async function getFightDisplay(currentGame: FightGame, action: string): P
     const builder = new EmbedBuilder()
         .setColor(0x0099ff)
         .setAuthor({
-            name: `It's ${nextPlayer.appUser.discord}'s Turn!`,
+            name: `It's ${nextPlayer.appUser.discord.displayName}'s Turn!`,
             iconURL: nextPlayer.appUser.discord.avatarURL()!,
         })
-        .setDescription(currentPlayer.appUser.discord + ": " + action)
+        .setDescription(currentPlayer.appUser.discord.displayName + ": " + action)
         .setImage("attachment://game-field.png")
         .addFields(player1DisplayStats, player2DisplayStats)
         .setFooter({
-            text: `➡️ It's ${nextPlayer.appUser.discord}'s Turn!`,
+            text: `➡️ It's ${nextPlayer.appUser.discord.displayName}'s Turn!`,
             iconURL: nextPlayer.appUser.discord.avatarURL()!,
         })
         .setTimestamp();

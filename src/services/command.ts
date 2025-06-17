@@ -1,6 +1,7 @@
 import { Command } from "@/commands";
 import { Service } from "@/service";
 import { AutocompleteInteraction, Client, Events, type Interaction, MessageFlags } from "discord.js";
+import { Globals } from "..";
 
 export default class CommandService extends Service.Base {
     override async start(client: Client): Promise<void> {
@@ -20,10 +21,17 @@ export default class CommandService extends Service.Base {
             }
 
             const subName = (interaction.options as any).getSubcommand(false);
-            if (!subName) await command.main.onExecute(interaction);
-            else {
+            if (!subName) {
+                if (command.main.requires_admin && !interaction.memberPermissions?.has("Administrator"))
+                    return interaction.reply({ content: Globals.MISSING_PERMS, flags: "Ephemeral" });
+
+                await command.main.onExecute(interaction);
+            } else {
                 for (const sub of command.subs) {
                     if (subName === sub.name) {
+                        if (sub.requires_admin && !interaction.memberPermissions?.has("Administrator"))
+                            return interaction.reply({ content: Globals.MISSING_PERMS, flags: "Ephemeral" });
+
                         await sub.onExecute(interaction);
                         break;
                     }

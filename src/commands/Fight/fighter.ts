@@ -1,3 +1,4 @@
+import { Globals } from "@/index";
 import type { AppUser } from "@/user";
 
 export default class Fighter {
@@ -5,15 +6,77 @@ export default class Fighter {
     posX: number = 0;
     currentHealth: number = 0;
     currentMana: number = 0;
+    attackRange: number = 1;
 
     constructor(appUser: AppUser) {
         this.appUser = appUser;
+        this.currentHealth = this.getMaxHealthStats();
+        this.currentMana = this.getMaxManaStats();
     }
 
     getMaxHealthStats(): number {
-        return (this.appUser.database.stats.vitality || 1) * 10;
+        let maxHealth = this.appUser.getStat("vitality") || 1;
+        return maxHealth > 100 ? 100 : maxHealth;
     }
     getMaxManaStats(): number {
-        return this.appUser.database.stats.stamina || 1;
+        let maxHealth = this.appUser.getStat("stamina") || 1;
+        return maxHealth > 100 ? 100 : maxHealth;
+    }
+
+    attack(opponent: Fighter) {
+        this.drainMana(1);
+        if (Math.abs(this.posX - opponent.posX) <= this.attackRange) {
+            const damage = Globals.random(0, this.appUser.getStat("strength"));
+            return opponent.receiveDamage(damage);
+        } else {
+            return "Too far away to attack!";
+        }
+    }
+    receiveDamage(damage: number) {
+        const defense = this.appUser.getStat("defense");
+        if (defense > 0) {
+            if (Math.random() > damage / defense) {
+                return this.appUser.discord.username + ": Blocked the attack!";
+            }
+        }
+        this.currentHealth = Math.max(0, this.currentHealth - damage);
+        return this.appUser.discord.username + ": Received " + damage.toFixed(2) + " damage!";
+    }
+
+    flee(): boolean {
+        this.drainMana(1);
+        return this.appUser.getStat("agility") / 100 > Math.random();
+    }
+    sleep() {
+        const randomHealthGain = Globals.random(this.appUser.getStat("vitality") / 2, 0.1);
+        const randomManaGain = Globals.random(this.appUser.getStat("stamina") / 2, 0.9);
+        this.gainHealth(randomHealthGain);
+        this.gainMana(randomManaGain);
+        return `Slept and gained ${randomHealthGain} ${Globals.ATTRIBUTES.health.emoji} and ${randomManaGain} ${Globals.ATTRIBUTES.mana.emoji}`;
+    }
+
+    gainHealth(amount: number) {
+        this.currentHealth = Math.min(this.getMaxHealthStats(), this.currentHealth + amount);
+    }
+
+    gainMana(amount: number) {
+        this.currentMana = Math.min(this.getMaxManaStats(), this.currentMana + amount);
+    }
+
+    drainMana(amount: number): boolean {
+        if (this.currentMana >= amount) {
+            this.currentMana -= amount;
+            return true;
+        }
+        return false;
+    }
+
+    move(direction: "left" | "right", arenaSize: number) {
+        this.drainMana(1);
+        if (direction === "left") {
+            this.posX = Math.max(0, this.posX - 1);
+        } else if (direction === "right") {
+            this.posX = Math.min(arenaSize - 1, this.posX + 1);
+        }
     }
 }

@@ -71,6 +71,7 @@ export default class ItemCommand extends Command.Base {
                 cost: costOpt,
                 flatModifiers: modifiers.flatModifiers,
                 percentageModifiers: modifiers.percentageModifiers,
+                image_url: "",
             })
             .save();
 
