@@ -250,7 +250,7 @@ export class AppUser {
             }
         });
 
-        return (value + flat) * (1 + percent / 100);
+        return (value + flat) * (1 + percent);
     }
 
     /////////////////////////////////////////////////////////
