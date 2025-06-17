@@ -5,9 +5,9 @@ import { Globals } from "..";
 import { UserDB } from "@/models/user";
 
 export default class ProfileCommand extends Command.Base {
-    // prettier-ignore
     public override main: Command.Command = new Command.Command(
-        "profile", "Display your profile", 
+        "profile",
+        "Display your profile",
         [{ name: "user", description: "Who do you want to stalk?", type: ApplicationCommandOptionType.User }],
         this.onExecute.bind(this),
     );
@@ -36,7 +36,7 @@ export default class ProfileCommand extends Command.Base {
         const statString = statsData
             .map((stat) => {
                 const padded = stat.name.padEnd(maxNameLength, " ");
-                return `${stat.emoji} ${padded}: ${stat.value} + ${user.getStat(stat.name.toLowerCase())}`;
+                return `${stat.emoji} ${padded}: ${stat.value} + ${user.getStat(stat.name.toLowerCase() as UserDB.StatDB.Type)}`;
             })
             .join("\n");
 

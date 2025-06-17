@@ -76,5 +76,3 @@ export namespace UserDB {
     export type Model = mongoose.InferSchemaType<typeof schema>;
     export const Model = mongoose.model<Document>("User", schema);
 }
-
-export const UserModel = undefined;

@@ -10,9 +10,7 @@ export default class RescueQuest extends Quest.Base {
     players: string[] = [];
     maxPlayers: number = 3;
 
-    maxGoldReward: number = 10;
-    minGoldReward: number = 2;
-    xpReward: number = 2;
+    reward: number = Globals.random(10, 2);
 
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);
@@ -48,29 +46,24 @@ export default class RescueQuest extends Quest.Base {
         let playerStrength: number = 0;
 
         users.forEach((user) => {
-            const stats = user.database.stats;
-            playerStrength += stats.strength + stats.agility + stats.defense;
+            playerStrength += user.getStat("strength") + user.getStat("agility") + user.getStat("defense") / 3;
         });
 
-        const beastStrengh = Math.floor(Math.random() * playerStrength) + users.length * 25;
+        const beastStrengh = Globals.random(playerStrength) + users.length * 25;
 
         const playersWon = playerStrength > beastStrengh;
-        const goldReward = Math.floor(Math.random() * (this.maxGoldReward - this.minGoldReward)) + this.minGoldReward;
 
-        if (playersWon)
-            users.forEach(
-                async (user) => await user.addGold(goldReward).addXP(this.xpReward).upgradeSkill("strength").save(),
-            );
+        if (playersWon) users.forEach(async (user) => await user.addGold(this.reward).addXP(this.reward).addSkillPoints(0.5).save());
         else
             users.forEach(async (user) => {
-                await user.downgradeSkill("strength").save();
+                user.addSkillPoints(-0.5).save();
             });
 
         const embed = new EmbedBuilder()
             .setTitle("Result")
             .setDescription(
                 playersWon
-                    ? `The players won over the beast! and got rewarded\n1x${Globals.ATTRIBUTES.strength.emoji}\n${goldReward}${Globals.ATTRIBUTES.gold.emoji}\n${this.xpReward}${Globals.ATTRIBUTES.xp.emoji}`
+                    ? `The players won over the beast! and got rewarded\n1x${Globals.ATTRIBUTES.strength.emoji}\n${this.reward}${Globals.ATTRIBUTES.gold.emoji}\n${this.reward}${Globals.ATTRIBUTES.xp.emoji}`
                     : `The beast won over the players and ran away with the villager all players lost 1x${Globals.ATTRIBUTES.strength.emoji}` +
                           `\nBeast strengh: ${beastStrengh}, player strengh: ${playerStrength}`,
             )

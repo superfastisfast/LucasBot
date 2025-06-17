@@ -1,11 +1,9 @@
 import { Service } from "@/service";
-import { Client, GatewayIntentBits, Partials, Events, ActivityType, TextChannel } from "discord.js";
+import { Client, GatewayIntentBits, Partials, Events, TextChannel } from "discord.js";
 import mongoose from "mongoose";
 import { Quest } from "./quest";
 import { Command } from "./commands";
 
-// Stats emoji
-// Global link AKA Lucas's yt
 export namespace Globals {
     export const ATTRIBUTES = {
         strength: {

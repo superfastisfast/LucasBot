@@ -1,10 +1,5 @@
 import { Command } from "@/commands";
-import {
-    CommandInteraction,
-    InteractionResponse,
-    ApplicationCommandOptionType,
-    AutocompleteInteraction,
-} from "discord.js";
+import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType, AutocompleteInteraction } from "discord.js";
 
 interface Globglogabgelab {
     url: string;
@@ -82,16 +77,19 @@ const songs: Globglogabgelab[] = [
 ];
 
 export default class GlobglogabgelabCommand extends Command.Base {
-    // prettier-ignore
-    public override main: Command.Command = new Command.Command("globglogabgelab", "The Globglogabgelab will sing you a banger from 2016", 
-        [{
-            name: "song", 
-            description: "The song you want to play", 
-            type: ApplicationCommandOptionType.Number, 
-            autocomplete: true, 
-        }], 
-        this.onExecute, 
-        this.onAutocomplete, 
+    public override main: Command.Command = new Command.Command(
+        "globglogabgelab",
+        "The Globglogabgelab will sing you a banger from 2016",
+        [
+            {
+                name: "song",
+                description: "The song you want to play",
+                type: ApplicationCommandOptionType.Number,
+                autocomplete: true,
+            },
+        ],
+        this.onExecute,
+        this.onAutocomplete,
     );
 
     public async onExecute(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {

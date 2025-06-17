@@ -1,7 +1,6 @@
 import { Command } from "@/commands";
 import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType, AutocompleteInteraction, User } from "discord.js";
 import { AppUser } from "../user";
-import { Globals } from "..";
 import { UserDB } from "@/models/user";
 
 export default class SkillpointCommand extends Command.Base {

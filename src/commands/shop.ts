@@ -3,8 +3,6 @@ import {
     CommandInteraction,
     InteractionResponse,
     EmbedBuilder,
-    ApplicationCommandOptionType,
-    SlashCommandBuilder,
     ActionRowBuilder,
     StringSelectMenuBuilder,
     StringSelectMenuOptionBuilder,
@@ -16,12 +14,7 @@ import { client, Globals } from "..";
 import { Item } from "@/models/item";
 
 export default class ShopCommand extends Command.Base {
-    // prettier-ignore
-    public override main: Command.Command = new Command.Command(
-        "shop", "Buy some cool items", 
-        [],
-        this.onExecute.bind(this),
-    );
+    public override main: Command.Command = new Command.Command("shop", "Buy some cool items", [], this.onExecute.bind(this));
 
     stock: number = 10;
 

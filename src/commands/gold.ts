@@ -1,7 +1,6 @@
 import { Command } from "@/commands";
 import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType } from "discord.js";
 import { AppUser } from "../user";
-import { Globals } from "..";
 
 export default class GoldCommand extends Command.Base {
     public override main: Command.Command = new Command.Command("gold", "Gold related stuff", []);
