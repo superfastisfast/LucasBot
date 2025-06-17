@@ -31,6 +31,8 @@ export default class XpCommand extends Command.Base {
                 },
             ],
             this.onAdd,
+            undefined,
+            true,
         ),
         new Command.Command(
             "add",
@@ -50,6 +52,8 @@ export default class XpCommand extends Command.Base {
                 },
             ],
             this.onAdd,
+            undefined,
+            true,
         ),
     ];
 

@@ -1,11 +1,6 @@
 import { Command } from "@/commands";
 import { Quest } from "@/quest";
-import {
-    CommandInteraction,
-    InteractionResponse,
-    ApplicationCommandOptionType,
-    AutocompleteInteraction,
-} from "discord.js";
+import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType, AutocompleteInteraction } from "discord.js";
 
 export default class QuestCommand extends Command.Base {
     public override main: Command.Command = new Command.Command("quest", "Quest related stuff", []);
@@ -23,6 +18,7 @@ export default class QuestCommand extends Command.Base {
             }],
             this.onExecute,
             this.onAutocomplete,
+            true,
         ),
         // prettier-ignore
         new Command.Command(
@@ -37,6 +33,7 @@ export default class QuestCommand extends Command.Base {
             }],
             this.onEnd,
             this.onAutocomplete,
+            true,
         ),
     ];
 

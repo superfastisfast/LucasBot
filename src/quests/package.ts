@@ -1,7 +1,7 @@
 import { type ButtonInteraction, type Message, EmbedBuilder } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
-import { ItemDB } from "@/models/item";
+import { Item, ItemDB } from "@/models/item";
 import { AppUser } from "@/user";
 import { Globals } from "..";
 
@@ -40,7 +40,7 @@ export default class PackageQuest extends Quest.Base {
         const user = await AppUser.fromID(interaction.user.id);
         await interaction.deferUpdate();
 
-        const item = await ItemDB.getRandom();
+        const item = await Item.manager.getRandom();
         if (!item) return;
         const itemInfo: string = `${item.name} worth ${item.cost} ${Globals.ATTRIBUTES.gold.emoji}`;
 
@@ -97,9 +97,7 @@ export default class PackageQuest extends Quest.Base {
 
         const embed = new EmbedBuilder()
             .setTitle("Mysterious Package")
-            .setDescription(
-                `${user.discord} found a buyer of the package, and recived ${goldAmount.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}`,
-            )
+            .setDescription(`${user.discord} found a buyer of the package, and recived ${goldAmount.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}`)
             .setColor("#C1A471")
             .setURL(Globals.LINK)
             .toJSON();
