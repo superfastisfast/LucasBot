@@ -127,7 +127,7 @@ export default class ShopCommand extends Command.Base {
 
         return new EmbedBuilder()
             .setTitle("Shop")
-            .setDescription(`Items for sale!\nYou have ${user.inventory.gold} ${Globals.ATTRIBUTES.gold.emoji}`)
+            .setDescription(`Items for sale!\nYou have ${user.inventory.gold.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}`)
             .setColor("#A6F7CB")
             .setURL(Globals.LINK)
             .setFooter({ text: "Shop opened" })

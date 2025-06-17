@@ -32,7 +32,6 @@ export default class QuestService extends Service.Base {
         const firstIndex = Math.floor(Math.random() * quests.length);
         for (let index = 0; index < quests.length; index++) {
             let quest = quests[(firstIndex + index) % quests.length];
-            console.log("index: " + (firstIndex + index));
             if (quest && quest[1].isActive === false) {
                 Quest.start(quest[0]);
                 return;

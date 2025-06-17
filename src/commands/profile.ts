@@ -46,7 +46,7 @@ export default class ProfileCommand extends Command.Base {
 
         const inventoryString = inventoryLines.length > 0 ? "```" + inventoryLines.join("\n") + "```" : "No items...";
 
-        const otherString = `${user.inventory.gold} ${Globals.ATTRIBUTES.gold.emoji}\n${user.database.skillPoints} ${Globals.ATTRIBUTES.skillpoint.emoji}`;
+        const otherString = `${user.inventory.gold.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}\n${user.database.skillPoints.toFixed(2)} ${Globals.ATTRIBUTES.skillpoint.emoji}`;
 
         return new EmbedBuilder()
             .setTitle(`${user.discord.displayName}'s Profile`)
