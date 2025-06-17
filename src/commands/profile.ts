@@ -36,7 +36,7 @@ export default class ProfileCommand extends Command.Base {
         const statString = statsData
             .map((stat) => {
                 const padded = stat.name.padEnd(maxNameLength, " ");
-                return `${stat.emoji} ${padded}: ${stat.value} + ${user.getStat(stat.name.toLowerCase() as UserDB.StatDB.Type)}`;
+                return `${stat.emoji} ${padded}: ${stat.value} + ${user.getStat(stat.name.toLowerCase() as UserDB.StatDB.Type) - stat.value}`;
             })
             .join("\n");
 
