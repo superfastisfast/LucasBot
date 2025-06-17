@@ -4,7 +4,7 @@ import { Globals } from "@/index";
 import { Item } from "@/models/item";
 import type { AppUser } from "@/user";
 import { createCanvas, Image, loadImage, type SKRSContext2D } from "@napi-rs/canvas";
-import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, type InteractionUpdateOptions } from "discord.js";
+import { AttachmentBuilder, EmbedBuilder, type InteractionUpdateOptions } from "discord.js";
 
 export const BLOCK_SIZE = 64;
 
@@ -89,16 +89,11 @@ export async function createStatBar(current: number, max: number, length: number
 }
 
 export async function getPlayerDisplay(player: Fighter, healthbar: string, manaBar: string) {
-    const playerItems = await player.appUser.getItems();
-    let items: Item.Base[] = [];
-    for (const [equipItem, itemName] of playerItems) {
-        if (equipItem) {
-            Item.manager.findByName(itemName);
-            if (itemName) items.push();
-        }
-    }
+    const playerEquipedItems: string[] = (await player.appUser.getEquippedItems()).map(([bool, name]) => name);
+    let items: Item.Base[] = Item.manager.findManyByNames(playerEquipedItems);
     let itemsDisplay = "";
     items.forEach((item, i) => {
+        console.log("Item: " + item.name);
         const flatModifiers = Object.entries(item.flatModifiers ?? {})
             .filter(([_, v]) => v !== 0)
             .map(([k, v]) => `${k} ${v > 0 ? "+" : ""}${v}`)

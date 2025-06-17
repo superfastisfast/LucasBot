@@ -36,6 +36,14 @@ export namespace Item {
         findByName(name: string): Base | undefined {
             return this.items.find((item) => item.name.toLowerCase() === name.toLowerCase());
         }
+        findManyByNames(names: string[]): Base[] {
+            let items: Base[] = [];
+            for (const name of names) {
+                const item = this.findByName(name);
+                if (item) items.push(item);
+            }
+            return items;
+        }
 
         create(newItem: Base): this {
             const index = this.items.findIndex((item) => item.name === newItem.name);

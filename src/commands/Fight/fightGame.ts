@@ -75,6 +75,8 @@ export default class FightGame {
         this.id = FightGame.nextId++;
         this.bet = amount;
         this.appUsers = [discordUser1, discordUser2];
+        discordUser1.fighter.posX = 0;
+        discordUser2.fighter.posX = this.arenaSize - 1;
     }
     public async sendInviteMessage() {
         const builder = new EmbedBuilder()
