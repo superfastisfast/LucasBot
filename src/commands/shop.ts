@@ -16,7 +16,7 @@ import { Item } from "@/models/item";
 export default class ShopCommand extends Command.Base {
     public override main: Command.Command = new Command.Command("shop", "Buy some cool items", [], this.onExecute.bind(this));
 
-    stock: number = 10;
+    stock: number = 3;
 
     items: Item.Base[] = [];
 
