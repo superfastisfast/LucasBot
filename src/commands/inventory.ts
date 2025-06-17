@@ -15,7 +15,7 @@ export default class QuestCommand extends Command.Base {
                     name: "item",
                     description: "The item you want to equip",
                     type: ApplicationCommandOptionType.String,
-                    required: false,
+                    required: true,
                     autocomplete: true,
                 },
             ],
