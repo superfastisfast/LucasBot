@@ -40,17 +40,17 @@ export default class ProfileCommand extends Command.Base {
             })
             .join("\n");
 
-        const goldString = `${user.inventory.gold} ${Globals.ATTRIBUTES.gold.emoji}`;
-
         const inventoryLines = [...user.inventory.items]
             .sort((a, b) => Number(b[0]) - Number(a[0]))
             .map(([hasItem, itemName]) => `${hasItem ? "✅" : "❌"} ${itemName}`);
 
         const inventoryString = inventoryLines.length > 0 ? "```" + inventoryLines.join("\n") + "```" : "No items...";
 
+        const otherString = `${user.inventory.gold} ${Globals.ATTRIBUTES.gold.emoji}\n${user.database.skillPoints} ${Globals.ATTRIBUTES.skillpoint.emoji}`;
+
         return new EmbedBuilder()
             .setTitle(`${user.discord.displayName}'s Profile`)
-            .setDescription(`**Stats**\n\`\`\`\n${statString}\n\`\`\`\n` + `**Inventory**\n${goldString}\n${inventoryString}`)
+            .setDescription(`**Stats**\n\`\`\`\n${statString}\n\`\`\`\n` + `**Inventory**\n${otherString}\n${inventoryString}`)
             .setColor(user.discord.hexAccentColor || 0x3498db)
             .setThumbnail(user.discord.avatarURL())
             .setFooter({ text: "Profile displayed" })
