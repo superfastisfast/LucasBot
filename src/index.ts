@@ -100,7 +100,7 @@ export const client = new Client({
 });
 
 client.once(Events.ClientReady, async (readyClient) => {
-    console.log(`Bot connected as '${readyClient.user.tag}'`);
+    console.log(`${new Date().toISOString()} Bot connected as '${readyClient.user.tag}'`);
 
     await mongoose.connect(process.env.DATABASE_URL || "mongodb://localhost:27017/mydiscordapp");
     console.log("Connected to MongoDB");
