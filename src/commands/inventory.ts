@@ -90,7 +90,7 @@ export default class QuestCommand extends Command.Base {
             }
         }
 
-        return interaction.reply({ content: `Equipped '${itemNameOpt}'.`, flags: "Ephemeral" });
+        return interaction.reply({ content: `Equipped item ${itemNameOpt}`, flags: "Ephemeral" });
     }
 
     public async onUnequip(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
@@ -108,7 +108,7 @@ export default class QuestCommand extends Command.Base {
             }
         }
 
-        return interaction.reply({ content: `Unequipped '${itemNameOpt}'.`, flags: "Ephemeral" });
+        return interaction.reply({ content: `Unequipped item ${itemNameOpt}`, flags: "Ephemeral" });
     }
 
     public async onAdd(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
@@ -122,7 +122,7 @@ export default class QuestCommand extends Command.Base {
 
         await user.addItem(item).save();
 
-        return interaction.reply({ content: `Cleared '${user.discord}'`, flags: "Ephemeral" });
+        return interaction.reply({ content: `Added a ${item.name} to ${user.discord}'s inventory`, flags: "Ephemeral" });
     }
 
     public async onAutocomplete(interaction: AutocompleteInteraction): Promise<void> {
@@ -156,6 +156,6 @@ export default class QuestCommand extends Command.Base {
         user.inventory.items = [];
         await user.save();
 
-        return interaction.reply({ content: `Cleared '${user.discord}'`, flags: "Ephemeral" });
+        return interaction.reply({ content: `Cleared ${user.discord}'s inventory`, flags: "Ephemeral" });
     }
 }

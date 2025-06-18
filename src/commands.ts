@@ -5,6 +5,7 @@ import {
     CommandInteraction,
     SlashCommandSubcommandBuilder,
     ApplicationCommandOptionType,
+    PermissionFlagsBits,
 } from "discord.js";
 import { client } from ".";
 
@@ -14,7 +15,10 @@ export namespace Command {
         public subs: Command[] = [];
 
         public get slash(): SlashCommandBuilder {
-            const builder = new SlashCommandBuilder().setName(this.main.name).setDescription(this.main.description);
+            const builder = new SlashCommandBuilder()
+                .setName(this.main.name)
+                .setDescription(this.main.description)
+                .setDefaultMemberPermissions(this.main.requires_admin ? PermissionFlagsBits.Administrator : null);
 
             if (this.main.options && this.main.options.length > 0) applyOptionsToDiscordBuilder(builder, this.main.options);
 

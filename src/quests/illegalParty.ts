@@ -41,11 +41,15 @@ export default class IllegalPartyQuest extends Quest.Base {
 
     public override async end(): Promise<Quest.EndReturn> {
         if (this.joined && this.joined.length > 0) {
-            // const randomEnding = this.endings[Globals.random(this.endings.length)];
-            // if (!randomEnding) this.endRefund();
-            // else randomEnding();
+            const randomEnding = this.endings[Globals.random(this.endings.length)];
+            if (!randomEnding) this.endRefund();
+            else randomEnding();
+        } else {
+            const embed = new EmbedBuilder().setTitle("Result").setDescription(`No one joined`).setColor(this.color).setURL(Globals.LINK);
 
-            this.endRizz();
+            this.message.edit({
+                embeds: [embed],
+            });
         }
 
         return Quest.end(this.name);
