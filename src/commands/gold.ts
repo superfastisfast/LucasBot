@@ -1,9 +1,10 @@
 import { Command } from "@/commands";
 import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType } from "discord.js";
 import { AppUser } from "../user";
+import { Globals } from "..";
 
 export default class GoldCommand extends Command.Base {
-    public override main: Command.Command = new Command.Command("gold", "Gold related stuff", []);
+    public override main: Command.Command = new Command.Command("gold", "Gold related stuff", [], undefined, undefined, true);
     public override subs: Command.Command[] = [
         new Command.Command(
             "set",
@@ -58,7 +59,7 @@ export default class GoldCommand extends Command.Base {
 
         await user.setGold(amountOpt).save();
 
-        return interaction.reply(`Set ${amountOpt} gold to ${user.discord}`);
+        return interaction.reply(`Set ${user.discord}'s ${Globals.ATTRIBUTES.gold.emoji} ${amountOpt}`);
     }
 
     public async onAdd(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
@@ -70,6 +71,6 @@ export default class GoldCommand extends Command.Base {
 
         await user.addGold(amountOpt).save();
 
-        return interaction.reply(`Added ${amountOpt} gold to ${user.discord}`);
+        return interaction.reply(`Added ${amountOpt} ${Globals.ATTRIBUTES.gold.emoji} to ${user.discord}`);
     }
 }

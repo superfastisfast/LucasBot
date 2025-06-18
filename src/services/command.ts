@@ -22,9 +22,6 @@ export default class CommandService extends Service.Base {
 
             const subName = (interaction.options as any).getSubcommand(false);
             if (!subName) {
-                if (command.main.requires_admin && !interaction.memberPermissions?.has("Administrator"))
-                    return interaction.reply({ content: Globals.MISSING_PERMS, flags: "Ephemeral" });
-
                 await command.main.onExecute(interaction);
             } else {
                 for (const sub of command.subs) {

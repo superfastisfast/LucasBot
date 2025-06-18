@@ -62,10 +62,12 @@ export default class RescueQuest extends Quest.Base {
         const embed = new EmbedBuilder()
             .setTitle("Result")
             .setDescription(
-                playersWon
-                    ? `The players won over the beast! and got rewarded\n1x${Globals.ATTRIBUTES.strength.emoji}\n${this.reward}${Globals.ATTRIBUTES.gold.emoji}\n${this.reward}${Globals.ATTRIBUTES.xp.emoji}`
-                    : `The beast won over the players and ran away with the villager all players lost 1x${Globals.ATTRIBUTES.strength.emoji}` +
-                          `\nBeast strengh: ${beastStrengh}, player strengh: ${playerStrength}`,
+                users.length > 0
+                    ? playersWon
+                        ? `The players won over the beast! and got rewarded\n1x${Globals.ATTRIBUTES.strength.emoji}\n${this.reward}${Globals.ATTRIBUTES.gold.emoji}\n${this.reward}${Globals.ATTRIBUTES.xp.emoji}`
+                        : `The beast won over the players and ran away with the villager all players lost 1x${Globals.ATTRIBUTES.strength.emoji}` +
+                          `\nBeast strengh: ${beastStrengh}, player strengh: ${playerStrength}`
+                    : "No one joined",
             )
             .setColor("#4CAF50")
             .setURL(Globals.LINK)

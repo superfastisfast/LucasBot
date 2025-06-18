@@ -12,7 +12,7 @@ export default class PackageQuest extends Quest.Base {
         new AppButton("Sell it", this.onPressSell.bind(this)),
     ];
 
-    maxGoldReward = 10;
+    maxReward = 10;
 
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);
@@ -63,19 +63,19 @@ export default class PackageQuest extends Quest.Base {
     private async onPressOwner(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
         await interaction.deferUpdate();
-        const goldAmount = Math.random() * this.maxGoldReward;
+        const reward = Math.random() * this.maxReward;
 
         let gainSkillPoint = false;
         if (user.database.stats.charisma * Math.random() > 0) {
             gainSkillPoint = true;
             user.addSkillPoints(1);
         }
-        await user.addGold(goldAmount).save();
+        await user.addGold(reward).save();
 
         const embed = new EmbedBuilder()
             .setTitle("Mysterious Package")
             .setDescription(
-                `${user.discord} found the owner of the package, and received ${goldAmount.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji} ${gainSkillPoint ? ` And 1x${Globals.ATTRIBUTES.skillpoint.emoji}` : ""}`,
+                `${user.discord} found the owner of the package, and received ${reward.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji} ${gainSkillPoint ? ` And 1x${Globals.ATTRIBUTES.skillpoint.emoji}` : ""}`,
             )
             .setColor("#C1A471")
             .setURL(Globals.LINK)
@@ -91,13 +91,13 @@ export default class PackageQuest extends Quest.Base {
     private async onPressSell(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
         await interaction.deferUpdate();
-        const goldAmount = Math.random() * this.maxGoldReward * 2;
+        const reward = Math.random() * this.maxReward * 2;
 
-        await user.addGold(goldAmount).save();
+        await user.addGold(reward).save();
 
         const embed = new EmbedBuilder()
             .setTitle("Mysterious Package")
-            .setDescription(`${user.discord} found a buyer of the package, and recived ${goldAmount.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}`)
+            .setDescription(`${user.discord} found a buyer of the package, and recived ${reward.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}`)
             .setColor("#C1A471")
             .setURL(Globals.LINK)
             .toJSON();

@@ -103,7 +103,7 @@ export default class BanditAmbushQuest extends Quest.Base {
         const lobby = new EmbedBuilder()
             .setTitle("Lobby")
             .setDescription(`${this.players.length}/${this.maxPlayers} players joined so far!`)
-            .setColor("#4CAF50")
+            .setColor("#e63946")
             .setURL(Globals.LINK)
             .toJSON();
 
