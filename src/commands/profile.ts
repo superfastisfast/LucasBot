@@ -46,11 +46,12 @@ export default class ProfileCommand extends Command.Base {
 
         const inventoryString = inventoryLines.length > 0 ? "```" + inventoryLines.join("\n") + "```" : "No items...";
 
-        const otherString = `${user.inventory.gold.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}\n${user.database.skillPoints.toFixed(2)} ${Globals.ATTRIBUTES.skillpoint.emoji}`;
-
         return new EmbedBuilder()
             .setTitle(`${user.discord.displayName}'s Profile`)
-            .setDescription(`**Stats**\n\`\`\`\n${statString}\n\`\`\`\n` + `**Inventory**\n${otherString}\n${inventoryString}`)
+            .setDescription(
+                `${Globals.ATTRIBUTES.xp.emoji} ${user.database.xp}\n${Globals.ATTRIBUTES.skillpoint.emoji} ${user.database.skillPoints.toFixed(2)}\n\n**Stats**\n\`\`\`\n${statString}\n\`\`\`\n` +
+                    `**Inventory**\n${Globals.ATTRIBUTES.gold.emoji} ${user.inventory.gold.toFixed(2)}\n\n${inventoryString}`,
+            )
             .setColor(user.discord.hexAccentColor || 0x3498db)
             .setThumbnail(user.discord.avatarURL())
             .setFooter({ text: "Profile displayed" })
