@@ -18,7 +18,7 @@ export namespace Globals {
         },
         agility: {
             name: "Agility",
-            value: "Agility",
+            value: "agility",
             emoji: "💨",
         },
         magicka: {

@@ -5,7 +5,10 @@ import { AppUser } from "@/user";
 import { Globals } from "..";
 
 export default class TimmyQuest extends Quest.Base {
-    public override buttons: AppButton[] = [new AppButton("Help", this.onPressHelp), new AppButton("Unalive", this.onPressUnalive)];
+    public override buttons: AppButton[] = [
+        new AppButton("Help", this.onPressHelp.bind(this)),
+        new AppButton("Unalive", this.onPressUnalive.bind(this)),
+    ];
     reward: number = 10;
 
     public override async start(): Promise<Message<true>> {
@@ -41,6 +44,7 @@ export default class TimmyQuest extends Quest.Base {
     private async onPressUnalive(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
 
+        console.log("gold: " + this.reward);
         await user.addGold(this.reward).save();
 
         await interaction.reply({
