@@ -84,7 +84,7 @@ export namespace Quest {
             });
             active.delete(name);
         } catch (error) {
-            console.error(`Failed to start quest: ${name}`, error);
+            console.error(`Failed to end quest: ${name}`, error);
         }
 
         return {};

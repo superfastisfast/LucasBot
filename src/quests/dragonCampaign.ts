@@ -67,7 +67,7 @@ export default class DragonCampaignQuest extends Quest.Base {
         const playersWon = playerStrength > dragonStrength;
         let msg = "The dragon won against the players";
         if (playersWon)
-            msg = `The players won over the dragon!\nRewards:\n1x${Globals.ATTRIBUTES.skillpoint.emoji}\n10${Globals.ATTRIBUTES.gold.emoji} * ${Globals.ATTRIBUTES.charisma.emoji}\n10${Globals.ATTRIBUTES.xp.emoji} * ${Globals.ATTRIBUTES.gold.emoji}`;
+            msg = `The players won over the dragon!\nRewards:\n1x${Globals.ATTRIBUTES.skillpoint.emoji}\n10${Globals.ATTRIBUTES.gold.emoji} * ${Globals.ATTRIBUTES.charisma.emoji}\n10${Globals.ATTRIBUTES.xp.emoji} * ${Globals.ATTRIBUTES.charisma.emoji}`;
         users.forEach(async (user) => {
             await user
                 .addSkillPoints(1)
@@ -80,7 +80,7 @@ export default class DragonCampaignQuest extends Quest.Base {
             .setTitle("Result")
             .setDescription(
                 `${msg}\n
-                Player strengh was ${playerStrength}, dragon strengh was ${dragonStrength}`,
+                Player strengh was ${playerStrength.toFixed(2)}, dragon strengh was ${dragonStrength.toFixed(2)}`,
             )
             .setColor("#FF4500")
             .setURL(Globals.LINK)
