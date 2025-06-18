@@ -1,5 +1,5 @@
-import { User, Guild, GuildMember, Role, PermissionsBitField, DiscordAPIError, TextChannel } from "discord.js";
-import { client } from ".";
+import { User, Guild, GuildMember, Role, PermissionsBitField, DiscordAPIError, TextChannel, EmbedBuilder } from "discord.js";
+import { client, Globals } from ".";
 import { UserDB } from "./models/user";
 import { InventoryDB } from "./models/inventory";
 import { Item } from "./models/item";
@@ -256,22 +256,26 @@ export class AppUser {
     ///                      OTHER                         //
     /////////////////////////////////////////////////////////
     async level(xp: number): Promise<void> {
-        if (!process.env.QUEST_CHANNEL_ID) throw new Error("QUEST_CHANNEL_ID is not defined in .env");
-        const levelChannel = (await client.channels.fetch(process.env.QUEST_CHANNEL_ID)) as TextChannel;
-
         const level = calculateLevel(xp);
 
         if (level > this.database.level) {
             this.addSkillPoints(1).addGold(level);
             this.database.level = level;
-            await levelChannel.send(`${this.discord} is now level ${level}!`);
+            const embed = new EmbedBuilder()
+                .setTitle(`${this.discord.displayName} leveled up!`)
+                .setDescription(`+1 ${Globals.ATTRIBUTES.skillpoint.emoji}`)
+                .setColor("#D3D3D3")
+                .setImage(this.discord.avatarURL())
+                .setURL(`discord.com/users${this.discord.username}`);
+
+            await Globals.CHANNEL.send({ embeds: [embed] });
         }
 
-        const guildId = levelChannel.guild.id;
+        const guildId = Globals.CHANNEL.guild.id;
         const guild: Guild | undefined = await client.guilds.fetch(guildId);
 
         const rank = rankFromLevel(level) || "";
-        if (rank === "") return;
+        if (!rank) return;
 
         this.setRole(guild, rank, true);
     }
@@ -305,6 +309,6 @@ function calculateLevel(xp: number): number {
 }
 
 function rankFromLevel(level: number): string | undefined {
-    if (level > 0 && level % 5 === 0) return `Level ${level}`;
+    if ((level > 0 && level % 5 === 0) || level === 1) return `Level ${level}`;
     return undefined;
 }

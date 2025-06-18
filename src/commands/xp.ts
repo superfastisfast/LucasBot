@@ -24,7 +24,7 @@ export default class XpCommand extends Command.Base {
                     required: true,
                 },
             ],
-            this.onAdd,
+            this.onSet,
             undefined,
             true,
         ),
@@ -76,7 +76,7 @@ export default class XpCommand extends Command.Base {
 
         const user = await AppUser.fromID(userOpt.id);
 
-        await user.addXP(amountOpt).save();
+        await user.setXP(amountOpt).save();
 
         return interaction.reply(`Set ${amountOpt} xp to ${user.discord}`);
     }

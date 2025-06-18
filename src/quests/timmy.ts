@@ -9,6 +9,8 @@ export default class TimmyQuest extends Quest.Base {
         new AppButton("Help", this.onPressHelp.bind(this)),
         new AppButton("Unalive", this.onPressUnalive.bind(this)),
     ];
+    users: string[] = [];
+
     reward: number = 10;
 
     public override async start(): Promise<Message<true>> {
@@ -32,17 +34,32 @@ export default class TimmyQuest extends Quest.Base {
     private async onPressHelp(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
 
+        if (this.users.includes(user.discord.id)) {
+            await interaction.reply({ content: "You have already interacted with Timmy", flags: "Ephemeral" });
+            return;
+        }
+
+        this.users.push(user.discord.id);
+
         user.database.stats.strength -= 1;
         user.database.stats.charisma -= 1;
         await user.save();
-        interaction.reply({
-            content: `You helped litle Timmy\n-1 strengh ${Globals.ATTRIBUTES.strength.emoji}, -1 charisma ${Globals.ATTRIBUTES.charisma.emoji}`,
+
+        await interaction.reply({
+            content: `You helped little Timmy\n-1 strengh ${Globals.ATTRIBUTES.strength.emoji}, -1 charisma ${Globals.ATTRIBUTES.charisma.emoji}`,
             flags: "Ephemeral",
         });
     }
 
     private async onPressUnalive(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
+
+        if (this.users.includes(user.discord.id)) {
+            await interaction.reply({ content: "You have already interacted with Timmy", flags: "Ephemeral" });
+            return;
+        }
+
+        this.users.push(user.discord.id);
 
         await user.addGold(this.reward).save();
 
