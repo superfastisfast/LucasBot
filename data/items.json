@@ -2,23 +2,13 @@
   {
     "name": "Crocs",
     "cost": 350,
-    "tag": "boots",
+    "type": "boots",
     "flatModifiers": {
       "defense": 4
     },
     "percentageModifiers": {
       "agility": 3
     }
-  },
-  {
-    "name": "Banana Hammer",
-    "cost": 120,
-    "tag": "weapon",
-    "flatModifiers": {
-      "strength": 2,
-      "dexterity": 1
-    },
-    "percentageModifiers": {}
   },
   {
     "name": "Hello darkness My friend",
@@ -79,7 +69,7 @@
   {
     "name": "Banana Hammer",
     "cost": 120,
-    "tag": "weapon",
+    "type": "weapon",
     "flatModifiers": {
       "strength": 1.2
     },
