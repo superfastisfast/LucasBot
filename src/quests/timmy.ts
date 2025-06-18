@@ -41,7 +41,6 @@ export default class TimmyQuest extends Quest.Base {
     private async onPressKill(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
 
-        console.log("gold: " + this.reward);
         await user.addGold(this.reward).save();
 
         await interaction.reply({
