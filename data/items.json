@@ -313,7 +313,7 @@
   {
     "name": "Crocs",
     "cost": 500,
-    "tag": "boots",
+    "type": "boots",
     "flatModifiers": {
       "defense": 1
     },
