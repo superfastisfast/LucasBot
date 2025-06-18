@@ -57,13 +57,17 @@ export default class QuestCommand extends Command.Base {
     }
 
     public async onAutocomplete(interaction: AutocompleteInteraction): Promise<void> {
+        const focused = interaction.options.getFocused();
         const sub = (interaction.options as any).getSubcommand();
         const quests = sub === "execute" ? Quest.quests : Quest.active;
 
-        const options = Array.from(quests.keys()).map((q) => ({
-            name: q,
-            value: q,
-        }));
+        const options = Array.from(quests.keys())
+            .filter((q) => q.toLowerCase().includes(focused.toLowerCase()))
+            .slice(0, 25)
+            .map((q) => ({
+                name: q,
+                value: q,
+            }));
 
         await interaction.respond(options);
     }

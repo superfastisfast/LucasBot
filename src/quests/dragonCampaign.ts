@@ -65,9 +65,9 @@ export default class DragonCampaignQuest extends Quest.Base {
         const dragonStrength = Math.floor((Math.random() * (max - min + 1) + min) / 4);
 
         const playersWon = playerStrength > dragonStrength;
-        let msg = "The dragon won against the players";
-        if (playersWon)
-            msg = `The players won over the dragon!\nRewards:\n1x${Globals.ATTRIBUTES.skillpoint.emoji}\n10${Globals.ATTRIBUTES.gold.emoji} * ${Globals.ATTRIBUTES.charisma.emoji}\n10${Globals.ATTRIBUTES.xp.emoji} * ${Globals.ATTRIBUTES.gold.emoji}`;
+        const message = !playersWon
+            ? "The dragon won against the players"
+            : `The players won over the dragon!\nRewards:\n1x${Globals.ATTRIBUTES.skillpoint.emoji}\n10${Globals.ATTRIBUTES.gold.emoji} * ${Globals.ATTRIBUTES.charisma.emoji}\n10${Globals.ATTRIBUTES.xp.emoji} * ${Globals.ATTRIBUTES.gold.emoji}`;
         users.forEach(async (user) => {
             await user
                 .addSkillPoints(1)
@@ -79,8 +79,10 @@ export default class DragonCampaignQuest extends Quest.Base {
         const embed = new EmbedBuilder()
             .setTitle("Result")
             .setDescription(
-                `${msg}\n
-                Player strengh was ${playerStrength}, dragon strengh was ${dragonStrength}`,
+                users.length > 0
+                    ? `${message}\n
+                Player strengh was ${playerStrength.toFixed(2)}, dragon strengh was ${dragonStrength.toFixed(2)}`
+                    : "No one joined",
             )
             .setColor("#FF4500")
             .setURL(Globals.LINK)

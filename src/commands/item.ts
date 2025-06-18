@@ -1,12 +1,27 @@
 import { Command } from "@/commands";
 import { Item } from "@/models/item";
-import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType, AutocompleteInteraction, User } from "discord.js";
+import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType, AutocompleteInteraction, User, EmbedBuilder } from "discord.js";
 import { Globals } from "..";
 import { UserDB } from "@/models/user";
 
 export default class ItemCommand extends Command.Base {
     public override main: Command.Command = new Command.Command("item", "Item related stuff", []);
     public override subs: Command.Command[] = [
+        new Command.Command(
+            "view",
+            "Shows an items stats",
+            [
+                {
+                    name: "name",
+                    description: "The name of the item you want to view",
+                    type: ApplicationCommandOptionType.String,
+                    required: true,
+                    autocomplete: true,
+                },
+            ],
+            this.onView,
+            this.onViewAutocomplete,
+        ),
         new Command.Command(
             "add",
             "Add an item",
@@ -40,6 +55,7 @@ export default class ItemCommand extends Command.Base {
             ],
             this.onAdd,
             this.onAddAutocomplete,
+            true,
         ),
         new Command.Command(
             "remove",
@@ -55,6 +71,7 @@ export default class ItemCommand extends Command.Base {
             ],
             this.onRemove,
             this.onRemoveAutocomplete,
+            true,
         ),
     ];
 
@@ -78,7 +95,7 @@ export default class ItemCommand extends Command.Base {
             .save();
 
         return interaction.reply({
-            content: `Added item name: '${nameOpt}', type: '${typeOpt}', cost: ${costOpt} ${Globals.ATTRIBUTES.gold.emoji}, modifiers: '${modifiersOpt}'`,
+            content: `Created item\nName: '${nameOpt}'\nCost: ${costOpt} ${Globals.ATTRIBUTES.gold.emoji}\nType: '${typeOpt}'\nModifiers:\n'${modifiersOpt}'`,
             flags: "Ephemeral",
         });
     }
@@ -86,9 +103,10 @@ export default class ItemCommand extends Command.Base {
     public async onRemove(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
         const nameOpt = interaction.options.get("name")?.value as string;
 
-        const item = Item.manager.delete(nameOpt);
+        const deleted = Item.manager.delete(nameOpt);
+        if (deleted) Item.manager.save();
         return interaction.reply({
-            content: `Removed item '${nameOpt}'`,
+            content: deleted ? `Removed item '${nameOpt}'` : `Failed to delete item: ${nameOpt}`,
             flags: "Ephemeral",
         });
     }
@@ -181,6 +199,53 @@ export default class ItemCommand extends Command.Base {
         }));
 
         await interaction.respond(suggestions.slice(0, 25));
+    }
+
+    public async onView(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
+        const nameOpt = interaction.options.get("name")?.value as string;
+
+        const item = Item.manager.findByName(nameOpt);
+        if (!item)
+            return interaction.reply({
+                content: `Failed to find item: ${nameOpt}`,
+                flags: "Ephemeral",
+            });
+
+        let modifers: string = "";
+        Object.entries(item.flatModifiers ?? {}).forEach(([key, value]) => {
+            if (value !== 0) modifers += `${Globals.ATTRIBUTES[key as keyof typeof Globals.ATTRIBUTES].emoji} ${value > 0 ? "+" : "-"}${value}`;
+        });
+        Object.entries(item.percentageModifiers ?? {}).forEach(([key, value]) => {
+            if (value !== 0)
+                modifers += `${Globals.ATTRIBUTES[key as keyof typeof Globals.ATTRIBUTES].emoji} ${value > 0 ? "+" : "-"}${value * 100}%`;
+        });
+
+        const embed = new EmbedBuilder()
+            .setTitle(`${item.name} ${Globals.ATTRIBUTES.items.emoji}`)
+            .setDescription(`Cost: ${item.cost}\nType: ${item.type}\n\n${modifers}`)
+            .setColor("#C1A265")
+            .setThumbnail(item.image_url)
+            .setFooter({ text: `Item View of ${item.name}` })
+            .setTimestamp();
+        return interaction.reply({
+            embeds: [embed],
+            flags: "Ephemeral",
+        });
+    }
+
+    public async onViewAutocomplete(interaction: AutocompleteInteraction): Promise<void> {
+        const filteredItems: Array<[boolean, string]> = Item.manager.getAll().map((item) => [false, item.name] as [boolean, string]);
+
+        const options = filteredItems.map(([isEquipped, name]) => ({
+            name: `${Globals.ATTRIBUTES.items.emoji} ${name}`,
+            value: name,
+        }));
+
+        const focusedValue = interaction.options.getFocused();
+
+        const matchedOptions = options.filter((option) => option.name.toLowerCase().includes(focusedValue.toLowerCase()));
+
+        await interaction.respond(matchedOptions.slice(0, 25));
     }
 
     static parseModifiers(modifiers: string): any {
