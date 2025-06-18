@@ -50,7 +50,6 @@ export namespace Quest {
 
     export async function start(name: string) {
         try {
-            console.log(`try to start quest: ${name}`);
             const oldQuest = await quests.get(name);
             if (!oldQuest) return console.log(`Failed to get quest: '${name}'`);
             // Quest.end(oldQuest.name);
@@ -62,6 +61,7 @@ export namespace Quest {
 
             quests.set(name, quest);
             active.set(name, quest);
+            console.log(`${new Date().toISOString()} Started quest: ${name}`);
         } catch (error) {
             console.error(`Failed to start quest: ${name}`, error);
         }
@@ -83,6 +83,7 @@ export namespace Quest {
                 components: [],
             });
             active.delete(name);
+            console.log(`${new Date().toISOString()} Ended quest: ${name}`);
         } catch (error) {
             console.error(`Failed to end quest: ${name}`, error);
         }
