@@ -265,8 +265,8 @@ export class AppUser {
                 .setTitle(`${this.discord.displayName} leveled up!`)
                 .setDescription(`+1 ${Globals.ATTRIBUTES.skillpoint.emoji}`)
                 .setColor("#D3D3D3")
-                .setImage(this.discord.avatarURL())
-                .setURL(`discord.com/users${this.discord.username}`);
+                .setImage(this.discord.avatarURL());
+            // .setURL(`discord.com/users${this.discord.username}`);
 
             await Globals.CHANNEL.send({ embeds: [embed] });
         }
