@@ -41,8 +41,8 @@ export default class TimmyQuest extends Quest.Base {
 
         this.users.push(user.discord.id);
 
-        user.database.stats.strength -= 1;
-        user.database.stats.charisma -= 1;
+        user.downgradeSkill("strength");
+        user.downgradeSkill("charisma");
         await user.save();
 
         await interaction.reply({
