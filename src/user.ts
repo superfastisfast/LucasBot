@@ -258,12 +258,13 @@ export class AppUser {
     async level(xp: number): Promise<void> {
         const level = calculateLevel(xp);
 
-        if (level > this.database.level) {
-            this.addSkillPoints(1).addGold(level);
-            this.database.level = level;
+        while (level > this.database.level) {
+            const newLevel = this.database.level + 1;
+            this.addSkillPoints(1).addGold(newLevel);
+            this.database.level = newLevel;
             const embed = new EmbedBuilder()
-                .setTitle(`${this.discord.displayName} leveled up!`)
-                .setDescription(`+1 ${Globals.ATTRIBUTES.skillpoint.emoji}`)
+                .setTitle(`${this.discord.displayName} leveled up! ${Globals.ATTRIBUTES.level.emoji}${newLevel}`)
+                .setDescription(`+1 ${Globals.ATTRIBUTES.skillpoint.emoji}\n+${newLevel} ${Globals.ATTRIBUTES.gold.emoji}`)
                 .setColor("#D3D3D3")
                 .setImage(this.discord.avatarURL());
             // .setURL(`discord.com/users${this.discord.username}`);
@@ -292,17 +293,17 @@ const xpThresholds: number[] = [
     50, //             2
     100, //            3
     250, //            4
-    500, //            5
-    1000, //           6
-    1750, //           7
-    2750, //           8
-    4000, //           9
-    5000, //          10
-    7500, //          11
-    9500, //          12
-    10250, //         13
-    15250, //         14
-    20000, //         15
+    600, //            5
+    1300, //           6
+    2850, //           7
+    6000, //           8
+    15000, //          9
+    30000, //          10
+    60000, //          11
+    120000, //         12
+    250000, //         13
+    500000, //         14
+    1000000, //        15
 ];
 
 function calculateLevel(xp: number): number {

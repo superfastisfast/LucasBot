@@ -49,7 +49,7 @@ export default class ProfileCommand extends Command.Base {
         return new EmbedBuilder()
             .setTitle(`${user.discord.displayName}'s Profile`)
             .setDescription(
-                `${Globals.ATTRIBUTES.xp.emoji} ${user.database.xp}\n${Globals.ATTRIBUTES.skillpoint.emoji} ${user.database.skillPoints.toFixed(2)}\n\n**Stats**\n\`\`\`\n${statString}\n\`\`\`\n` +
+                `${Globals.ATTRIBUTES.level.emoji} ${user.database.level}\n${Globals.ATTRIBUTES.xp.emoji} ${user.database.xp}\n${Globals.ATTRIBUTES.skillpoint.emoji} ${user.database.skillPoints.toFixed(2)}\n\n**Stats**\n\`\`\`\n${statString}\n\`\`\`\n` +
                     `**Inventory**\n${Globals.ATTRIBUTES.gold.emoji} ${user.inventory.gold.toFixed(2)}\n\n${inventoryString}`,
             )
             .setColor(user.discord.hexAccentColor || 0x3498db)
