@@ -277,7 +277,11 @@ export class AppUser {
         const rank = rankFromLevel(level) || "";
         if (!rank) return;
 
-        this.setRole(guild, rank, true);
+        try {
+            await this.setRole(guild, rank, true);
+        } catch (error: any) {
+            console.log("SetRole Error: " + error);
+        }
     }
 }
 
