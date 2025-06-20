@@ -94,7 +94,6 @@ export default class IllegalPartyQuest extends Quest.Base {
             .toJSON();
 
         this.message.edit({
-            content: "",
             embeds: [lobby],
         });
     }

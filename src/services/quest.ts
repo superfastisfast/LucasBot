@@ -7,7 +7,7 @@ export default class QuestService extends Service.Base {
     questChance: number = 0;
 
     override async start(client: Client): Promise<void> {
-        this.intervalId = setInterval(() => this.update(), 1000 * 3);
+        this.intervalId = setInterval(() => this.update(), 1000 * 60);
     }
 
     override async stop(client: Client): Promise<void> {

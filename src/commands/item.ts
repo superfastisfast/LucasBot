@@ -213,16 +213,16 @@ export default class ItemCommand extends Command.Base {
 
         let modifers: string = "";
         Object.entries(item.flatModifiers ?? {}).forEach(([key, value]) => {
-            if (value !== 0) modifers += `${Globals.ATTRIBUTES[key as keyof typeof Globals.ATTRIBUTES].emoji} ${value > 0 ? "+" : "-"}${value}`;
+            if (value !== 0) modifers += `${Globals.ATTRIBUTES[key as keyof typeof Globals.ATTRIBUTES].emoji} ${value > 0 ? "+" : ""}${value}, `;
         });
         Object.entries(item.percentageModifiers ?? {}).forEach(([key, value]) => {
             if (value !== 0)
-                modifers += `${Globals.ATTRIBUTES[key as keyof typeof Globals.ATTRIBUTES].emoji} ${value > 0 ? "+" : "-"}${value * 100}%`;
+                modifers += `${Globals.ATTRIBUTES[key as keyof typeof Globals.ATTRIBUTES].emoji} ${value > 0 ? "+" : ""}${value * 100}%, `;
         });
 
         const embed = new EmbedBuilder()
             .setTitle(`${item.name} ${Globals.ATTRIBUTES.items.emoji}`)
-            .setDescription(`Cost: ${item.cost}\nType: ${item.type}\n\n${modifers}`)
+            .setDescription(`Worth: ${item.cost}\nType: ${item.type}\n\n${modifers}`)
             .setColor("#C1A265")
             .setThumbnail(item.image_url)
             .setFooter({ text: `Item View of ${item.name}` })

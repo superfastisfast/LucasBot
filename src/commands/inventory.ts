@@ -73,6 +73,21 @@ export default class QuestCommand extends Command.Base {
             undefined,
             true,
         ),
+        new Command.Command(
+            "sell",
+            "Sells an item from your inventory",
+            [
+                {
+                    name: "item",
+                    description: "The item you want to sell for da monkeeeeyyy",
+                    type: ApplicationCommandOptionType.String,
+                    required: true,
+                    autocomplete: true,
+                },
+            ],
+            this.onSell,
+            this.onAutocomplete,
+        ),
     ];
 
     public async onEquip(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
@@ -125,19 +140,54 @@ export default class QuestCommand extends Command.Base {
         return interaction.reply({ content: `Added a ${item.name} to ${user.discord}'s inventory`, flags: "Ephemeral" });
     }
 
+    public async onSell(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
+        const itemNameOpt = interaction.options.get("item")?.value as string;
+        const user = await AppUser.fromID(interaction.user.id);
+
+        const itemIndex = user.inventory.items.findIndex((item) => item[1] === itemNameOpt);
+        if (itemIndex === -1) {
+            return interaction.reply({
+                content: `Either the item doesn't exist or you don't have the item: ${itemNameOpt}`,
+                flags: "Ephemeral",
+            });
+        }
+
+        const sellable = user.inventory.items[itemIndex];
+        if (!sellable) return interaction.reply({ content: `You don't have the item '${itemNameOpt}'`, flags: "Ephemeral" });
+
+        const item = Item.manager.findByName(sellable[1]);
+        if (!item) {
+            return interaction.reply({
+                content: `Item '${sellable[1]}' not found`,
+                flags: "Ephemeral",
+            });
+        }
+
+        const prize = Math.min((item.cost / 10) * 6 + user.getStat("charisma"), 100);
+
+        user.inventory.items.splice(itemIndex, 1);
+        await user.addGold(prize).save();
+
+        return interaction.reply({
+            content: `Sold item ${item.name} for ${prize.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}`,
+            flags: "Ephemeral",
+        });
+    }
+
     public async onAutocomplete(interaction: AutocompleteInteraction): Promise<void> {
         const sub = (interaction.options as any).getSubcommand();
 
         const user = await AppUser.fromID(interaction.user.id);
 
-        let filteredItems: Array<[boolean, string]> = [];
+        let filteredItems: [boolean, string][] = [];
         if (sub === "equip") filteredItems = user.inventory.items.filter(([isEquipped]) => !isEquipped);
         else if (sub === "unequip") filteredItems = user.inventory.items.filter(([isEquipped]) => isEquipped);
         else if (sub === "add") filteredItems = Item.manager.getAll().map((item) => [false, item.name] as [boolean, string]);
+        else if (sub === "sell") filteredItems = user.inventory.items;
         else filteredItems = user.inventory.items;
 
         const options = filteredItems.map(([isEquipped, name]) => ({
-            name: `${sub === "add" ? Globals.ATTRIBUTES.items.emoji : isEquipped ? "✅" : "❌"} ${name}`,
+            name: `${sub === "add" || sub === "sell" ? Globals.ATTRIBUTES.items.emoji : isEquipped ? "✅" : "❌"} ${name}`,
             value: name,
         }));
 
