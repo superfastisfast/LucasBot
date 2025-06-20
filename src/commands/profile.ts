@@ -1,8 +1,16 @@
 import { Command } from "@/commands";
-import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
+import {
+    CommandInteraction,
+    InteractionResponse,
+    ApplicationCommandOptionType,
+    EmbedBuilder,
+    ButtonInteraction,
+    type InteractionUpdateOptions,
+} from "discord.js";
 import { AppUser } from "../user";
 import { Globals } from "..";
 import { UserDB } from "@/models/user";
+import { AppButton } from "@/button";
 
 export default class ProfileCommand extends Command.Base {
     public override main: Command.Command = new Command.Command(
@@ -12,14 +20,21 @@ export default class ProfileCommand extends Command.Base {
         this.onExecute.bind(this),
     );
 
+    buttons: AppButton[] = [];
+
     public async onExecute(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
         const userOpt = (interaction.options.get("user") || interaction).user;
         if (!userOpt) return interaction.reply(`Failed to get user option`);
         const user = await AppUser.fromID(userOpt.id);
 
+        if (this.buttons.length <= 0) this.buttons = await this.generateButtons();
+
+        const actionRow = user.database.skillPoints >= 1 ? AppButton.createActionRow(this.buttons) : undefined;
+
         const embed = await this.generateEmbed(user);
         return await interaction.reply({
             embeds: [embed],
+            components: actionRow,
             flags: "Ephemeral",
         });
     }
@@ -56,5 +71,38 @@ export default class ProfileCommand extends Command.Base {
             .setThumbnail(user.discord.avatarURL())
             .setFooter({ text: "Profile displayed" })
             .setTimestamp();
+    }
+
+    private async generateButtons(): Promise<AppButton[]> {
+        let buttons: AppButton[] = [];
+
+        UserDB.StatDB.keyArray.forEach((key) => {
+            buttons.push(
+                new AppButton(
+                    `${Globals.ATTRIBUTES[key as keyof typeof Globals.ATTRIBUTES].emoji} ${Globals.ATTRIBUTES[key as keyof typeof Globals.ATTRIBUTES].name}`,
+                    async (interaction: ButtonInteraction) => {
+                        const user = await AppUser.fromID(interaction.user.id);
+                        if (user.database.skillPoints >= 1) {
+                            user.database.stats[key as UserDB.StatDB.Type] += 1;
+                            await user.addSkillPoints(-1).save();
+
+                            const embed = await this.generateEmbed(user);
+
+                            let options: InteractionUpdateOptions = {};
+                            options.embeds = [embed];
+                            if (user.database.skillPoints < 1) options.components = [];
+                            interaction.update(options);
+                        } else {
+                            interaction.reply({
+                                content: "You don't have enough skillpoints",
+                                flags: "Ephemeral",
+                            });
+                        }
+                    },
+                ),
+            );
+        });
+
+        return buttons;
     }
 }
