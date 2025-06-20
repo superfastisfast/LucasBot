@@ -52,12 +52,20 @@ export namespace Quest {
         try {
             const oldQuest = await quests.get(name);
             if (!oldQuest) return console.log(`Failed to get quest: '${name}'`);
-            // Quest.end(oldQuest.name);
+
+            const currentTime = new Date().getTime();
+
             const quest = new oldQuest.class();
             quest.name = oldQuest.name;
-            quest.endTime = new Date().getTime() + quest.maxTimeActiveMS;
+            quest.endTime = currentTime + quest.maxTimeActiveMS;
             (quest as any).isActive = true;
             quest.message = await quest.start();
+
+            const min = Math.round(Math.abs(quest.endTime / 1000 - currentTime / 1000)) / 60;
+
+            quest.message.edit({
+                content: `${Math.floor(min / 60)}h ${(min % 60).toFixed()}min`,
+            });
 
             quests.set(name, quest);
             active.set(name, quest);
@@ -80,6 +88,7 @@ export namespace Quest {
             if (quest.isActive) quest.end();
             (quest as any).isActive = false;
             quest.message.edit({
+                content: "Quest ended",
                 components: [],
             });
             active.delete(name);

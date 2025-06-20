@@ -7,15 +7,23 @@ export default class QuestService extends Service.Base {
     questChance: number = 0;
 
     override async start(client: Client): Promise<void> {
-        this.intervalId = setInterval(() => this.update(client), 1000 * 60);
+        this.intervalId = setInterval(() => this.update(), 1000 * 3);
     }
 
     override async stop(client: Client): Promise<void> {
         clearInterval(this.intervalId);
     }
 
-    private update(client: Client): void {
+    private update(): void {
         const currentTime = new Date().getTime();
+
+        Quest.active.forEach((quest) => {
+            const min = Math.round(Math.abs(quest.endTime / 1000 - currentTime / 1000)) / 60;
+
+            quest.message.edit({
+                content: `${Math.floor(min / 60)}h ${(min % 60).toFixed()}min`,
+            });
+        });
 
         Array.from(Quest.active).forEach((quest) => {
             if (currentTime > quest[1].endTime) Quest.end(quest[0]);
