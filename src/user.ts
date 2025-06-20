@@ -186,7 +186,7 @@ export class AppUser {
 
         this.inventory.items.forEach(([active, name], i) => {
             if (active) {
-                const item = Item.manager.findByName(name)!;
+                const item = Item.manager.findByName(name);
                 if (!item) {
                     this.inventory.items.splice(1);
                 }
