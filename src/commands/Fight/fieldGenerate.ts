@@ -111,12 +111,12 @@ export async function getPlayerDisplay(player: Fighter, healthbar: string, manaB
         const flatModifiers = Object.entries(item.flatModifiers ?? {})
             .filter(([_, v]) => v !== 0)
             .map(([k, v]) => `${Globals.ATTRIBUTES[k as keyof typeof Globals.ATTRIBUTES].emoji} ${v > 0 ? "+" : ""}${v}`)
-            .join("\n");
+            .join(", ");
 
         const percentageModifiers = Object.entries(item.percentageModifiers ?? {})
             .filter(([_, v]) => v !== 0)
             .map(([k, v]) => `${Globals.ATTRIBUTES[k as keyof typeof Globals.ATTRIBUTES].emoji} ${v > 0 ? "+" : ""}${v * 100}%`)
-            .join("\n");
+            .join(", ");
         const modifiers = [flatModifiers, percentageModifiers].filter(Boolean).join("\n");
 
         itemsDisplay += `**${item.name}**\nType: ${item.type ?? "???"}${modifiers ? `\n${modifiers}` : ""}\n\n`;

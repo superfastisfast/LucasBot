@@ -73,7 +73,13 @@ export default class ShopCommand extends Command.Base {
                 });
 
             const user = await AppUser.fromID(interaction.user.id);
-            await user.addItem(item).save();
+            if (item.cost > user.inventory.gold)
+                return interaction.reply({
+                    content: `You don't have enough money to buy a ${item.name}`,
+                    flags: "Ephemeral",
+                });
+
+            await user.addItem(item).addGold(-item.cost).save();
 
             const possiblePurchaseMessage = [
                 `You now own a ${item.name} worth ${item.cost} ${Globals.ATTRIBUTES.gold.emoji}.`,
