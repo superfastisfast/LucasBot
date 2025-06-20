@@ -10,6 +10,8 @@ export default class SubscribePortalQuest extends Quest.Base {
         new AppButton("Blue 🔵", this.onPressBlue.bind(this)),
     ];
 
+    public override maxTimeActiveMS: number = 1000 * 60 * 60 * 2;
+
     bet: number = 5;
     teamRed: Array<string> = new Array();
     teamBlue: Array<string> = new Array();

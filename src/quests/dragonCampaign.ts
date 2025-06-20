@@ -127,7 +127,6 @@ export default class DragonCampaignQuest extends Quest.Base {
             .toJSON();
 
         this.message.edit({
-            content: "",
             embeds: [joinedPlayersEmbed],
         });
     }
