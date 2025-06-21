@@ -16,6 +16,8 @@ export default class ButtonService extends Service.Base {
         const button = AppButton.buttons.get(interaction.customId);
         if (button) button.onPress(interaction);
         else interaction.reply({ content: "This button is not active", flags: "Ephemeral" });
-        console.log(`${new Date().toISOString()} ${interaction.user.displayName} pressed ${(button!.builder.data as any).label}`);
+        console.log(
+            `${new Date().toISOString()} ${interaction.user.displayName} pressed ${(button ? (button!.builder.data as any) : "Undefined").label}`,
+        );
     };
 }
