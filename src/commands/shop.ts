@@ -1,18 +1,7 @@
 import { Command } from "@/commands";
-import {
-    CommandInteraction,
-    InteractionResponse,
-    EmbedBuilder,
-    ActionRowBuilder,
-    StringSelectMenuBuilder,
-    StringSelectMenuOptionBuilder,
-    Events,
-    type APIEmbedField,
-    ButtonInteraction,
-    ButtonStyle,
-} from "discord.js";
+import { CommandInteraction, InteractionResponse, EmbedBuilder, type APIEmbedField, ButtonInteraction, ButtonStyle } from "discord.js";
 import { AppUser } from "../user";
-import { client, Globals } from "..";
+import { Globals } from "..";
 import { Item } from "@/models/item";
 import { AppButton } from "@/button";
 

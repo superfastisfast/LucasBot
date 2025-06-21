@@ -73,24 +73,24 @@ export default class XpCommand extends Command.Base {
     public async onSet(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
         const userOpt = interaction.options.get("user")?.user;
         const amountOpt = interaction.options.get("amount")?.value as number;
-        if (!userOpt) return interaction.reply(`Failed to get user option`);
+        if (!userOpt) return interaction.reply({ content: `Failed to get user option`, flags: "Ephemeral" });
 
         const user = await AppUser.fromID(userOpt.id);
 
         await user.setXP(amountOpt).save();
 
-        return interaction.reply(`Set ${amountOpt} xp to ${user.discord}`);
+        return interaction.reply({ content: `Set ${amountOpt} xp to ${user.discord}`, flags: "Ephemeral" });
     }
 
     public async onAdd(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
         const userOpt = interaction.options.get("user")?.user;
         const amountOpt = interaction.options.get("amount")?.value as number;
-        if (!userOpt) return interaction.reply(`Failed to get user option`);
+        if (!userOpt) return interaction.reply({ content: `Failed to get user option`, flags: "Ephemeral" });
 
         const user = await AppUser.fromID(userOpt.id);
 
         await user.addXP(amountOpt).save();
 
-        return interaction.reply(`Added ${amountOpt} xp to ${user.discord}`);
+        return interaction.reply({ content: `Added ${amountOpt} xp to ${user.discord}`, flags: "Ephemeral" });
     }
 }
