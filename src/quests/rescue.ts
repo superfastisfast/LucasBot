@@ -46,17 +46,18 @@ export default class RescueQuest extends Quest.Base {
         let playerStrength: number = 0;
 
         users.forEach((user) => {
-            playerStrength += user.getStat("strength") + user.getStat("agility") + user.getStat("defense") / 3;
+            playerStrength += user.getStat("strength") + user.getStat("agility") + user.getStat("defense");
         });
 
-        const beastStrengh = Globals.random(playerStrength) + users.length * 25;
+        playerStrength = Globals.randomFloat(0, playerStrength);
+        const beastStrengh = this.reward * 3 * 5;
 
         const playersWon = playerStrength > beastStrengh;
 
         if (playersWon) users.forEach(async (user) => await user.addGold(this.reward).addXP(this.reward).addSkillPoints(0.5).save());
         else
             users.forEach(async (user) => {
-                user.addSkillPoints(-0.5).save();
+                user.addGold(this.reward).save();
             });
 
         const embed = new EmbedBuilder()
@@ -65,7 +66,7 @@ export default class RescueQuest extends Quest.Base {
                 users.length > 0
                     ? playersWon
                         ? `The players won over the beast! and got rewarded\n1x${Globals.ATTRIBUTES.strength.emoji}\n${this.reward}${Globals.ATTRIBUTES.gold.emoji}\n${this.reward}${Globals.ATTRIBUTES.xp.emoji}`
-                        : `The beast won over the players and ran away with the villager all players lost 1x${Globals.ATTRIBUTES.strength.emoji}` +
+                        : `The beast won over the players and ran away with the villager all players lost ${this.reward}${Globals.ATTRIBUTES.gold.emoji}` +
                           `\nBeast strengh: ${beastStrengh}, player strengh: ${playerStrength}`
                     : "No one joined",
             )
