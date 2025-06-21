@@ -184,14 +184,16 @@ export class AppUser {
             }
         });
 
-        this.inventory.items.forEach(([active, name], i) => {
-            if (active) {
-                const item = Item.manager.findByName(name);
+        for (let i = this.inventory.items.length - 1; i >= 0; i--) {
+            const inventoryItem = this.inventory.items[i];
+
+            if (inventoryItem?.[0]) {
+                const item = Item.manager.findByName(inventoryItem[1]);
                 if (!item) {
-                    this.inventory.items.splice(1);
+                    this.inventory.items.splice(i, 1);
                 }
             }
-        });
+        }
 
         await this.level(this.database.xp);
         await this.inventory.save();
