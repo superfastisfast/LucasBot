@@ -10,7 +10,7 @@ export default class RescueQuest extends Quest.Base {
     players: string[] = [];
     maxPlayers: number = 3;
 
-    reward: number = Globals.random(10, 2);
+    reward: number = Globals.random(2, 10);
 
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);

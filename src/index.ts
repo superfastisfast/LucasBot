@@ -82,11 +82,11 @@ export namespace Globals {
     export let CHANNEL: TextChannel;
     export const MISSING_PERMS = "You don't have the right permissions to execute this command";
 
-    export function random(max: number, min: number = 0): number {
+    export function random(min: number, max: number = 0): number {
         if (min > max) return min;
         return Math.floor(Math.random() * (max - min) + min);
     }
-    export function randomFloat(max: number, min: number = 0): number {
+    export function randomFloat(min: number, max: number = 0): number {
         if (min > max) return min;
         return Math.random() * (max - min) + min;
     }

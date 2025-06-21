@@ -9,7 +9,7 @@ export default class IllegalPartyQuest extends Quest.Base {
     public override buttons: AppButton[] = [new AppButton("Join", this.onPressJoin.bind(this))];
     public override maxTimeActiveMS: number = 1000 * 60 * 180;
 
-    fee: number = Globals.random(40, 10);
+    fee: number = Globals.random(10, 40);
     color: ColorResolvable | null = "#9F00FF";
 
     joined: string[] = [];
@@ -41,7 +41,7 @@ export default class IllegalPartyQuest extends Quest.Base {
 
     public override async end(): Promise<Quest.EndReturn> {
         if (this.joined && this.joined.length > 0) {
-            const randomEnding = this.endings[Globals.random(this.endings.length)];
+            const randomEnding = this.endings[Globals.random(0, this.endings.length - 1)];
             if (!randomEnding) this.endRefund();
             else randomEnding();
         } else {
@@ -107,7 +107,7 @@ export default class IllegalPartyQuest extends Quest.Base {
 
         const fallbackEndMessages: string[] = [];
 
-        const fallbackEndMessage = fallbackEndMessages[Globals.random(fallbackEndMessages.length)];
+        const fallbackEndMessage = fallbackEndMessages[Globals.random(0, fallbackEndMessages.length - 1)];
 
         const embed = new EmbedBuilder()
             .setTitle("Result")
@@ -127,7 +127,7 @@ export default class IllegalPartyQuest extends Quest.Base {
             const user = await AppUser.fromID(join);
 
             let item = Item.manager.getRandom();
-            if (item && item.cost > this.fee * 5) item = Globals.random(100) < 25 ? undefined : Item.manager.getRandom();
+            if (item && item.cost > this.fee * 5) item = Globals.random(0, 100) < 25 ? undefined : Item.manager.getRandom();
 
             if (item) await user.addItem(item).save();
 
@@ -158,7 +158,7 @@ export default class IllegalPartyQuest extends Quest.Base {
 
             if (!["l", "h", "q"].some((letter) => user.discord.username.toLowerCase().includes(letter))) continue;
 
-            const rizz = Globals.random(4, 1) / 4;
+            const rizz = Globals.random(1, 4) / 4;
             user.database.stats.charisma += rizz;
             rizzlers.push([user, rizz]);
         }
@@ -171,7 +171,7 @@ export default class IllegalPartyQuest extends Quest.Base {
                 `${user.discord} had and still has MAD rizz, +${rizz}`,
             ];
 
-            rizzlerString += rizzMessages[Globals.random(rizzMessages.length)];
+            rizzlerString += rizzMessages[Globals.random(0, rizzMessages.length - 1)];
         });
 
         const embed = new EmbedBuilder()
