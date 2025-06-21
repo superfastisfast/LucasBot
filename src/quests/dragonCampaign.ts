@@ -8,6 +8,7 @@ export default class DragonCampaignQuest extends Quest.Base {
     public override buttons: AppButton[] = [new AppButton("Join", this.onPressJoin.bind(this))];
 
     players: string[] = [];
+    reward: number = Globals.random(10, 1);
 
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);
@@ -51,18 +52,13 @@ export default class DragonCampaignQuest extends Quest.Base {
                 user.getStat("strength") +
                 user.getStat("agility") +
                 user.getStat("stamina") +
+                user.getStat("charisma") +
                 user.getStat("magicka") +
                 user.getStat("defense") +
-                user.getStat("vitality") / 6;
+                user.getStat("vitality");
         });
 
-        // TODO: Make balancing better maybe idk
-        const avgStrength = playerStrength / users.length;
-
-        const min = Math.max(10, playerStrength - users.length * users.length);
-        const max = Math.max(min + 1, avgStrength * playerStrength * Math.abs(Math.sin(Math.random())));
-
-        const dragonStrength = Math.floor((Math.random() * (max - min + 1) + min) / 4);
+        const dragonStrength = 7 * this.reward * 10;
 
         const playersWon = playerStrength > dragonStrength;
 

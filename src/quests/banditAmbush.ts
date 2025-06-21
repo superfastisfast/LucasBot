@@ -46,18 +46,17 @@ export default class BanditAmbushQuest extends Quest.Base {
         let playerStrength: number = 0;
 
         users.forEach((user) => {
-            const stats = user.database.stats;
-            playerStrength += stats.charisma + stats.defense;
+            playerStrength += user.getStat("strength");
         });
 
-        const banditsStrengh = Math.floor(Math.random() * playerStrength) + users.length * 25;
+        playerStrength = Globals.randomFloat(0, playerStrength);
+        const banditsStrengh = this.reward * 3.5;
 
         const playersWon = playerStrength > banditsStrengh;
 
         if (playersWon) users.forEach(async (user) => await user.addGold(this.reward).addXP(this.reward).save());
         else
             users.forEach(async (user) => {
-                user.database.stats.strength = Math.max(0, user.database.stats.charisma - 2);
                 await user.addGold(-this.reward).save();
             });
 
