@@ -86,6 +86,10 @@ export namespace Globals {
         if (min > max) return min;
         return Math.floor(Math.random() * (max - min) + min);
     }
+    export function randomFloat(max: number, min: number = 0): number {
+        if (min > max) return min;
+        return Math.random() * (max - min) + min;
+    }
 }
 
 export const client = new Client({

@@ -26,7 +26,7 @@ export default class Fighter {
     attack(opponent: Fighter) {
         this.drainMana(1);
         if (Math.abs(this.posX - opponent.posX) <= this.attackRange) {
-            const damage = Globals.random(0, this.appUser.getStat("strength"));
+            const damage = Globals.randomFloat(0, this.appUser.getStat("strength"));
             return opponent.receiveDamage(damage);
         } else {
             return "Too far away to attack!";
@@ -48,11 +48,11 @@ export default class Fighter {
         return this.appUser.getStat("agility") / 100 > Math.random();
     }
     sleep() {
-        const randomHealthGain = Globals.random(this.appUser.getStat("vitality") / 2, 0.1);
-        const randomManaGain = Globals.random(this.appUser.getStat("stamina") / 2, 0.9);
+        const randomHealthGain = Globals.randomFloat(this.appUser.getStat("vitality") / 2, 0.1);
+        const randomManaGain = Globals.randomFloat(this.appUser.getStat("stamina") / 2, 0.5);
         this.gainHealth(randomHealthGain);
         this.gainMana(randomManaGain);
-        return `Slept and gained ${randomHealthGain} ${Globals.ATTRIBUTES.health.emoji} and ${randomManaGain} ${Globals.ATTRIBUTES.mana.emoji}`;
+        return `Slept and gained ${randomHealthGain.toFixed(2)} ${Globals.ATTRIBUTES.health.emoji} and ${randomManaGain.toFixed(2)} ${Globals.ATTRIBUTES.mana.emoji}`;
     }
 
     gainHealth(amount: number) {

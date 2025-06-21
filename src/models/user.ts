@@ -8,13 +8,13 @@ export namespace UserDB {
 
         export const schema = new Schema(
             {
-                strength: { type: Number, default: 3.0 },
-                agility: { type: Number, default: 3.0 },
-                charisma: { type: Number, default: 1.0 },
-                magicka: { type: Number, default: 1.0 },
-                stamina: { type: Number, default: 3.0 },
-                defense: { type: Number, default: 1.0 },
-                vitality: { type: Number, default: 3.0 },
+                strength: { type: Number, default: 0.0 },
+                agility: { type: Number, default: 0.0 },
+                charisma: { type: Number, default: 0.0 },
+                magicka: { type: Number, default: 0.0 },
+                stamina: { type: Number, default: 0.0 },
+                defense: { type: Number, default: 0.0 },
+                vitality: { type: Number, default: 0.0 },
             },
             { _id: false },
         );
@@ -45,13 +45,13 @@ export namespace UserDB {
             stats: {
                 type: StatDB.schema,
                 default: () => ({
-                    strength: 3.0,
+                    strength: 1.0,
                     agility: 10.0,
                     charisma: 1.0,
                     magicka: 1.0,
                     stamina: 3.0,
                     defense: 3.0,
-                    vitality: 1.0,
+                    vitality: 3.0,
                 }),
             },
             portalsEntered: { type: Number, default: 0.0 },
