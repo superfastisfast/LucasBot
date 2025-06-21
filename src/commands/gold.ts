@@ -53,24 +53,24 @@ export default class GoldCommand extends Command.Base {
     public async onSet(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
         const userOpt = interaction.options.get("user")?.user;
         const amountOpt = interaction.options.get("amount")?.value as number;
-        if (!userOpt) return interaction.reply(`Failed to get user option`);
+        if (!userOpt) return interaction.reply({ content: `Failed to get user option`, flags: "Ephemeral" });
 
         const user = await AppUser.fromID(userOpt.id);
 
         await user.setGold(amountOpt).save();
 
-        return interaction.reply(`Set ${user.discord}'s ${Globals.ATTRIBUTES.gold.emoji} ${amountOpt}`);
+        return interaction.reply({ content: `Set ${user.discord}'s ${Globals.ATTRIBUTES.gold.emoji} ${amountOpt}`, flags: "Ephemeral" });
     }
 
     public async onAdd(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
         const userOpt = interaction.options.get("user")?.user;
         const amountOpt = interaction.options.get("amount")?.value as number;
-        if (!userOpt) return interaction.reply(`Failed to get user option`);
+        if (!userOpt) return interaction.reply({ content: `Failed to get user option`, flags: "Ephemeral" });
 
         const user = await AppUser.fromID(userOpt.id);
 
         await user.addGold(amountOpt).save();
 
-        return interaction.reply(`Added ${amountOpt} ${Globals.ATTRIBUTES.gold.emoji} to ${user.discord}`);
+        return interaction.reply({ content: `Added ${amountOpt} ${Globals.ATTRIBUTES.gold.emoji} to ${user.discord}`, flags: "Ephemeral" });
     }
 }

@@ -21,7 +21,7 @@ export default class DonateCommand extends Command.Base {
                 required: true,
             },
         ],
-        this.onExecute.bind(this),
+        this.onExecute,
     );
 
     public async onExecute(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
