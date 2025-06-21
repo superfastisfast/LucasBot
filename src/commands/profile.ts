@@ -34,7 +34,7 @@ export default class ProfileCommand extends Command.Base {
         const embed = await this.generateEmbed(user);
         return await interaction.reply({
             embeds: [embed],
-            components: actionRow,
+            components: user.discord.id === interaction.user.id ? actionRow : undefined,
             flags: "Ephemeral",
         });
     }
