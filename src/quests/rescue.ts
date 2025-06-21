@@ -50,7 +50,7 @@ export default class RescueQuest extends Quest.Base {
         });
 
         playerStrength = Globals.randomFloat(0, playerStrength);
-        const beastStrengh = this.reward * 3 * 5;
+        const beastStrengh = this.reward * 9;
 
         const playersWon = playerStrength > beastStrengh;
 
