@@ -222,7 +222,7 @@ export default class ItemCommand extends Command.Base {
 
         const embed = new EmbedBuilder()
             .setTitle(`${item.name} ${Globals.ATTRIBUTES.items.emoji}`)
-            .setDescription(`Worth: ${item.cost}\nType: ${item.type}\n\n${modifers}`)
+            .setDescription(`Worth: ${item.cost} ${Globals.ATTRIBUTES.gold.emoji}\nType: ${item.type}\n\n${modifers}`)
             .setColor("#C1A265")
             .setThumbnail(item.image_url)
             .setFooter({ text: `Item View of ${item.name}` })
