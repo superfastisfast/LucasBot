@@ -10,7 +10,7 @@ export default class BanditAmbushQuest extends Quest.Base {
     players: string[] = [];
     maxPlayers: number = 5;
 
-    reward: number = Globals.random(10, 1);
+    reward: number = Globals.random(1, 10);
 
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);
