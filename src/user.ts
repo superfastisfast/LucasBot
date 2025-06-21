@@ -263,7 +263,7 @@ export class AppUser {
             this.addSkillPoints(1).addGold(newLevel);
             this.database.level = newLevel;
             const embed = new EmbedBuilder()
-                .setTitle(`${this.discord.displayName} leveled up! ${Globals.ATTRIBUTES.level.emoji}${newLevel}`)
+                .setTitle(`${this.discord.displayName} leveled up! ${newLevel} ${Globals.ATTRIBUTES.level.emoji}`)
                 .setDescription(`+1 ${Globals.ATTRIBUTES.skillpoint.emoji}\n+${newLevel} ${Globals.ATTRIBUTES.gold.emoji}`)
                 .setColor("#D3D3D3")
                 .setImage(this.discord.avatarURL());
