@@ -66,7 +66,7 @@ export default class BanditAmbushQuest extends Quest.Base {
                 playersWon
                     ? `The players won over the bandits!\n All players recived: ${this.reward} ${Globals.ATTRIBUTES.gold.emoji}!`
                     : `The bandits won over the players and stole ${this.reward}${Globals.ATTRIBUTES.gold.emoji} From each player` +
-                          `\n\nBndits strengh: ${banditsStrengh}, player strengh: ${playerStrength}`,
+                          `\n\nBndits strengh: ${banditsStrengh.toFixed(2)}, player strengh: ${playerStrength.toFixed(2)}`,
             )
             .setColor("#e63946")
             .setURL(Globals.LINK)
