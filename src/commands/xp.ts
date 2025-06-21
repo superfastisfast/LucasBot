@@ -2,6 +2,7 @@ import { Command } from "@/commands";
 import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
 import { AppUser } from "../user";
 import { UserDB } from "@/models/user";
+import { Globals } from "..";
 
 export default class XpCommand extends Command.Base {
     public override main: Command.Command = new Command.Command("xp", "XP related stuff", []);
@@ -59,7 +60,7 @@ export default class XpCommand extends Command.Base {
         const lines = await Promise.all(
             topUsers.map(async (user, index) => {
                 const name = (await AppUser.fromID(user.id)).discord.displayName;
-                return `**${index + 1}.** ${name} — ${user.xp} XP`;
+                return `#${index + 1} ${name}:   ${user.xp} ${Globals.ATTRIBUTES.xp.emoji}`;
             }),
         );
         const description = lines.join("\n");
