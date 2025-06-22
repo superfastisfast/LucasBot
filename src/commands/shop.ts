@@ -3,7 +3,7 @@ import { CommandInteraction, InteractionResponse, EmbedBuilder, type APIEmbedFie
 import { AppUser } from "../user";
 import { Globals } from "..";
 import { Item } from "@/models/item";
-import { AppButton } from "@/button";
+import { AppButton } from "@/ui";
 
 export default class ShopCommand extends Command.Base {
     public override main: Command.Command = new Command.Command("shop", "Buy some cool items", [], this.onExecute.bind(this));

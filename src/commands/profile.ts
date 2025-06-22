@@ -10,7 +10,7 @@ import {
 import { AppUser } from "../user";
 import { Globals } from "..";
 import { UserDB } from "@/models/user";
-import { AppButton } from "@/button";
+import { AppButton } from "@/ui";
 
 export default class ProfileCommand extends Command.Base {
     public override main: Command.Command = new Command.Command(

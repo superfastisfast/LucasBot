@@ -1,6 +1,6 @@
 import { Message, type ButtonInteraction, EmbedBuilder } from "discord.js";
 import { Quest } from "@/quest";
-import { AppButton } from "@/button";
+import { AppButton } from "@/ui";
 import { AppUser } from "@/user";
 import { Globals } from "..";
 

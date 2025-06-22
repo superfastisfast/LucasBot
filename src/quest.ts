@@ -1,5 +1,5 @@
 import { type Message } from "discord.js";
-import type { AppButton } from "./button";
+import type { AppButton } from "./ui";
 
 export namespace Quest {
     export abstract class Base {

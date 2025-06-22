@@ -95,9 +95,11 @@ export default class QuestCommand extends Command.Base {
         const user = await AppUser.fromID(interaction.user.id);
 
         for (let i = 0; i < user.inventory.items.length; i++) {
-            const item = user.inventory.items[i];
-            if (!item) continue;
-            if (item[1] === itemNameOpt) {
+            const slot = user.inventory.items[i];
+            const item = Item.manager.findByName(slot?.[1] || "");
+            if (!slot || (item?.type === "item" && slot[0])) continue;
+
+            if (slot[1] === itemNameOpt) {
                 user.inventory.items[i]![0] = true;
                 user.inventory.markModified("items");
                 await user.save();
@@ -113,9 +115,11 @@ export default class QuestCommand extends Command.Base {
         const user = await AppUser.fromID(interaction.user.id);
 
         for (let i = 0; i < user.inventory.items.length; i++) {
-            const item = user.inventory.items[i];
-            if (!item) continue;
-            if (item[1] === itemNameOpt) {
+            const slot = user.inventory.items[i];
+            const item = Item.manager.findByName(slot?.[1] || "");
+            if (!slot || (item!.type === "item" && !slot[0])) continue;
+
+            if (slot[1] === itemNameOpt) {
                 user.inventory.items[i]![0] = false;
                 user.inventory.markModified("items");
                 await user.save();
