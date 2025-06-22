@@ -28,7 +28,7 @@ export default class StudentProfession extends Profession {
         let questions: [string, string][] = [];
         let fields: AppModalField[] = [];
 
-        const randomQuestions = StudentProfession.questions.sort(() => Math.random() - 0.5);
+        const randomQuestions = StudentProfession.questions.sort(() => Math.random() - 0.5).slice(0, 5);
 
         randomQuestions.forEach((question, i) => {
             questions.push(question);
