@@ -36,7 +36,7 @@ export default class StudentProfession extends Profession {
             fields.push({
                 name: `#${i + 1}`,
                 value: question[0].slice(0, 4000),
-                style: "Paragraph",
+                style: "Short",
             });
         });
 
