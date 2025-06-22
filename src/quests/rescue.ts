@@ -1,6 +1,6 @@
 import { Message, type ButtonInteraction, EmbedBuilder } from "discord.js";
 import { Quest } from "@/quest";
-import { AppButton } from "@/button";
+import { AppButton } from "@/ui";
 import { AppUser } from "@/user";
 import { Globals } from "..";
 
@@ -112,6 +112,6 @@ export default class RescueQuest extends Quest.Base {
             embeds: [lobby],
         });
 
-        if (this.players.length >= this.maxPlayers) this.end();
+        if (this.players.length >= this.maxPlayers) Quest.end(this.name);
     }
 }

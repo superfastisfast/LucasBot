@@ -1,6 +1,6 @@
 import { Message, ButtonInteraction, EmbedBuilder } from "discord.js";
 import { Quest } from "@/quest";
-import { AppButton } from "@/button";
+import { AppButton } from "@/ui";
 import { AppUser } from "@/user";
 /**
  * TODO: Fix this quest, it doesnt work idk man its stupid, It might be because we arent storing the members or shit but I dont have the patiens for that ¯\_(ツ)_/¯

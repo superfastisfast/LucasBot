@@ -1,6 +1,6 @@
 import { ButtonInteraction, Message } from "discord.js";
 import { Quest } from "@/quest";
-import { AppButton } from "@/button";
+import { AppButton } from "@/ui";
 import { Globals } from "..";
 
 export default class TestQuest extends Quest.Base {

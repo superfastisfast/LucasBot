@@ -1,4 +1,4 @@
-import { AppButton } from "@/button";
+import { AppButton } from "@/ui";
 import { Globals } from "@/index";
 import { AppUser } from "@/user";
 import { ButtonInteraction, EmbedBuilder, InteractionResponse, type Message } from "discord.js";

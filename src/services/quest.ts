@@ -29,8 +29,8 @@ export default class QuestService extends Service.Base {
             if (currentTime > quest[1].endTime) Quest.end(quest[0]);
         });
 
-        // 30 is max amount of min
-        if (this.questChance < 30) {
+        // 120 is max amount of min
+        if (this.questChance < 120) {
             this.questChance += 1 + Math.random();
             return;
         }
