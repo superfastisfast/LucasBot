@@ -5,10 +5,23 @@ import { AppUser } from "@/user";
 import { Profession } from "../work";
 
 export default class StudentProfession extends Profession {
-    // prettier-ignore
     static questions: [string, string][] = [
         ["1+1", "2"],
-        ["1+1", "2"]
+        ["3*4", "12"],
+        ["5-2", "3"],
+        ["10/2", "5"],
+        ["2^3", "8"],
+        ["7+6", "13"],
+        ["9-5", "4"],
+        ["6*7", "42"],
+        ["100/25", "4"],
+        ["8+2*3", "14"],
+        ["(8+2)*3", "30"],
+        ["15%4", "3"],
+        ["3**2", "9"],
+        ["9+10", "19"],
+        ["14-7", "7"],
+        ["0*100", "0"],
     ];
 
     constructor() {
