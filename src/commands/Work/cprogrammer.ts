@@ -7,7 +7,7 @@ import { Profession } from "../work";
 export default class CProgrammerProfession extends Profession {
     // prettier-ignore
     static questions: [string, string][] = [
-    [
+        [
 `#include <stdio.h>
 
 int main() {
@@ -31,9 +31,9 @@ int main() {
 
     return 0;
 }`,
-    ],
+        ],
 
-    [
+        [
 `#include <stdlib.h>
 
 int main() {
@@ -52,9 +52,9 @@ int main() {
     return 0;
 }
 `,
-    ],
+        ],
 
-    [
+        [
 `#include <stdio.h>
 
 int main() {
@@ -74,9 +74,9 @@ int main() {
     printf("%s", str);
     return 0;
 }`,
-    ],
+        ],
 
-[
+        [
 `#ifndef WOW_H
 #define WOW_H
 
@@ -87,12 +87,8 @@ void wow()
 `#pragma once
 
 void wow()`,
-    ],
-];
-
-    static getRandomQuestion() {
-        return CProgrammerProfession.questions[Globals.random(0, CProgrammerProfession.questions.length - 1)]!;
-    }
+        ],
+    ];
 
     constructor() {
         let questions: [string, string][] = [];
@@ -119,23 +115,14 @@ void wow()`,
                 if (String(answer).trim() === String(question[1]).trim()) solvedCount++;
             }
 
-            if (solvedCount >= 1) {
-                const user = await AppUser.fromID(interaction.user.id);
+            const user = await AppUser.fromID(interaction.user.id);
+            const reward = solvedCount * Math.max(0, user.getStat("charisma") - 5) + user.getStat("magicka") / 2;
+            await user.addGold(reward).save();
 
-                const reward = solvedCount * Math.max(0, user.getStat("charisma") - 5) + user.getStat("magicka") / 2;
-
-                await user.addGold(reward).save();
-
-                await interaction.reply({
-                    content: `Congrats you fixed all the issues!\n+${reward} ${Globals.ATTRIBUTES.gold.emoji}`,
-                    flags: "Ephemeral",
-                });
-            } else {
-                await interaction.reply({
-                    content: `You only solved ${solvedCount}/${modal.fields.length} questions\nGo back to Python`,
-                    flags: "Ephemeral",
-                });
-            }
+            await interaction.reply({
+                content: `You solved ${solvedCount}/${modal.fields.length} c coding problems\n+${reward.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}`,
+                flags: "Ephemeral",
+            });
         });
 
         super(modal);
