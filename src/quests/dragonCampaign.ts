@@ -8,7 +8,8 @@ export default class DragonCampaignQuest extends Quest.Base {
     public override buttons: AppButton[] = [new AppButton("Join", this.onPressJoin.bind(this))];
 
     players: string[] = [];
-    reward: number = Globals.random(1, 10);
+    difculty: number = Globals.random(1, 10);
+    reward: number = this.difculty * 10;
 
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);
@@ -58,7 +59,7 @@ export default class DragonCampaignQuest extends Quest.Base {
                 user.getStat("vitality");
         });
 
-        const dragonStrength = 7 * this.reward * 10;
+        const dragonStrength = 7 * this.difculty * 10;
 
         const playersWon = playerStrength > dragonStrength;
 
@@ -69,8 +70,8 @@ export default class DragonCampaignQuest extends Quest.Base {
             users.forEach(async (user) => {
                 await user
                     .addSkillPoints(1)
-                    .addXP(10 + user.database.stats.charisma)
-                    .addGold(10 + user.database.stats.charisma)
+                    .addXP(10 + user.getStat("charisma"))
+                    .addGold(10 + user.getStat("charisma"))
                     .save();
             });
         }

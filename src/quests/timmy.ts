@@ -41,12 +41,11 @@ export default class TimmyQuest extends Quest.Base {
 
         this.users.push(user.discord.id);
 
-        user.downgradeSkill("strength");
         user.downgradeSkill("charisma");
         await user.save();
 
         await interaction.reply({
-            content: `You helped little Timmy\n-1 strengh ${Globals.ATTRIBUTES.strength.emoji}, -1 charisma ${Globals.ATTRIBUTES.charisma.emoji}`,
+            content: `You helped little Timmy\n-1 charisma ${Globals.ATTRIBUTES.charisma.emoji}`,
             flags: "Ephemeral",
         });
     }

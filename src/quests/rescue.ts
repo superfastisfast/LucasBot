@@ -10,7 +10,8 @@ export default class RescueQuest extends Quest.Base {
     players: string[] = [];
     maxPlayers: number = 3;
 
-    reward: number = Globals.random(1, 10);
+    difculty: number = Globals.random(1, 10);
+    reward: number = this.difculty * 10;
 
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);
@@ -50,7 +51,7 @@ export default class RescueQuest extends Quest.Base {
         });
 
         playerStrength = Globals.randomFloat(0, playerStrength);
-        const beastStrengh = this.reward * 9;
+        const beastStrengh = this.difculty * 9;
 
         const playersWon = playerStrength > beastStrengh;
 

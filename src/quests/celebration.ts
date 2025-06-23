@@ -64,7 +64,7 @@ export default class CelebrationQuest extends Quest.Base {
             .setImage(celebration.image)
             .setURL(Globals.LINK);
 
-        this.reward = Math.floor(Math.random() * 5);
+        this.reward = Math.floor(Math.random() * 35);
 
         (await Globals.CHANNEL.guild.members.fetch()).forEach(async (member) => (await AppUser.fromID(member.id)).addGold(this.reward).save());
 

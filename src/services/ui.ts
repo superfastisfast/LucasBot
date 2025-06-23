@@ -28,6 +28,8 @@ export default class ButtonService extends Service.Base {
         const modal = AppModal.modals.get(interaction.customId);
         if (modal) modal.onOpen(interaction);
         else interaction.reply({ content: "This button is not active", flags: "Ephemeral" });
-        console.log(`${new Date().toISOString()} ${interaction.user.displayName} opened modal ${(modal!.builder.data as any).title}`);
+        console.log(
+            `${new Date().toISOString()} ${interaction.user.displayName} opened modal ${modal ? (modal!.builder.data as any).title : "unknown"}`,
+        );
     };
 }
