@@ -88,22 +88,7 @@ export async function createStatBar(current: number, max: number, length: number
     return `${current.toFixed(2)}/${max.toFixed(2)}\`\`\`ansi\n[2;${filledColorCode}m${filledBar}[0m[2;37m${emptyBar}[0m\n\`\`\` `;
 }
 
-export async function getPlayerDisplay(player: Fighter, healthbar: string, manaBar: string) {
-    const statsData = UserDB.StatDB.keys.map((key) => ({
-        name: Globals.ATTRIBUTES[key].name,
-        emoji: Globals.ATTRIBUTES[key].emoji,
-        value: player.appUser.database.stats[key],
-    }));
-
-    const maxNameLength = Math.max(...statsData.map((stat) => stat.name.length));
-
-    const statString = statsData
-        .map((stat) => {
-            const padded = stat.name.padEnd(maxNameLength, " ");
-            return `${stat.emoji} ${padded}: ${stat.value} + ${(player.appUser.getStat(stat.name.toLowerCase() as UserDB.StatDB.Type) - stat.value).toFixed(2)}`;
-        })
-        .join("\n");
-
+export async function getItemDisplay(player: Fighter) {
     const playerEquipedItems: string[] = (await player.appUser.getEquippedItems()).map(([bool, name]) => name);
     let items: Item.Base[] = Item.manager.findManyByNames(playerEquipedItems);
     let itemsDisplay = "";
@@ -123,8 +108,31 @@ export async function getPlayerDisplay(player: Fighter, healthbar: string, manaB
     });
 
     return {
-        name: `${player.appUser.discord.displayName}'s Status`,
-        value: `❤️ Health: ${healthbar}\n` + `🔵 Mana: ${manaBar}\n` + statString + "\n" + `📦 Items: \n${itemsDisplay}`,
+        name: `${player.appUser.discord.displayName}'s Itens`,
+        value: `📦 Items: \n${itemsDisplay}\n`,
+        inline: true,
+    };
+}
+
+export async function getStatsDisplay(player: Fighter) {
+    const statsData = UserDB.StatDB.keys.map((key) => ({
+        name: Globals.ATTRIBUTES[key].name,
+        emoji: Globals.ATTRIBUTES[key].emoji,
+        value: player.appUser.database.stats[key],
+    }));
+
+    const maxNameLength = Math.max(...statsData.map((stat) => stat.name.length));
+
+    const statString = statsData
+        .map((stat) => {
+            const padded = stat.name.padEnd(maxNameLength, " ");
+            return `${stat.emoji} ${padded}: ${stat.value} + ${(player.appUser.getStat(stat.name.toLowerCase() as UserDB.StatDB.Type) - stat.value).toFixed(2)}`;
+        })
+        .join("\n");
+
+    return {
+        name: `${player.appUser.discord.displayName}'s Stats`,
+        value: statString + "\n\n\n",
         inline: true,
     };
 }
@@ -138,8 +146,10 @@ export async function getFightDisplay(currentGame: FightGame, action: string): P
     const player1ManaBar = await createStatBar(player1.currentMana, player1.getMaxManaStats(), player1.getMaxManaStats(), "34");
     const player2HealthBar = await createStatBar(player2.currentHealth, player2.getMaxHealthStats(), player2.getMaxHealthStats(), "31");
     const player2ManaBar = await createStatBar(player2.currentMana, player2.getMaxManaStats(), player2.getMaxManaStats(), "34");
-    const player1DisplayStats = await getPlayerDisplay(player1, player1HealthBar, player1ManaBar);
-    const player2DisplayStats = await getPlayerDisplay(player2, player2HealthBar, player2ManaBar);
+    const player1ItemDisplay = await getItemDisplay(player1);
+    const player2ItemDisplay = await getItemDisplay(player2);
+    const player1StatsDisplay = await getStatsDisplay(player1);
+    const player2StatsDisplay = await getStatsDisplay(player2);
     const fieldImageAttachment = await getFieldImage(currentGame);
     const builder = new EmbedBuilder()
         .setColor(0x0099ff)
@@ -147,9 +157,39 @@ export async function getFightDisplay(currentGame: FightGame, action: string): P
             name: `It's ${nextPlayer.appUser.discord.displayName}'s Turn!`,
             iconURL: nextPlayer.appUser.discord.avatarURL()!,
         })
-        .setDescription(currentPlayer.appUser.discord.displayName + ": " + action)
         .setImage("attachment://game-field.png")
-        .addFields(player1DisplayStats, player2DisplayStats)
+        .addFields(player1ItemDisplay, { name: "\u200B", value: "\u200B", inline: true }, player2ItemDisplay)
+        .addFields(player1StatsDisplay, { name: "\u200B", value: "\u200B", inline: true }, player2StatsDisplay)
+        .addFields(
+            {
+                name: "Health",
+                value: player1HealthBar,
+                inline: true,
+            },
+            { name: "\u200B", value: "\u200B", inline: true },
+            {
+                name: "Health",
+                value: player2HealthBar,
+                inline: true,
+            },
+        )
+        .addFields(
+            {
+                name: "Mana",
+                value: player1ManaBar,
+                inline: true,
+            },
+            { name: "\u200B", value: "\u200B", inline: true },
+            {
+                name: "Mana",
+                value: player2ManaBar,
+                inline: true,
+            },
+        )
+        .addFields({
+            name: "\n**Action**",
+            value: `${currentPlayer.appUser.discord.displayName} : ${action}`,
+        })
         .setFooter({
             text: `➡️ It's ${nextPlayer.appUser.discord.displayName}'s Turn!`,
             iconURL: nextPlayer.appUser.discord.avatarURL()!,
