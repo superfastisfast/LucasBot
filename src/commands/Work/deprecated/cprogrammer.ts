@@ -77,12 +77,9 @@ int main() {
         ],
 
         [
-`#ifndef WOW_H
-#define WOW_H
+`#pragma once;
 
-void wow()
-
-#endif`,
+void wow()`,
 
 `#pragma once
 
@@ -101,18 +98,18 @@ void wow()`,
 
             fields.push({
                 name: `#${i + 1}`,
-                value: question[0].slice(0, 4000),
+                value: question[0],
                 style: "Paragraph",
             });
         });
 
-        const modal = new AppModal("C Internship, fix all the issues", fields, async (interaction: ModalSubmitInteraction) => {
+        const modal = new AppModal("Fix issues and make the code clean!", fields, async (modal: AppModal, interaction: ModalSubmitInteraction) => {
             let solvedCount: number = 0;
 
             for (let i: number = 0; i < randomQuestions.length; i++) {
-                const answer = interaction.fields.getField(`#${i + 1}`).value as string;
-                const question = randomQuestions[i] ?? "";
-                if (String(answer).trim() === String(question[1]).trim()) solvedCount++;
+                const answer = modal.getField(interaction, `#${i + 1}`);
+                const question = (randomQuestions[i] ?? ["", ""])[1];
+                if (answer === question) solvedCount++;
             }
 
             const user = await AppUser.fromID(interaction.user.id);
@@ -120,7 +117,7 @@ void wow()`,
             await user.addGold(reward).save();
 
             await interaction.reply({
-                content: `You solved ${solvedCount}/${modal.fields.length} c coding problems\n+${reward.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}`,
+                content: `You solved ${solvedCount}/${[...modal.fields.values()].length} c coding problems\n+${reward.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}`,
                 flags: "Ephemeral",
             });
         });
