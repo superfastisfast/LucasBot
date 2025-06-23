@@ -9,7 +9,8 @@ import FightCommand from "../fight";
 export default class FightGame {
     appUsers: AppUser[] = [];
     bet: number = 0;
-    bonusReward: number = 5;
+    goldReward: number = 5;
+    xpReward: number = 3;
     playerTurn: number = 1;
     arenaSize: number = 6;
     gameOverMsg: string = "";
@@ -169,12 +170,12 @@ export default class FightGame {
         if (this.winner !== undefined) {
             (await AppUser.fromID(this.winner.discord.id))
                 .addGold(this.bet * 2)
-                .addGold(this.bonusReward)
-                .addXP(this.bonusReward)
+                .addGold(this.goldReward)
+                .addXP(this.xpReward)
                 .save();
             const looserID = this.winner.discord.id !== this.appUsers[0]!.discord.id ? this.appUsers[0]!.discord.id : this.appUsers[1]!.discord.id;
-            (await AppUser.fromID(looserID)).addGold(this.bonusReward).addXP(this.bonusReward).save();
-            this.gameOverMsg += `\nand gained the prize of ${this.bet * 2}${Globals.ATTRIBUTES.gold.emoji}\nBoth players got:\n${this.bonusReward}${Globals.ATTRIBUTES.gold.emoji}\n${this.bonusReward}${Globals.ATTRIBUTES.xp.emoji}`;
+            (await AppUser.fromID(looserID)).addGold(this.goldReward).addXP(this.xpReward).save();
+            this.gameOverMsg += `\nand gained the prize of ${this.bet * 2}${Globals.ATTRIBUTES.gold.emoji}\nBoth players got:\n${this.goldReward}${Globals.ATTRIBUTES.gold.emoji}\n${this.xpReward}${Globals.ATTRIBUTES.xp.emoji}`;
         } else {
             for (const user of this.appUsers) {
                 (await AppUser.fromID(user.discord.id)).addGold(this.bet).save();
