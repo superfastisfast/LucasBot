@@ -34,7 +34,7 @@ export default class DonateCommand extends Command.Base {
         const profession = this.professions.get(
             professionOpt
                 ? (professionOpt.value as string)
-                : [...this.professions.keys()][Globals.random([...this.professions.values()].length - 1)]!,
+                : [...this.professions.keys()][Globals.random(0, [...this.professions.values()].length - 1)]!,
         )!;
 
         return (await interaction.showModal(profession.modal.builder)) as any;
