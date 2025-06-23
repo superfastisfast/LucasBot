@@ -22,6 +22,26 @@ export default class StudentProfession extends Profession {
         ["9+10", "19"],
         ["14-7", "7"],
         ["0*100", "0"],
+        ["4+5", "9"],
+        ["12-8", "4"],
+        ["6/3", "2"],
+        ["3^2", "9"],
+        ["2+2*2", "6"],
+        ["(2+2)*2", "8"],
+        ["18/3", "6"],
+        ["20-4*2", "12"],
+        ["(20-4)*2", "32"],
+        ["5+5+5", "15"],
+        ["2^4", "16"],
+        ["10%3", "1"],
+        ["7*5", "35"],
+        ["64/8", "8"],
+        ["1+1+1+1", "4"],
+        ["11+11", "22"],
+        ["50/5", "10"],
+        ["9*3", "27"],
+        ["30-6", "24"],
+        ["7+8", "15"],
     ];
 
     constructor() {
@@ -52,7 +72,7 @@ export default class StudentProfession extends Profession {
             }
 
             const user = await AppUser.fromID(interaction.user.id);
-            const reward = solvedCount * Math.max(0, user.getStat("charisma") - 5) + user.getStat("magicka") / 3;
+            const reward = (Math.log(solvedCount) + (Math.max(0, user.getStat("charisma") - 5 + user.getStat("magicka") / 5) + 0.25)) / 2.5;
             await user.addGold(reward).save();
 
             await interaction.reply({
