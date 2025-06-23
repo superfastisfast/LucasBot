@@ -174,7 +174,7 @@ export default class FightGame {
                 .save();
             const looserID = this.winner.discord.id !== this.appUsers[0]!.discord.id ? this.appUsers[0]!.discord.id : this.appUsers[1]!.discord.id;
             (await AppUser.fromID(looserID)).addGold(this.bonusReward).addXP(this.bonusReward).save();
-            this.gameOverMsg += `\nand gained the prize of ${this.bet * 2}${Globals.ATTRIBUTES.gold.emoji}`;
+            this.gameOverMsg += `\nand gained the prize of ${this.bet * 2}${Globals.ATTRIBUTES.gold.emoji}\nBoth players got:\n${this.bonusReward}${Globals.ATTRIBUTES.gold.emoji}\n${this.bonusReward}${Globals.ATTRIBUTES.xp.emoji}`;
         } else {
             for (const user of this.appUsers) {
                 (await AppUser.fromID(user.discord.id)).addGold(this.bet).save();
