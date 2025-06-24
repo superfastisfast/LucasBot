@@ -11,6 +11,7 @@ import { AppUser } from "../user";
 import { Globals } from "..";
 import { UserDB } from "@/models/user";
 import { AppButton } from "@/ui";
+import { Item } from "@/models/item";
 
 export default class ProfileCommand extends Command.Base {
     public override main: Command.Command = new Command.Command(
@@ -57,7 +58,7 @@ export default class ProfileCommand extends Command.Base {
 
         const inventoryLines = [...user.inventory.items]
             .sort((a, b) => Number(b[0]) - Number(a[0]))
-            .map(([hasItem, itemName]) => `${hasItem ? "✅" : "❌"} ${itemName}`);
+            .map(([equipped, name]) => `${equipped ? "✅" : "❌"} ${name} - ${Item.manager.findByName(name)?.type}`);
 
         const inventoryString = inventoryLines.length > 0 ? "```" + inventoryLines.join("\n") + "```" : "No items...";
 
