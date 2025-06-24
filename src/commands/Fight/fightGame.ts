@@ -15,6 +15,7 @@ export default class FightGame {
     arenaSize: number = 6;
     gameOverMsg: string = "";
     winner?: AppUser = undefined;
+    gameStarted: Boolean = false;
 
     private static nextId: number = 0;
     id: number = 0;
@@ -58,6 +59,7 @@ export default class FightGame {
         this.nextTurn();
         this.appUsers[0]!.addGold(-this.bet).save();
         this.appUsers[1]!.addGold(-this.bet).save();
+        this.gameStarted = true;
         return ret;
     }
     public async onPressDecline(interaction: ButtonInteraction): Promise<InteractionResponse<true>> {
@@ -177,10 +179,12 @@ export default class FightGame {
             (await AppUser.fromID(looserID)).addGold(this.goldReward).addXP(this.xpReward).save();
             this.gameOverMsg += `\nand gained the prize of ${this.bet * 2}${Globals.ATTRIBUTES.gold.emoji}\nBoth players got:\n${this.goldReward}${Globals.ATTRIBUTES.gold.emoji}\n${this.xpReward}${Globals.ATTRIBUTES.xp.emoji}`;
         } else {
-            for (const user of this.appUsers) {
-                (await AppUser.fromID(user.discord.id)).addGold(this.bet).save();
+            if (this.gameStarted) {
+                for (const user of this.appUsers) {
+                    (await AppUser.fromID(user.discord.id)).addGold(this.bet).save();
+                }
+                this.gameOverMsg += `\neach player got their bet back ${this.bet}${Globals.ATTRIBUTES.gold.emoji}`;
             }
-            this.gameOverMsg += `\neach player got their bet back ${this.bet}${Globals.ATTRIBUTES.gold.emoji}`;
         }
         const endMsg = await getFightDisplay(this, this.gameOverMsg);
         this.message.edit({ content: "# **GameOver**", embeds: endMsg.embeds, components: [] });
