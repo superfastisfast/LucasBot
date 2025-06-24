@@ -45,12 +45,12 @@ export namespace UserDB {
             stats: {
                 type: StatDB.schema,
                 default: () => ({
-                    strength: 1.0,
+                    strength: 2.0,
                     agility: 10.0,
                     charisma: 1.0,
                     magicka: 1.0,
                     stamina: 3.0,
-                    defense: 3.0,
+                    defense: 2.0,
                     vitality: 3.0,
                 }),
             },

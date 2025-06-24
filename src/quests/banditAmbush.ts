@@ -10,7 +10,7 @@ export default class BanditAmbushQuest extends Quest.Base {
     players: string[] = [];
     maxPlayers: number = 5;
 
-    difculty: number = Globals.random(1, 10);
+    difculty: number = Globals.random(1, 5);
     reward: number = this.difculty * 10;
 
     public override async start(): Promise<Message<true>> {
@@ -111,6 +111,6 @@ export default class BanditAmbushQuest extends Quest.Base {
             embeds: [lobby],
         });
 
-        if (this.players.length >= this.maxPlayers) this.end();
+        if (this.players.length >= this.maxPlayers) Quest.end(this.name);
     }
 }

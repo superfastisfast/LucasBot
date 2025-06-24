@@ -10,7 +10,7 @@ export default class RescueQuest extends Quest.Base {
     players: string[] = [];
     maxPlayers: number = 3;
 
-    difculty: number = Globals.random(1, 10);
+    difculty: number = Globals.random(1, 5);
     reward: number = this.difculty * 10;
 
     public override async start(): Promise<Message<true>> {

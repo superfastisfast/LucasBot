@@ -8,7 +8,7 @@ export default class DragonCampaignQuest extends Quest.Base {
     public override buttons: AppButton[] = [new AppButton("Join", this.onPressJoin.bind(this))];
 
     players: string[] = [];
-    difculty: number = Globals.random(1, 10);
+    difculty: number = Globals.random(1, 5);
     reward: number = this.difculty * 10;
 
     public override async start(): Promise<Message<true>> {

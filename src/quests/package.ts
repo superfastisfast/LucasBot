@@ -12,7 +12,7 @@ export default class PackageQuest extends Quest.Base {
         new AppButton("Sell it", this.onPressSell.bind(this)),
     ];
 
-    maxReward = 10;
+    maxReward = 200;
 
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);

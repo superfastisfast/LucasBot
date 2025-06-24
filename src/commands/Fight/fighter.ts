@@ -48,8 +48,8 @@ export default class Fighter {
         return this.appUser.getStat("agility") / 100 > Math.random();
     }
     sleep() {
-        const randomHealthGain = Globals.randomFloat(this.appUser.getStat("vitality") / 2, 0.1);
-        const randomManaGain = Globals.randomFloat(this.appUser.getStat("stamina") / 2, 0.5);
+        const randomHealthGain = Globals.randomFloat(this.appUser.getStat("vitality") / 20, this.appUser.getStat("vitality") / 8);
+        const randomManaGain = Globals.randomFloat(1, this.appUser.getStat("stamina") / 8);
         this.gainHealth(randomHealthGain);
         this.gainMana(randomManaGain);
         return `Slept and gained ${randomHealthGain.toFixed(2)} ${Globals.ATTRIBUTES.health.emoji} and ${randomManaGain.toFixed(2)} ${Globals.ATTRIBUTES.mana.emoji}`;
