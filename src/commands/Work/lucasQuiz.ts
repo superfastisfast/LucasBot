@@ -6,14 +6,14 @@ import { Profession } from "../work";
 
 export default class LucasQuiz extends Profession {
     static questions: [string, string, string][] = [
-        ["Which is Lucas's favorit programming language?", "A: Zig\nB: C++\nC: C\nD: Typescript", "C"],
-        ["Which is Lucas's least favorit programming language?", "A: Python\nB: C++\nC: C\nD: Typescript", "A"],
+        ["Lucas's favorit language?", "A: Zig\nB: C++\nC: C\nD: Typescript", "C"],
+        ["Lucas's least favorit language?", "A: Python\nB: C++\nC: C\nD: Typescript", "A"],
         ["Does Lucas like pineapple 🍍?", "A: Yes\nB: No", "A"],
         ["Does Lucas hit Jim?", "A: No\nB: Yes", "B"],
         ["How much can Lucas bench 🏋️‍♂️?", "A: 70kg\nB: 80kg\nC: 90kg\nD: 100kg\nE: 110kg", "D"],
     ];
 
-    public override onExecute(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
+    public override async onExecute(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
         let questions: [string, string, string][] = [];
         let fields: AppModalField[] = [];
 
@@ -51,6 +51,6 @@ export default class LucasQuiz extends Profession {
             });
         });
 
-        return interaction.reply("...");
+        return (await interaction.showModal(modal.builder)) as any;
     }
 }
