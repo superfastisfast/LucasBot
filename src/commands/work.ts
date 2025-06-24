@@ -2,7 +2,12 @@ import { Command } from "@/commands";
 import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType, AutocompleteInteraction, ModalSubmitInteraction } from "discord.js";
 import { AppUser } from "../user";
 import { Globals } from "..";
-import { AppModal } from "@/ui";
+
+export abstract class Profession {
+    public async onExecute(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
+        return undefined!;
+    }
+}
 
 export default class DonateCommand extends Command.Base {
     public override main = new Command.Command(
@@ -37,7 +42,7 @@ export default class DonateCommand extends Command.Base {
                 : [...this.professions.keys()][Globals.random(0, [...this.professions.values()].length - 1)]!,
         )!;
 
-        return (await interaction.showModal(profession.modal.builder)) as any;
+        return await profession.onExecute(interaction);
     }
 
     public async onAutocomplete(interaction: AutocompleteInteraction): Promise<void> {
@@ -71,13 +76,5 @@ export default class DonateCommand extends Command.Base {
             console.log(`\t${name}`);
             this.professions.set(name, profession);
         }
-    }
-}
-
-export abstract class Profession {
-    public modal: AppModal;
-
-    constructor(modal: AppModal) {
-        this.modal = modal;
     }
 }

@@ -23,7 +23,7 @@ export default class GoldCommand extends Command.Base {
                     required: true,
                 },
             ],
-            this.onAdd,
+            this.onSet,
             undefined,
             true,
         ),

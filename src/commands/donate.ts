@@ -32,6 +32,12 @@ export default class DonateCommand extends Command.Base {
         const user = await AppUser.fromID(interaction.user.id);
         const poor = await AppUser.fromID(poorOpt.id);
 
+        if (user.discord.id === poor.discord.id)
+            return interaction.reply({
+                content: "You can't donate money to yourself idiot",
+                flags: "Ephemeral",
+            });
+
         if (amountOpt < 0)
             return interaction.reply({
                 content: "What are you a thief?",
