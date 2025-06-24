@@ -73,7 +73,7 @@ export default class Student extends Profession {
             }
 
             const user = await AppUser.fromID(interaction.user.id);
-            const reward = solvedCount / Math.min(1, maxSolvedCount - user.getStat("magicka"));
+            const reward = solvedCount / 5;
             await user.addGold(reward).save();
 
             await interaction.reply({
