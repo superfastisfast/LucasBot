@@ -4,7 +4,7 @@ import { Globals } from "../..";
 import { AppUser } from "@/user";
 import { Profession } from "../work";
 
-export default class StudentProfession extends Profession {
+export default class Student extends Profession {
     static questions: [string, string][] = [
         ["1+1", "2"],
         ["3*4", "12"],
@@ -48,7 +48,7 @@ export default class StudentProfession extends Profession {
         let questions: [string, string][] = [];
         let fields: AppModalField[] = [];
 
-        const randomQuestions = StudentProfession.questions.sort(() => Math.random() - 0.5).slice(0, 5);
+        const randomQuestions = Student.questions.sort(() => Math.random() - 0.5).slice(0, 5);
 
         randomQuestions.forEach((question, i) => {
             questions.push(question);
