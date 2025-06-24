@@ -11,7 +11,7 @@ export default class RescueQuest extends Quest.Base {
     maxPlayers: number = 3;
 
     difculty: number = Globals.random(1, 5);
-    reward: number = this.difculty * 10;
+    reward: number = this.difculty * 30;
 
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);
@@ -66,7 +66,7 @@ export default class RescueQuest extends Quest.Base {
             .setDescription(
                 users.length > 0
                     ? playersWon
-                        ? `The players won over the beast! and got rewarded\n1x${Globals.ATTRIBUTES.strength.emoji}\n${this.reward}${Globals.ATTRIBUTES.gold.emoji}\n${this.reward}${Globals.ATTRIBUTES.xp.emoji}`
+                        ? `The players won over the beast! and got rewarded\n0.5x${Globals.ATTRIBUTES.skillpoint.emoji}\n${this.reward}${Globals.ATTRIBUTES.gold.emoji}\n${this.reward}${Globals.ATTRIBUTES.xp.emoji}`
                         : `The beast won over the players and ran away with the villager all players lost ${this.reward}${Globals.ATTRIBUTES.gold.emoji}` +
                           `\nBeast strengh: ${beastStrengh.toFixed(2)}, player strengh: ${playerStrength.toFixed(2)}`
                     : "No one joined",
