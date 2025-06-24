@@ -1,5 +1,7 @@
 # LucasBot
 
+TODO: rewrite this ai slop
+
 LucasBot is a **TypeScript + [Bun](https://bun.sh)** powered Discord bot that sprinkles a light‑weight yet surprisingly addictive _RPG‑flavoured_ progression layer onto your Discord server. It ships with slash‑command mini‑games, XP & gold rewards, user‑driven quests, and handy role utilities – all persisted in **MongoDB Atlas**, so your hard‑earned loot never disappears when the host restarts.
 
 > “A bot that will make you want to watch the globglogabgalab more!” – _original author_
