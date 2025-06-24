@@ -1,4 +1,4 @@
-import { ModalSubmitInteraction } from "discord.js";
+import { CommandInteraction, InteractionResponse, ModalSubmitInteraction } from "discord.js";
 import { AppModal, type AppModalField } from "../../ui";
 import { Globals } from "../..";
 import { AppUser } from "@/user";
@@ -44,7 +44,7 @@ export default class StudentProfession extends Profession {
         ["7+8", "15"],
     ];
 
-    constructor() {
+    public override async onExecute(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
         let questions: [string, string][] = [];
         let fields: AppModalField[] = [];
 
@@ -63,6 +63,7 @@ export default class StudentProfession extends Profession {
 
         const modal = new AppModal("C Internship, fix all the issues", fields, async (modal: AppModal, interaction: ModalSubmitInteraction) => {
             let solvedCount: number = 0;
+            const maxSolvedCount = [...modal.fields.values()].length;
 
             for (let i: number = 0; i < randomQuestions.length; i++) {
                 const answer = modal.getField(interaction, randomQuestions[i]?.[0] || "");
@@ -72,15 +73,15 @@ export default class StudentProfession extends Profession {
             }
 
             const user = await AppUser.fromID(interaction.user.id);
-            const reward = (Math.log(solvedCount) + (Math.max(0, user.getStat("charisma") - 5 + user.getStat("magicka") / 5) + 0.25)) / 2.5;
+            const reward = solvedCount / Math.min(1, maxSolvedCount - user.getStat("magicka"));
             await user.addGold(reward).save();
 
             await interaction.reply({
-                content: `You solved ${solvedCount}/${[...modal.fields.values()].length} math problems\n+${reward.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}`,
+                content: `You solved ${solvedCount}/${maxSolvedCount} math problems\n+${reward.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}`,
                 flags: "Ephemeral",
             });
         });
 
-        super(modal);
+        return (await interaction.showModal(modal.builder)) as any;
     }
 }
