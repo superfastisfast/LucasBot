@@ -18,7 +18,7 @@
     "dependencies": {
         "@napi-rs/canvas": "^0.1.70",
         "@sapphire/snowflake": "^3.5.5",
-        "discord.js": "^14.19.3",
-        "mongoose": "^8.15.1"
+        "discord.js": "^14.20.0",
+        "mongoose": "^8.16.0"
     }
 }
