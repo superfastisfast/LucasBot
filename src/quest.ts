@@ -64,7 +64,7 @@ export namespace Quest {
             const min = Math.round(Math.abs(quest.endTime / 1000 - currentTime / 1000)) / 60;
 
             quest.message.edit({
-                content: `${Math.floor(min / 60)}h ${(min % 60).toFixed()}min`,
+                content: `${Math.floor(min / 60)}h ${(min % 60).toFixed()}min <@&${process.env.QUEST_ROLE || "none"}>`,
             });
 
             quests.set(name, quest);
