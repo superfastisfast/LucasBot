@@ -12,6 +12,7 @@ export default class BanditAmbushQuest extends Quest.Base {
 
     difculty: number = Globals.random(1, 5);
     reward: number = this.difculty * 10;
+    penalty: number = this.reward / 10;
 
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);
@@ -58,7 +59,7 @@ export default class BanditAmbushQuest extends Quest.Base {
         if (playersWon) users.forEach(async (user) => await user.addGold(this.reward).addXP(this.reward).save());
         else
             users.forEach(async (user) => {
-                await user.addGold(-this.reward / 10).save();
+                await user.addGold(-this.penalty).save();
             });
 
         const embed = new EmbedBuilder()
@@ -66,7 +67,7 @@ export default class BanditAmbushQuest extends Quest.Base {
             .setDescription(
                 playersWon
                     ? `The players won over the bandits!\n All players recived: ${this.reward} ${Globals.ATTRIBUTES.gold.emoji}!`
-                    : `The bandits won over the players and stole ${this.reward}${Globals.ATTRIBUTES.gold.emoji} From each player` +
+                    : `The bandits won over the players and stole ${this.penalty}${Globals.ATTRIBUTES.gold.emoji} From each player` +
                           `\n\nBndits strengh: ${banditsStrengh.toFixed(2)}, player strengh: ${playerStrength.toFixed(2)}`,
             )
             .setColor("#e63946")

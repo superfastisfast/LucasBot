@@ -30,7 +30,7 @@ export default class QuestService extends Service.Base {
         });
 
         // 120 is max amount of min
-        if (this.questChance < 120) {
+        if (this.questChance < 30) {
             this.questChance += 1 + Math.random();
             return;
         }
