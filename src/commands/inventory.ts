@@ -93,21 +93,32 @@ export default class QuestCommand extends Command.Base {
     public async onEquip(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
         const itemNameOpt = interaction.options.get("item")?.value as string;
         const user = await AppUser.fromID(interaction.user.id);
+        const itemToEquip = Item.manager.findByName(itemNameOpt);
 
-        for (let i = 0; i < user.inventory.items.length; i++) {
-            const slot = user.inventory.items[i];
-            const item = Item.manager.findByName(slot?.[1] || "");
-            if (!slot || (item?.type === "item" && slot[0])) continue;
+        if (!itemToEquip) return interaction.reply({ content: `Item "${itemNameOpt}" not found.`, flags: "Ephemeral" });
 
-            if (slot[1] === itemNameOpt) {
-                user.inventory.items[i]![0] = true;
-                user.inventory.markModified("items");
-                await user.save();
-                break;
+        if (itemToEquip.type !== "item") {
+            for (let i = 0; i < user.inventory.items.length; i++) {
+                const [equipped, name] = user.inventory.items[i] ?? [false, ""];
+                const currentItem = Item.manager.findByName(name);
+                if (equipped && currentItem?.type === itemToEquip.type) {
+                    user.inventory.items[i]![0] = false;
+                }
             }
         }
 
-        return interaction.reply({ content: `Equipped item ${itemNameOpt}`, flags: "Ephemeral" });
+        for (let i = 0; i < user.inventory.items.length; i++) {
+            const [_, name] = user.inventory.items[i] ?? [false, ""];
+            if (name === itemNameOpt) {
+                user.inventory.items[i]![0] = true;
+                user.inventory.markModified("items");
+                await user.save();
+
+                return interaction.reply({ content: `Equipped item ${itemNameOpt}`, flags: "Ephemeral" });
+            }
+        }
+
+        return interaction.reply({ content: `Item "${itemNameOpt}" not found in your inventory.`, flags: "Ephemeral" });
     }
 
     public async onUnequip(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {

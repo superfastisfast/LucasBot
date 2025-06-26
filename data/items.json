@@ -1,328 +1,342 @@
 [
-    {
-        "name": "Nokia Phone",
-        "type": "shield",
-        "cost": 80,
-        "flatModifiers": {
-            "defense": 0.8
-        },
-        "percentageModifiers": {
-            "defense": 0.02,
-            "charisma": 0.1
-        }
+  {
+    "name": "Nokia Phone",
+    "type": "shield",
+    "cost": 80,
+    "flatModifiers": {
+      "defense": 0.8
     },
-    {
-        "name": "Stained White T-Shirt",
-        "type": "chestplate",
-        "cost": 250,
-        "flatModifiers": {},
-        "percentageModifiers": {
-            "defense": 0.25
-        }
-    },
-    {
-        "name": "Banana Hammer",
-        "cost": 120,
-        "type": "weapon",
-        "flatModifiers": {
-            "strength": 1.2
-        },
-        "percentageModifiers": {}
-    },
-    {
-        "name": "AK-47",
-        "type": "weapon",
-        "cost": 1400,
-        "flatModifiers": {
-            "strength": 4,
-            "defense": 2,
-            "charisma": 3
-        },
-        "percentageModifiers": {
-            "strength": 0.5
-        }
-    },
-    {
-        "name": "Glock-19",
-        "type": "weapon",
-        "cost": 650,
-        "flatModifiers": {
-            "strength": 3,
-            "defense": 0.5,
-            "charisma": 1
-        },
-        "percentageModifiers": {
-            "strength": 0.1,
-            "agility": 0.1
-        }
-    },
-    {
-        "name": "Plastic Spoon",
-        "type": "weapon",
-        "cost": 10,
-        "flatModifiers": {
-            "strength": 0.1
-        },
-        "percentageModifiers": {}
-    },
-    {
-        "name": "Headset",
-        "type": "helmet",
-        "cost": 150,
-        "flatModifiers": {
-            "defense": 1,
-            "charisma": 0.5
-        }
-    },
-    {
-        "name": "Leather Helmet",
-        "type": "helmet",
-        "cost": 50,
-        "flatModifiers": {
-            "defense": 0.5
-        },
-        "percentageModifiers": {}
-    },
-    {
-        "name": "Leather Trousers",
-        "type": "leggings",
-        "cost": 80,
-        "flatModifiers": {
-            "defense": 0.8
-        },
-        "percentageModifiers": {}
-    },
-    {
-        "name": "Tight Leather Pants",
-        "type": "leggings",
-        "cost": 130,
-        "flatModifiers": {
-            "defense": 0.8
-        },
-        "percentageModifiers": {
-            "charisma": 0.12,
-            "agility": -0.08
-        }
-    },
-    {
-        "name": "Stick",
-        "type": "leggings",
-        "cost": 45,
-        "flatModifiers": {
-            "strength": 0.45
-        },
-        "percentageModifiers": {}
-    },
-    {
-        "name": "Iron Pickaxe",
-        "type": "weapon",
-        "cost": 170,
-        "flatModifiers": {
-            "strength": 1.2,
-            "defense": 0.4
-        },
-        "percentageModifiers": {
-            "strength": 0.05,
-            "defense": 0.05,
-            "agility": -0.1
-        }
-    },
-    {
-        "name": "Apple",
-        "type": "item",
-        "cost": 10,
-        "flatModifiers": {
-            "vitality": 0.1
-        },
-        "percentageModifiers": {}
-    },
-    {
-        "name": "Bread",
-        "type": "item",
-        "cost": 100,
-        "flatModifiers": {
-            "vitality": 1
-        },
-        "percentageModifiers": {}
-    },
-    {
-        "name": "Iron Chestplate",
-        "type": "item",
-        "cost": 220,
-        "flatModifiers": {
-            "defense": 3
-        },
-        "percentageModifiers": {
-            "agility": -0.1
-        }
-    },
-    {
-        "name": "Leather Chestplate",
-        "type": "item",
-        "cost": 150,
-        "flatModifiers": {
-            "defense": 1.5
-        },
-        "percentageModifiers": {}
-    },
-    {
-        "name": "Red Bull",
-        "type": "item",
-        "cost": 160,
-        "flatModifiers": {
-            "stamina": 1,
-            "vitality": 0.2
-        },
-        "percentageModifiers": {
-            "stamina": 0.02
-        }
-    },
-    {
-        "name": "Health Pack",
-        "type": "item",
-        "cost": 800,
-        "flatModifiers": {
-            "vitality": 4
-        },
-        "percentageModifiers": {
-            "vitality": 0.4
-        }
-    },
-    {
-        "name": "C",
-        "type": "item",
-        "cost": 1200,
-        "flatModifiers": {
-            "magicka": 10
-        },
-        "percentageModifiers": {
-            "magicka": 0.2
-        }
-    },
-    {
-        "name": "Zig",
-        "type": "item",
-        "cost": 800,
-        "flatModifiers": {
-            "magicka": 7
-        },
-        "percentageModifiers": {
-            "magicka": 0.1
-        }
-    },
-    {
-        "name": "Paper Headware",
-        "type": "helmet",
-        "cost": 3,
-        "flatModifiers": {
-            "defense": 0.05
-        },
-        "percentageModifiers": {}
-    },
-    {
-        "name": "Trash Bag",
-        "type": "chestplate",
-        "cost": 5,
-        "flatModifiers": {
-            "defense": 0.1
-        },
-        "percentageModifiers": {}
-    },
-    {
-        "name": "Underwear",
-        "type": "leggings",
-        "cost": 3,
-        "flatModifiers": {
-            "defense": 0.06
-        },
-        "percentageModifiers": {}
-    },
-    {
-        "name": "Sandles",
-        "type": "boots",
-        "cost": 2,
-        "flatModifiers": {
-            "defense": 0.02
-        },
-        "percentageModifiers": {}
-    },
-    {
-        "name": "Swords",
-        "type": "weapon",
-        "cost": 100,
-        "flatModifiers": {
-            "strength": 1
-        },
-        "percentageModifiers": {}
-    },
-    {
-        "name": "Knife",
-        "type": "weapon",
-        "cost": 50,
-        "flatModifiers": {
-            "strength": 0.5
-        },
-        "percentageModifiers": {}
-    },
-    {
-        "name": "Crocs",
-        "cost": 500,
-        "type": "boots",
-        "flatModifiers": {
-            "defense": 1
-        },
-        "percentageModifiers": {
-            "agility": 0.4
-        }
-    },
-    {
-        "name": "Socks",
-        "type": "boots",
-        "cost": 20,
-        "flatModifiers": {
-            "defense": 0.2
-        },
-        "percentageModifiers": {}
-    },
-    {
-        "name": "A Pair Of Plastic Bags",
-        "type": "boots",
-        "cost": 2,
-        "flatModifiers": {
-            "defense": 0.03,
-            "agility": 0.01
-        },
-        "percentageModifiers": {}
-    },
-    {
-        "name": "Plank",
-        "type": "shield",
-        "cost": 40,
-        "flatModifiers": {
-            "defense": 0.4
-        },
-        "percentageModifiers": {}
-    },
-    {
-        "name": "Banana Canon",
-        "type": "weapon",
-        "cost": 900,
-        "flatModifiers": {
-            "strength": 9
-        },
-        "percentageModifiers": {},
-        "image_url": ""
-    },
-    {
-        "name": "Garlic Bread",
-        "type": "item",
-        "cost": 250,
-        "flatModifiers": {
-            "vitality": 1.65
-        },
-        "percentageModifiers": {
-            "vitality": 0.11
-        },
-        "image_url": ""
+    "percentageModifiers": {
+      "defense": 0.02,
+      "charisma": 0.1
     }
+  },
+  {
+    "name": "Stained White T-Shirt",
+    "type": "chestplate",
+    "cost": 250,
+    "flatModifiers": {},
+    "percentageModifiers": {
+      "defense": 0.25
+    }
+  },
+  {
+    "name": "Banana Hammer",
+    "cost": 120,
+    "type": "weapon",
+    "flatModifiers": {
+      "strength": 1.2
+    },
+    "percentageModifiers": {}
+  },
+  {
+    "name": "AK-47",
+    "type": "weapon",
+    "cost": 1400,
+    "flatModifiers": {
+      "strength": 4,
+      "defense": 2,
+      "charisma": 3
+    },
+    "percentageModifiers": {
+      "strength": 0.5
+    }
+  },
+  {
+    "name": "Glock-19",
+    "type": "weapon",
+    "cost": 650,
+    "flatModifiers": {
+      "strength": 3,
+      "defense": 0.5,
+      "charisma": 1
+    },
+    "percentageModifiers": {
+      "strength": 0.1,
+      "agility": 0.1
+    }
+  },
+  {
+    "name": "Plastic Spoon",
+    "type": "weapon",
+    "cost": 10,
+    "flatModifiers": {
+      "strength": 0.1
+    },
+    "percentageModifiers": {}
+  },
+  {
+    "name": "Headset",
+    "type": "helmet",
+    "cost": 150,
+    "flatModifiers": {
+      "defense": 1,
+      "charisma": 0.5
+    }
+  },
+  {
+    "name": "Leather Helmet",
+    "type": "helmet",
+    "cost": 50,
+    "flatModifiers": {
+      "defense": 0.5
+    },
+    "percentageModifiers": {}
+  },
+  {
+    "name": "Leather Trousers",
+    "type": "leggings",
+    "cost": 80,
+    "flatModifiers": {
+      "defense": 0.8
+    },
+    "percentageModifiers": {}
+  },
+  {
+    "name": "Tight Leather Pants",
+    "type": "leggings",
+    "cost": 130,
+    "flatModifiers": {
+      "defense": 0.8
+    },
+    "percentageModifiers": {
+      "charisma": 0.12,
+      "agility": -0.08
+    }
+  },
+  {
+    "name": "Stick",
+    "type": "leggings",
+    "cost": 45,
+    "flatModifiers": {
+      "strength": 0.45
+    },
+    "percentageModifiers": {}
+  },
+  {
+    "name": "Iron Pickaxe",
+    "type": "weapon",
+    "cost": 170,
+    "flatModifiers": {
+      "strength": 1.2,
+      "defense": 0.4
+    },
+    "percentageModifiers": {
+      "strength": 0.05,
+      "defense": 0.05,
+      "agility": -0.1
+    }
+  },
+  {
+    "name": "Apple",
+    "type": "item",
+    "cost": 10,
+    "flatModifiers": {
+      "vitality": 0.1
+    },
+    "percentageModifiers": {}
+  },
+  {
+    "name": "Bread",
+    "type": "item",
+    "cost": 100,
+    "flatModifiers": {
+      "vitality": 1
+    },
+    "percentageModifiers": {}
+  },
+  {
+    "name": "Iron Chestplate",
+    "type": "item",
+    "cost": 220,
+    "flatModifiers": {
+      "defense": 3
+    },
+    "percentageModifiers": {
+      "agility": -0.1
+    }
+  },
+  {
+    "name": "Leather Chestplate",
+    "type": "item",
+    "cost": 150,
+    "flatModifiers": {
+      "defense": 1.5
+    },
+    "percentageModifiers": {}
+  },
+  {
+    "name": "Red Bull",
+    "type": "item",
+    "cost": 160,
+    "flatModifiers": {
+      "stamina": 1,
+      "vitality": 0.2
+    },
+    "percentageModifiers": {
+      "stamina": 0.02
+    }
+  },
+  {
+    "name": "Health Pack",
+    "type": "item",
+    "cost": 800,
+    "flatModifiers": {
+      "vitality": 4
+    },
+    "percentageModifiers": {
+      "vitality": 0.4
+    }
+  },
+  {
+    "name": "C",
+    "type": "item",
+    "cost": 1200,
+    "flatModifiers": {
+      "magicka": 10
+    },
+    "percentageModifiers": {
+      "magicka": 0.2
+    }
+  },
+  {
+    "name": "Zig",
+    "type": "item",
+    "cost": 800,
+    "flatModifiers": {
+      "magicka": 7
+    },
+    "percentageModifiers": {
+      "magicka": 0.1
+    }
+  },
+  {
+    "name": "Paper Headware",
+    "type": "helmet",
+    "cost": 3,
+    "flatModifiers": {
+      "defense": 0.05
+    },
+    "percentageModifiers": {}
+  },
+  {
+    "name": "Trash Bag",
+    "type": "chestplate",
+    "cost": 5,
+    "flatModifiers": {
+      "defense": 0.1
+    },
+    "percentageModifiers": {}
+  },
+  {
+    "name": "Underwear",
+    "type": "leggings",
+    "cost": 3,
+    "flatModifiers": {
+      "defense": 0.06
+    },
+    "percentageModifiers": {}
+  },
+  {
+    "name": "Sandles",
+    "type": "boots",
+    "cost": 2,
+    "flatModifiers": {
+      "defense": 0.02
+    },
+    "percentageModifiers": {}
+  },
+  {
+    "name": "Swords",
+    "type": "weapon",
+    "cost": 100,
+    "flatModifiers": {
+      "strength": 1
+    },
+    "percentageModifiers": {}
+  },
+  {
+    "name": "Knife",
+    "type": "weapon",
+    "cost": 50,
+    "flatModifiers": {
+      "strength": 0.5
+    },
+    "percentageModifiers": {}
+  },
+  {
+    "name": "Crocs",
+    "cost": 500,
+    "type": "boots",
+    "flatModifiers": {
+      "defense": 1
+    },
+    "percentageModifiers": {
+      "agility": 0.4
+    }
+  },
+  {
+    "name": "Socks",
+    "type": "boots",
+    "cost": 20,
+    "flatModifiers": {
+      "defense": 0.2
+    },
+    "percentageModifiers": {}
+  },
+  {
+    "name": "A Pair Of Plastic Bags",
+    "type": "boots",
+    "cost": 2,
+    "flatModifiers": {
+      "defense": 0.03,
+      "agility": 0.01
+    },
+    "percentageModifiers": {}
+  },
+  {
+    "name": "Plank",
+    "type": "shield",
+    "cost": 40,
+    "flatModifiers": {
+      "defense": 0.4
+    },
+    "percentageModifiers": {}
+  },
+  {
+    "name": "Banana Canon",
+    "type": "weapon",
+    "cost": 900,
+    "flatModifiers": {
+      "strength": 9
+    },
+    "percentageModifiers": {},
+    "image_url": ""
+  },
+  {
+    "name": "Garlic Bread",
+    "type": "item",
+    "cost": 250,
+    "flatModifiers": {
+      "vitality": 1.65
+    },
+    "percentageModifiers": {
+      "vitality": 0.11
+    },
+    "image_url": ""
+  },
+  {
+    "name": "frog",
+    "type": "weapon",
+    "cost": 1,
+    "flatModifiers": {},
+    "percentageModifiers": {
+      "strength": 1000,
+      "agility": 1000,
+      "charisma": 1000,
+      "magicka": 1000,
+      "stamina": 1000
+    },
+    "image_url": ""
+  }
 ]
