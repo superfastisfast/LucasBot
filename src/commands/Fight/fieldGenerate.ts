@@ -89,27 +89,37 @@ export async function createStatBar(current: number, max: number, length: number
 }
 
 export async function getItemDisplay(player: Fighter) {
-    const playerEquipedItems: string[] = (await player.appUser.getEquippedItems()).map(([bool, name]) => name);
-    let items: Item.Base[] = Item.manager.findManyByNames(playerEquipedItems);
+    const playerEquippedItems: string[] = (await player.appUser.getEquippedItems()).map(([_, name]) => name);
+    const items: Item.Base[] = Item.manager.findManyByNames(playerEquippedItems);
+
+    // Group by item name
+    const grouped: Record<string, { item: Item.Base; count: number }> = {};
+
+    for (const item of items)
+        if (!grouped[item.name]) grouped[item.name] = { item, count: 1 };
+        else grouped[item.name]!.count++;
+
     let itemsDisplay = "";
-    items.forEach((item, i) => {
+
+    for (const { item, count } of Object.values(grouped)) {
         const flatModifiers = Object.entries(item.flatModifiers ?? {})
-            .filter(([_, v]) => v !== 0)
+            .filter(([k, v]) => v !== 0 && Globals.ATTRIBUTES[k as keyof typeof Globals.ATTRIBUTES])
             .map(([k, v]) => `${Globals.ATTRIBUTES[k as keyof typeof Globals.ATTRIBUTES].emoji} ${v > 0 ? "+" : ""}${v}`)
             .join(", ");
 
         const percentageModifiers = Object.entries(item.percentageModifiers ?? {})
-            .filter(([_, v]) => v !== 0)
+            .filter(([k, v]) => v !== 0 && Globals.ATTRIBUTES[k as keyof typeof Globals.ATTRIBUTES])
             .map(([k, v]) => `${Globals.ATTRIBUTES[k as keyof typeof Globals.ATTRIBUTES].emoji} ${v > 0 ? "+" : ""}${v * 100}%`)
             .join(", ");
+
         const modifiers = [flatModifiers, percentageModifiers].filter(Boolean).join("\n");
 
-        itemsDisplay += `**${item.name}**\nType: ${item.type ?? "???"}${modifiers ? `\n${modifiers}` : ""}\n\n`;
-    });
+        itemsDisplay += `**${count > 1 ? `x${count} ` : ""}${item.name}**\nType: ${item.type ?? "???"}${modifiers ? `\n${modifiers}` : ""}\n\n`;
+    }
 
     return {
-        name: `${player.appUser.discord.displayName}'s Itens`,
-        value: `📦 Items: \n${itemsDisplay}\n`,
+        name: `${player.appUser.discord.displayName}'s Items`,
+        value: `📦 Items: \n${itemsDisplay.trim() || "None"}\n`,
         inline: true,
     };
 }

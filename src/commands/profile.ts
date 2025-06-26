@@ -17,7 +17,7 @@ export default class ProfileCommand extends Command.Base {
     public override main: Command.Command = new Command.Command(
         "profile",
         "Display your profile",
-        [{ name: "user", description: "Who do you want to stalk?", type: ApplicationCommandOptionType.User }],
+        [{ name: "user", description: "Who do you want to stalk today?", type: ApplicationCommandOptionType.User }],
         this.onExecute.bind(this),
     );
 
