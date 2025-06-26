@@ -2,8 +2,8 @@ import { Command } from "@/commands";
 import { CommandInteraction, InteractionResponse, EmbedBuilder } from "discord.js";
 import { Globals } from "..";
 
-export default class ProfileCommand extends Command.Base {
-    public override main: Command.Command = new Command.Command("profile", "Display your profile", [], this.onExecute.bind(this));
+export default class HelpCommand extends Command.Base {
+    public override main: Command.Command = new Command.Command("help", "See what you can do with this bot", [], this.onExecute.bind(this));
 
     public async onExecute(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
         // prettier-ignore
