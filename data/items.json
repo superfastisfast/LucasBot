@@ -13,7 +13,7 @@
     },
     {
         "name": "Stained White T-Shirt",
-        "type": "shield",
+        "type": "chestplate",
         "cost": 250,
         "flatModifiers": {},
         "percentageModifiers": {
