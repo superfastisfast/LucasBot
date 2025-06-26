@@ -338,5 +338,15 @@
       "stamina": 1000
     },
     "image_url": ""
+  },
+  {
+    "name": "frog2",
+    "type": "item",
+    "cost": 1,
+    "flatModifiers": {},
+    "percentageModifiers": {
+      "defence": 10000000
+    },
+    "image_url": ""
   }
 ]

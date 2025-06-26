@@ -103,12 +103,12 @@ export async function getItemDisplay(player: Fighter) {
 
     for (const { item, count } of Object.values(grouped)) {
         const flatModifiers = Object.entries(item.flatModifiers ?? {})
-            .filter(([_, v]) => v !== 0)
+            .filter(([k, v]) => v !== 0 && Globals.ATTRIBUTES[k as keyof typeof Globals.ATTRIBUTES])
             .map(([k, v]) => `${Globals.ATTRIBUTES[k as keyof typeof Globals.ATTRIBUTES].emoji} ${v > 0 ? "+" : ""}${v}`)
             .join(", ");
 
         const percentageModifiers = Object.entries(item.percentageModifiers ?? {})
-            .filter(([_, v]) => v !== 0)
+            .filter(([k, v]) => v !== 0 && Globals.ATTRIBUTES[k as keyof typeof Globals.ATTRIBUTES])
             .map(([k, v]) => `${Globals.ATTRIBUTES[k as keyof typeof Globals.ATTRIBUTES].emoji} ${v > 0 ? "+" : ""}${v * 100}%`)
             .join(", ");
 
