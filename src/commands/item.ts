@@ -22,57 +22,57 @@ export default class ItemCommand extends Command.Base {
             this.onView,
             this.onViewAutocomplete,
         ),
-        new Command.Command(
-            "add",
-            "Add an item",
-            [
-                {
-                    name: "name",
-                    description: "The name of the new item",
-                    type: ApplicationCommandOptionType.String,
-                    required: true,
-                },
-                {
-                    name: "type",
-                    description: "The item type",
-                    type: ApplicationCommandOptionType.String,
-                    required: true,
-                    autocomplete: true,
-                },
-                {
-                    name: "cost",
-                    description: "How much the item costs",
-                    type: ApplicationCommandOptionType.Number,
-                    required: true,
-                },
-                {
-                    name: "modifiers",
-                    description: "The items modifiers",
-                    type: ApplicationCommandOptionType.String,
-                    required: true,
-                    autocomplete: true,
-                },
-            ],
-            this.onAdd,
-            this.onAddAutocomplete,
-            true,
-        ),
-        new Command.Command(
-            "remove",
-            "Remove an item",
-            [
-                {
-                    name: "name",
-                    description: "The name of the item you want to remove",
-                    type: ApplicationCommandOptionType.String,
-                    required: true,
-                    autocomplete: true,
-                },
-            ],
-            this.onRemove,
-            this.onRemoveAutocomplete,
-            true,
-        ),
+        // new Command.Command(
+        //     "add",
+        //     "Add an item",
+        //     [
+        //         {
+        //             name: "name",
+        //             description: "The name of the new item",
+        //             type: ApplicationCommandOptionType.String,
+        //             required: true,
+        //         },
+        //         {
+        //             name: "type",
+        //             description: "The item type",
+        //             type: ApplicationCommandOptionType.String,
+        //             required: true,
+        //             autocomplete: true,
+        //         },
+        //         {
+        //             name: "cost",
+        //             description: "How much the item costs",
+        //             type: ApplicationCommandOptionType.Number,
+        //             required: true,
+        //         },
+        //         {
+        //             name: "modifiers",
+        //             description: "The items modifiers",
+        //             type: ApplicationCommandOptionType.String,
+        //             required: true,
+        //             autocomplete: true,
+        //         },
+        //     ],
+        //     this.onAdd,
+        //     this.onAddAutocomplete,
+        //     true,
+        // ),
+        // new Command.Command(
+        //     "remove",
+        //     "Remove an item",
+        //     [
+        //         {
+        //             name: "name",
+        //             description: "The name of the item you want to remove",
+        //             type: ApplicationCommandOptionType.String,
+        //             required: true,
+        //             autocomplete: true,
+        //         },
+        //     ],
+        //     this.onRemove,
+        //     this.onRemoveAutocomplete,
+        //     true,
+        // ),
     ];
 
     public async onAdd(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
