@@ -147,7 +147,7 @@
     },
     {
         "name": "Iron Chestplate",
-        "type": "item",
+        "type": "chestplate",
         "cost": 220,
         "flatModifiers": {
             "defense": 3
