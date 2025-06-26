@@ -167,7 +167,7 @@ export default class QuestCommand extends Command.Base {
             });
         }
 
-        const prize = Math.min((item.cost / 10) * 6 + user.getStat("charisma"), 100);
+        const prize = item.cost * Math.min(0.6 + user.getStat("charisma") * 0.01, 1);
 
         user.inventory.items.splice(itemIndex, 1);
         await user.addGold(prize).save();
