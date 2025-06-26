@@ -312,5 +312,17 @@
         },
         "percentageModifiers": {},
         "image_url": ""
+    },
+    {
+        "name": "Garlic Bread",
+        "type": "item",
+        "cost": 250,
+        "flatModifiers": {
+            "vitality": 1.65
+        },
+        "percentageModifiers": {
+            "vitality": 0.11
+        },
+        "image_url": ""
     }
 ]
