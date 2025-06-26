@@ -58,7 +58,7 @@ export default class BanditAmbushQuest extends Quest.Base {
         if (playersWon) users.forEach(async (user) => await user.addGold(this.reward).addXP(this.reward).save());
         else
             users.forEach(async (user) => {
-                await user.addGold(-this.reward).save();
+                await user.addGold(-this.reward / 10).save();
             });
 
         const embed = new EmbedBuilder()

@@ -58,7 +58,7 @@ export default class RescueQuest extends Quest.Base {
         if (playersWon) users.forEach(async (user) => await user.addGold(this.reward).addXP(this.reward).addSkillPoints(0.5).save());
         else
             users.forEach(async (user) => {
-                user.addGold(-this.reward).save();
+                user.addGold(-this.reward / 10).save();
             });
 
         const embed = new EmbedBuilder()
