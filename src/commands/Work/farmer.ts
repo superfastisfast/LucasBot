@@ -54,7 +54,7 @@ export default class Farmer extends Profession {
                 const user = await AppUser.fromID(interaction.user.id);
 
                 if (input === cleaned) {
-                    const reward = cleaned.length / 45;
+                    const reward = cleaned.length / 90;
                     await user.addGold(reward).save();
                     await interaction.reply({
                         content: `${theme.seed} Nice work! You weeded the field\n+${reward.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}`,
