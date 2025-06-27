@@ -56,9 +56,34 @@ export default class ProfileCommand extends Command.Base {
             })
             .join("\n");
 
-        const inventoryLines = [...user.inventory.items]
-            .sort((a, b) => Number(b[0]) - Number(a[0]))
-            .map(([equipped, name]) => `${equipped ? "✅" : "❌"} ${name} - ${Item.manager.findByName(name)?.type}`);
+        const groupedInventory = new Map<string, { count: number; type?: string }>();
+
+        // Helper to create unique keys per equipped status
+        function makeKey(name: string, equipped: boolean): string {
+            return (equipped ? "1|" : "0|") + name;
+        }
+
+        for (const [equipped, name] of user.inventory.items) {
+            const key = makeKey(name, equipped);
+            const entry = groupedInventory.get(key) ?? { count: 0, type: Item.manager.findByName(name)?.type };
+            entry.count += 1;
+            groupedInventory.set(key, entry);
+        }
+
+        const inventoryLines = [...groupedInventory.entries()]
+            .sort(([keyA], [keyB]) => {
+                // Sort equipped items (key starting with "1|") before unequipped ("0|")
+                if (keyA[0] !== keyB[0]) return keyB[0]!.localeCompare(keyA[0]!);
+                // Then alphabetically by name (slice off equipped prefix)
+                return keyA.slice(2).localeCompare(keyB.slice(2));
+            })
+            .map(([key, { count, type }]) => {
+                const equipped = key[0] === "1";
+                const name = key.slice(2);
+                const equippedMark = equipped ? "✅" : "❌";
+                const countText = count > 1 ? `${count}x ` : "";
+                return `${equippedMark} ${countText}${name} - ${type ?? "unknown"}`;
+            });
 
         const inventoryString = inventoryLines.length > 0 ? "```" + inventoryLines.join("\n") + "```" : "No items...";
 
