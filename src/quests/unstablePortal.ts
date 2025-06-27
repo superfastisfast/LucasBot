@@ -45,10 +45,10 @@ export default class UnstablePortalQuest extends Quest.Base {
         await interaction.reply({
             content: this.isDestroyed
                 ? "You can't enter the portal anymore... someone destroyed it!"
-                : `You ${successfullyEnterdPortal ? "successfully" : "unsuccessfully"} entered the portal${!successfullyEarnLoot ? "!" : ` and you got ${reward} ${Globals.ATTRIBUTES.gold.emoji}`}`,
+                : `You ${successfullyEnterdPortal ? "successfully" : "unsuccessfully"} entered the portal${destroyedPortal ? "" : "! And accidentally destroyed the portal"}${!successfullyEarnLoot ? "!" : ` and you got ${reward} ${Globals.ATTRIBUTES.gold.emoji}`}`,
             flags: "Ephemeral",
         });
-        if (destroyedPortal) this.end();
+        if (destroyedPortal) Quest.end(this.name);
     }
 
     private async onPressDestroy(interaction: ButtonInteraction): Promise<void> {
@@ -56,7 +56,7 @@ export default class UnstablePortalQuest extends Quest.Base {
             content: this.isDestroyed ? "You can't destroy the portal anymore... someone destroyed it!" : "You destroyed the portal!",
             flags: "Ephemeral",
         });
-        if (this.isDestroyed == false) this.end();
+        if (this.isDestroyed == false) Quest.end(this.name);
     }
 
     public override async end(): Promise<Quest.EndReturn> {
