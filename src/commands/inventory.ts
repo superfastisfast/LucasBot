@@ -91,34 +91,62 @@ export default class QuestCommand extends Command.Base {
     ];
 
     public async onEquip(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
-        const itemNameOpt = interaction.options.get("item")?.value as string;
+        const item = Item.manager.findByName(interaction.options.get("item")?.value as string);
+        if (!item) {
+            return interaction.reply({
+                content: `Item "${interaction.options.get("item")?.value as string}" not found.`,
+                flags: "Ephemeral",
+            });
+        }
+
         const user = await AppUser.fromID(interaction.user.id);
-        const itemToEquip = Item.manager.findByName(itemNameOpt);
 
-        if (!itemToEquip) return interaction.reply({ content: `Item "${itemNameOpt}" not found.`, flags: "Ephemeral" });
+        let slot: number | null = null;
+        let replacement_slot: number | null = null;
 
-        if (itemToEquip.type !== "item") {
-            for (let i = 0; i < user.inventory.items.length; i++) {
-                const [equipped, name] = user.inventory.items[i] ?? [false, ""];
-                const currentItem = Item.manager.findByName(name);
-                if (equipped && currentItem?.type === itemToEquip.type) {
-                    user.inventory.items[i]![0] = false;
-                }
+        user.inventory.items.forEach(([equipped, name], i) => {
+            if (equipped) return; // skip equipped slots
+
+            const newItem = Item.manager.findByName(name);
+            if (!newItem) return;
+
+            if (name !== item.name) return;
+
+            slot = i;
+
+            if (newItem.type !== "item") {
+                user.inventory.items.forEach(([equipped2, name2], i2) => {
+                    if (!equipped2) return;
+
+                    const replacementItem = Item.manager.findByName(name2);
+                    if (!replacementItem) return;
+
+                    if (replacementItem.type === newItem.type) {
+                        replacement_slot = i2;
+                    }
+                });
             }
+        });
+
+        if (item.type !== "item" && replacement_slot !== null) {
+            user.inventory.items[replacement_slot]![0] = false;
         }
 
-        for (let i = 0; i < user.inventory.items.length; i++) {
-            const [_, name] = user.inventory.items[i] ?? [false, ""];
-            if (name === itemNameOpt) {
-                user.inventory.items[i]![0] = true;
-                user.inventory.markModified("items");
-                await user.save();
+        if (slot !== null) {
+            user.inventory.items[slot]![0] = true;
+            user.inventory.markModified("items");
+            await user.save();
 
-                return interaction.reply({ content: `Equipped item ${itemNameOpt}`, flags: "Ephemeral" });
-            }
+            return interaction.reply({
+                content: `Equipped ${item.type === "item" ? "item" : item.type} "${item.name}"`,
+                flags: "Ephemeral",
+            });
+        } else {
+            return interaction.reply({
+                content: `Item "${item.name}" not found in your unequipped inventory.`,
+                flags: "Ephemeral",
+            });
         }
-
-        return interaction.reply({ content: `Item "${itemNameOpt}" not found in your inventory.`, flags: "Ephemeral" });
     }
 
     public async onUnequip(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
