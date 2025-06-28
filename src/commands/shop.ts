@@ -10,7 +10,7 @@ export default class ShopCommand extends Command.Base {
 
     endTime: number = new Date().getTime();
     stock: number = 4;
-    items: Item.Base[] = [];
+    items: [Item.Base, boolean][] = [];
 
     public async onExecute(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
         if (this.endTime < new Date().getTime()) {
@@ -29,7 +29,7 @@ export default class ShopCommand extends Command.Base {
                 if (selectedNames.has(item.name)) continue;
 
                 selectedNames.add(item.name);
-                this.items.push(item);
+                this.items.push([item, false]);
             }
 
             this.endTime = new Date().getTime() + 1000 * 60 * 15;
@@ -48,7 +48,7 @@ export default class ShopCommand extends Command.Base {
     private async generateEmbed(user: AppUser): Promise<EmbedBuilder> {
         let fields: APIEmbedField[] = [];
 
-        this.items.forEach((item, i) => {
+        this.items.forEach(([item, _], i) => {
             const flatModifiers = Object.entries(item.flatModifiers ?? {})
                 .filter(([_, v]) => v !== 0)
                 .map(([k, v]) => `${Globals.ATTRIBUTES[k as keyof typeof Globals.ATTRIBUTES].emoji} ${v > 0 ? "+" : ""}${v}`)
@@ -83,7 +83,7 @@ export default class ShopCommand extends Command.Base {
     private async generateButtons(user: AppUser): Promise<AppButton[]> {
         let buttons: AppButton[] = [];
 
-        this.items.forEach((item) => {
+        this.items.forEach(([item, disabled], i) => {
             buttons.push(
                 new AppButton(
                     `${item.name} (${item.cost} ${Globals.ATTRIBUTES.gold.emoji})`,
@@ -118,6 +118,8 @@ export default class ShopCommand extends Command.Base {
 
                         const purchaseMessage: string = possiblePurchaseMessage[Globals.random(0, possiblePurchaseMessage.length - 1)]!;
 
+                        if (this.items[i]) this.items[i][1] = true;
+
                         const embed = await this.generateEmbed(await AppUser.fromID(interaction.user.id));
                         const actionRow = AppButton.createActionRow(await this.generateButtons(await AppUser.fromID(interaction.user.id)), 2);
 
@@ -128,6 +130,7 @@ export default class ShopCommand extends Command.Base {
                         });
                     },
                     item.cost > user.inventory.gold ? ButtonStyle.Danger : ButtonStyle.Success,
+                    disabled,
                 ),
             );
         });

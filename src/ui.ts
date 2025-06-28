@@ -19,12 +19,17 @@ export class AppButton {
 
     static buttons: Map<string, AppButton> = new Map();
 
-    constructor(label: string, onPress: (interaction: ButtonInteraction) => void, style: ButtonStyle = ButtonStyle.Primary) {
+    constructor(
+        label: string,
+        onPress: (interaction: ButtonInteraction) => void,
+        style: ButtonStyle = ButtonStyle.Primary,
+        disabled: boolean = false,
+    ) {
         this.onPress = onPress;
         const randomId = Math.random();
         this.id = `#b${randomId.toString()}`;
 
-        this.builder = new ButtonBuilder().setCustomId(this.id).setLabel(label).setStyle(style);
+        this.builder = new ButtonBuilder().setCustomId(this.id).setLabel(label).setStyle(style).setDisabled(disabled);
 
         AppButton.buttons.set(this.id, this);
     }
