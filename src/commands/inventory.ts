@@ -230,7 +230,7 @@ export default class QuestCommand extends Command.Base {
         else filteredItems = user.inventory.items;
 
         const options = filteredItems.map(([isEquipped, name]) => ({
-            name: `${sub === "add" || sub === "sell" ? Globals.ATTRIBUTES.items.emoji : isEquipped ? "✅" : "❌"} ${name}`,
+            name: `${sub === "add" || sub === "sell" ? Globals.ATTRIBUTES.item.emoji : isEquipped ? "✅" : "❌"} ${name}`,
             value: name,
         }));
 

@@ -3,6 +3,7 @@ import path from "path";
 
 export namespace Item {
     export const Types = ["weapon", "shield", "helmet", "chestplate", "leggings", "boots", "item"] as const;
+    export const keyArray = ["weapon", "shield", "helmet", "chestplate", "leggings", "boots", "item"];
 
     export interface Base {
         name: string;
