@@ -15,11 +15,23 @@ export default class ShopCommand extends Command.Base {
     public async onExecute(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
         if (this.endTime < new Date().getTime()) {
             this.items = [];
-            for (let i = 0; i < this.stock; i++) {
+            const selectedNames = new Set();
+
+            while (this.items.length < this.stock) {
                 const item = await Item.manager.getRandom();
-                if (!item) return await interaction.reply({ content: "No items found", flags: "Ephemeral" });
+                if (!item) {
+                    return await interaction.reply({
+                        content: "No items found",
+                        flags: "Ephemeral",
+                    });
+                }
+
+                if (selectedNames.has(item.name)) continue;
+
+                selectedNames.add(item.name);
                 this.items.push(item);
             }
+
             this.endTime = new Date().getTime() + 1000 * 60 * 15;
         }
 

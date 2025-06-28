@@ -308,7 +308,7 @@ const xpThresholds: number[] = [
     1000000, //        15
 ];
 
-function calculateLevel(xp: number): number {
+export function calculateLevel(xp: number): number {
     for (let i = xpThresholds.length - 1; i >= 0; i--) {
         if (xp >= (xpThresholds[i] || xpThresholds[xpThresholds.length - 1]! * 2)) return i;
     }

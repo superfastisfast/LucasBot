@@ -1,11 +1,13 @@
 import { Command } from "@/commands";
-import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType } from "discord.js";
+import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
 import { AppUser } from "../user";
 import { Globals } from "..";
+import { InventoryDB } from "@/models/inventory";
 
 export default class GoldCommand extends Command.Base {
     public override main: Command.Command = new Command.Command("gold", "Gold related stuff", [], undefined, undefined, true);
     public override subs: Command.Command[] = [
+        new Command.Command("top", "Shows you the top 10 people based on gold", [], this.onTop),
         new Command.Command(
             "set",
             "Set a users gold to a value",
@@ -49,6 +51,24 @@ export default class GoldCommand extends Command.Base {
             true,
         ),
     ];
+
+    public async onTop(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
+        const topUsers = await InventoryDB.Model.find().sort({ gold: -1 }).limit(10).exec();
+
+        if (topUsers.length === 0) return await interaction.reply("No users found in the leaderboard.");
+
+        const lines = await Promise.all(
+            topUsers.map(async (dbuser, index) => {
+                const user = await AppUser.fromID(dbuser.id);
+                return `#${index + 1} ${user.discord.displayName}:   ${user.inventory.gold} ${Globals.ATTRIBUTES.gold.emoji}`;
+            }),
+        );
+        const description = lines.join("\n");
+
+        const embed = new EmbedBuilder().setTitle("🏆 Gold Leaderboard").setDescription(description).setColor("#FFD700");
+
+        return await interaction.reply({ embeds: [embed] });
+    }
 
     public async onSet(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
         const userOpt = interaction.options.get("user")?.user;

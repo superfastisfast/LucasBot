@@ -14,6 +14,16 @@ export default class CommandService extends Service.Base {
 
     private handleCommand = async (interaction: Interaction) => {
         if (interaction.isCommand()) {
+            if (interaction.guildId && interaction.guildId !== process.env.SERVER_ID) {
+                console.log(
+                    `${new Date().toISOString()} ${interaction.user.username} or ${interaction.user.displayName} tried to run command '${interaction.commandName}' on another server ${interaction.guild ? interaction.guild.name : "unknown"}`,
+                );
+                return interaction.reply({
+                    content: "This bot is not for this server.",
+                    flags: "Ephemeral",
+                });
+            }
+
             const command = Command.commands.get(interaction.commandName);
             if (!command) {
                 interaction.reply(`Command not found: '${interaction.commandName}'`);

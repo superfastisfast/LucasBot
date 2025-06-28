@@ -1,6 +1,6 @@
 import { Command } from "@/commands";
 import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
-import { AppUser } from "../user";
+import { AppUser, calculateLevel } from "../user";
 import { UserDB } from "@/models/user";
 import { Globals } from "..";
 
@@ -77,6 +77,9 @@ export default class XpCommand extends Command.Base {
 
         const user = await AppUser.fromID(userOpt.id);
 
+        const newLevel = calculateLevel(user.database.xp);
+        if (newLevel < user.database.level) user.database.level = newLevel;
+
         await user.setXP(amountOpt).save();
 
         return interaction.reply({ content: `Set ${amountOpt} xp to ${user.discord}`, flags: "Ephemeral" });
@@ -88,6 +91,9 @@ export default class XpCommand extends Command.Base {
         if (!userOpt) return interaction.reply({ content: `Failed to get user option`, flags: "Ephemeral" });
 
         const user = await AppUser.fromID(userOpt.id);
+
+        const newLevel = calculateLevel(user.database.xp);
+        if (newLevel < user.database.level) user.database.level = newLevel;
 
         await user.addXP(amountOpt).save();
 
