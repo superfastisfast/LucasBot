@@ -11,7 +11,7 @@ export default class TimmyQuest extends Quest.Base {
     ];
     users: string[] = [];
 
-    reward: number = 10;
+    reward: number = 50;
 
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);

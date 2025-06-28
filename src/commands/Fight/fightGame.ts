@@ -12,7 +12,7 @@ export default class FightGame {
     goldReward: number = 5;
     xpReward: number = 3;
     playerTurn: number = 1;
-    arenaSize: number = 6;
+    arenaSize: number = 7;
     gameOverMsg: string = "";
     winner?: AppUser = undefined;
     gameStarted: Boolean = false;
@@ -24,8 +24,8 @@ export default class FightGame {
         this.id = FightGame.nextId++;
         this.bet = amount;
         this.appUsers = [discordUser1, discordUser2];
-        discordUser1.fighter.posX = 0;
-        discordUser2.fighter.posX = this.arenaSize - 1;
+        discordUser1.fighter.posX = 1;
+        discordUser2.fighter.posX = this.arenaSize - 2;
     }
 
     message!: Message<true>;
@@ -52,7 +52,7 @@ export default class FightGame {
         if (!this.getAppUserByID(interaction.user.id) || interaction.user.id !== this.appUsers[1]?.discord.id)
             return interaction.reply({ content: `You are not the invited person`, flags: "Ephemeral" });
         const ret = interaction.reply({ content: `You accepted the fight`, flags: "Ephemeral" });
-        let field = await getFightDisplay(this, "accepted");
+        let field = await getFightDisplay(this, { type: "none" });
         const actionRow = AppButton.createActionRow(this.getActionButtons());
         field.components = actionRow;
         this.message.edit(field);
@@ -75,9 +75,9 @@ export default class FightGame {
         if ((await this.validateActionTurn(interaction)) !== undefined) return;
         interaction.deferUpdate();
 
-        this.getCurrentPlayer().move("left", this.arenaSize);
+        const action = this.getCurrentPlayer().move("left", this.arenaSize);
 
-        let field = await getFightDisplay(this, "Moved Left");
+        let field = await getFightDisplay(this, action);
         const actionRow = AppButton.createActionRow(this.getActionButtons());
         field.components = actionRow;
         this.message.edit(field);
@@ -87,28 +87,27 @@ export default class FightGame {
         if ((await this.validateActionTurn(interaction)) !== undefined) return;
         interaction.deferUpdate();
 
-        const msg = this.getCurrentPlayer().attack(this.getNextPlayer());
+        const action = this.getCurrentPlayer().attack(this.getNextPlayer());
 
-        if (this.getNextPlayer().currentHealth <= 0) {
-            this.winner = this.getCurrentPlayer().appUser;
-            this.gameOverMsg = `**Defeated: ${this.getNextPlayer().appUser.discord.displayName}**`;
-            FightCommand.endGameByID(this.id);
-            return;
-        }
-
-        let field = await getFightDisplay(this, msg);
+        let field = await getFightDisplay(this, action);
         const actionRow = AppButton.createActionRow(this.getActionButtons());
         field.components = actionRow;
         this.message.edit(field);
+        if (this.getNextPlayer().currentHealth <= 0) {
+            this.winner = this.getCurrentPlayer().appUser;
+            this.gameOverMsg = `**${this.getCurrentPlayer().appUser.discord.displayName}** Defeated: ${this.getNextPlayer().appUser.discord.displayName}`;
+            FightCommand.endGameByID(this.id);
+            return;
+        }
         this.nextTurn();
     }
     public async onPressMoveRight(interaction: ButtonInteraction): Promise<InteractionResponse<true> | void> {
         if ((await this.validateActionTurn(interaction)) !== undefined) return;
         interaction.deferUpdate();
 
-        this.getCurrentPlayer().move("right", this.arenaSize);
+        const action = this.getCurrentPlayer().move("right", this.arenaSize);
 
-        let field = await getFightDisplay(this, "Moved Right");
+        let field = await getFightDisplay(this, action);
         const actionRow = AppButton.createActionRow(this.getActionButtons());
         field.components = actionRow;
         this.message.edit(field);
@@ -118,9 +117,9 @@ export default class FightGame {
         if ((await this.validateActionTurn(interaction)) !== undefined) return;
         interaction.deferUpdate();
 
-        const msg = this.getCurrentPlayer().sleep();
+        const action = this.getCurrentPlayer().sleep();
 
-        let field = await getFightDisplay(this, msg);
+        let field = await getFightDisplay(this, action);
         const actionRow = AppButton.createActionRow(this.getActionButtons());
         field.components = actionRow;
         this.message.edit(field);
@@ -132,15 +131,15 @@ export default class FightGame {
 
         const fleeSuccess = this.getCurrentPlayer().flee();
 
-        if (fleeSuccess) {
-            this.gameOverMsg = "**Escaped the match**";
-            FightCommand.endGameByID(this.id);
-            return;
-        }
-        let field = await getFightDisplay(this, "Tried to flee");
+        let field = await getFightDisplay(this, { type: "escape", escaped: fleeSuccess });
         const actionRow = AppButton.createActionRow(this.getActionButtons());
         field.components = actionRow;
         await this.message.edit(field);
+        if (fleeSuccess) {
+            this.gameOverMsg = `**${this.getCurrentPlayer().appUser.discord.username} Escaped the match`;
+            FightCommand.endGameByID(this.id);
+            return;
+        }
         this.nextTurn();
     }
 
@@ -186,8 +185,7 @@ export default class FightGame {
                 this.gameOverMsg += `\neach player got their bet back ${this.bet}${Globals.ATTRIBUTES.gold.emoji}`;
             }
         }
-        const endMsg = await getFightDisplay(this, this.gameOverMsg);
-        this.message.edit({ content: "# **GameOver**", embeds: endMsg.embeds, components: [] });
+        this.message.edit({ content: "# **GameOver**\n" + this.gameOverMsg, components: [] });
     }
 
     getCurrentPlayer(): Fighter {

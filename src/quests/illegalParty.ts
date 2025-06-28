@@ -7,7 +7,6 @@ import { Item } from "@/models/item";
 
 export default class IllegalPartyQuest extends Quest.Base {
     public override buttons: AppButton[] = [new AppButton("Join", this.onPressJoin.bind(this))];
-    public override maxTimeActiveMS: number = 1000 * 60 * 12;
 
     fee: number = Globals.random(10, 40);
     color: ColorResolvable | null = "#9F00FF";

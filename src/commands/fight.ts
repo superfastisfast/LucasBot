@@ -20,7 +20,7 @@ export default class FightCommand extends Command.Base {
                 type: ApplicationCommandOptionType.Number,
                 required: true,
                 min_value: 0,
-                max_value: 100,
+                max_value: 250,
             },
         ],
         this.onExecute.bind(this),

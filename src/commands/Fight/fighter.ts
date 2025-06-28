@@ -1,5 +1,6 @@
 import { Globals } from "@/index";
 import type { AppUser } from "@/user";
+import type { PlayerAction } from "./fieldGenerate";
 
 export default class Fighter {
     appUser!: AppUser;
@@ -23,36 +24,36 @@ export default class Fighter {
         return maxHealth > 100 ? 100 : maxHealth;
     }
 
-    attack(opponent: Fighter) {
+    attack(opponent: Fighter): PlayerAction {
         this.drainMana(1);
         if (Math.abs(this.posX - opponent.posX) <= this.attackRange) {
             const damage = Globals.randomFloat(0, this.appUser.getStat("strength"));
             return opponent.receiveDamage(damage);
         } else {
-            return "Too far away to attack!";
+            return { type: "attack", damageTaken: 0 };
         }
     }
-    receiveDamage(damage: number) {
+    receiveDamage(damage: number): PlayerAction {
         const defense = this.appUser.getStat("defense");
         if (defense > 0) {
             if (Math.random() > damage / defense) {
-                return this.appUser.discord.username + ": Blocked the attack!";
+                return { type: "attack", damageTaken: 0 };
             }
         }
         this.currentHealth = Math.max(0, this.currentHealth - damage);
-        return this.appUser.discord.username + ": Received " + damage.toFixed(2) + " damage!";
+        return { type: "attack", damageTaken: -damage };
     }
 
     flee(): boolean {
         this.drainMana(1);
         return this.appUser.getStat("agility") / 100 > Math.random();
     }
-    sleep() {
+    sleep(): PlayerAction {
         const randomHealthGain = Globals.randomFloat(this.appUser.getStat("vitality") / 20, this.appUser.getStat("vitality") / 8);
         const randomManaGain = Globals.randomFloat(1, this.appUser.getStat("stamina") / 8);
         this.gainHealth(randomHealthGain);
         this.gainMana(randomManaGain);
-        return `Slept and gained ${randomHealthGain.toFixed(2)} ${Globals.ATTRIBUTES.health.emoji} and ${randomManaGain.toFixed(2)} ${Globals.ATTRIBUTES.mana.emoji}`;
+        return { type: "sleep", healthRegained: randomHealthGain, manaRegained: randomManaGain };
     }
 
     gainHealth(amount: number) {
@@ -71,12 +72,13 @@ export default class Fighter {
         return false;
     }
 
-    move(direction: "left" | "right", arenaSize: number) {
+    move(direction: "left" | "right", arenaSize: number): PlayerAction {
         this.drainMana(1);
         if (direction === "left") {
             this.posX = Math.max(0, this.posX - 1);
         } else if (direction === "right") {
             this.posX = Math.min(arenaSize - 1, this.posX + 1);
         }
+        return { type: "move" };
     }
 }

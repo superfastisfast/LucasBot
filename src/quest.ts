@@ -8,7 +8,7 @@ export namespace Quest {
         public message: Message<true> = undefined!;
         public name: string = undefined!;
 
-        public maxTimeActiveMS: number = 1000 * 60 * 10;
+        public maxTimeActiveMS: number = 1000 * 60 * 30;
         public endTime: number = 0;
         public readonly isActive: boolean = false;
 

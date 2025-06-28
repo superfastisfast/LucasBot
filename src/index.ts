@@ -3,6 +3,7 @@ import { Client, GatewayIntentBits, Partials, Events, TextChannel } from "discor
 import mongoose from "mongoose";
 import { Quest } from "./quest";
 import { Command } from "./commands";
+import { GlobalFonts } from "@napi-rs/canvas";
 
 export namespace Globals {
     export const ATTRIBUTES = {
@@ -104,6 +105,7 @@ export const client = new Client({
 });
 
 client.once(Events.ClientReady, async (readyClient) => {
+    GlobalFonts.registerFromPath("./assets/fonts/Bangers-Regular.ttf", "Bangers");
     console.log(`${new Date().toISOString()} Bot connected as '${readyClient.user.tag}'`);
 
     await mongoose.connect(process.env.DATABASE_URL || "mongodb://localhost:27017/mydiscordapp");

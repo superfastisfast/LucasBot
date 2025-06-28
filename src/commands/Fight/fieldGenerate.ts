@@ -4,43 +4,183 @@ import { Globals } from "@/index";
 import { Item } from "@/models/item";
 import { UserDB } from "@/models/user";
 import type { AppUser } from "@/user";
-import { createCanvas, Image, loadImage, type SKRSContext2D } from "@napi-rs/canvas";
+import { createCanvas, GlobalFonts, Image, loadImage, type SKRSContext2D } from "@napi-rs/canvas";
 import { AttachmentBuilder, EmbedBuilder, type InteractionUpdateOptions } from "discord.js";
 
-export const BLOCK_SIZE = 64;
+export const BLOCK_WIDTH = 64;
+export const BLOCK_HEIGHT = 128;
 
-async function addPlayerToConext(appUser: AppUser, context: SKRSContext2D, BorderImage: Image | undefined) {
+export type PlayerAction =
+    | { type: "attack"; damageTaken?: number }
+    | { type: "move" }
+    | { type: "sleep"; healthRegained?: number; manaRegained?: number }
+    | { type: "escape"; escaped: boolean }
+    | { type: "none" };
+
+async function addPlayerToConext(appUser: AppUser, context: SKRSContext2D, BorderImage: Image | undefined, isOtherSide: boolean) {
+    const pfpSize = BLOCK_WIDTH / 4;
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillStyle = "white";
+    context.strokeStyle = "#000000";
+    context.font = `${pfpSize}px Bangers`;
+    context.lineWidth = 1;
     const playerAvatarUrl = appUser.discord.displayAvatarURL({
         extension: "png",
-        size: BLOCK_SIZE,
+        size: BLOCK_WIDTH / 4,
     });
+
     const player: Fighter = appUser.fighter;
-    let playerAvatar;
+
+    const gladiatorBody = "./assets/Player.png";
+    const gladiatorDeadBody = "./assets/gladiatorDead.png";
     try {
-        playerAvatar = await loadImage(playerAvatarUrl);
-        context.drawImage(playerAvatar, player.posX * BLOCK_SIZE, 0, BLOCK_SIZE, BLOCK_SIZE);
-        if (BorderImage !== undefined) {
-            context.drawImage(BorderImage, player.posX * BLOCK_SIZE, 0, BLOCK_SIZE, BLOCK_SIZE);
+        let gladiatorImg = undefined;
+        if (player.currentHealth <= 0) {
+            gladiatorImg = await loadImage(gladiatorDeadBody);
+            context.drawImage(gladiatorImg, player.posX * BLOCK_WIDTH, BLOCK_HEIGHT / 2, BLOCK_HEIGHT, BLOCK_WIDTH);
+        } else {
+            gladiatorImg = await loadImage(gladiatorBody);
+            context.drawImage(gladiatorImg, player.posX * BLOCK_WIDTH, 0, BLOCK_WIDTH, BLOCK_HEIGHT);
         }
     } catch (error) {
-        console.error(`Failed to load player 1 avatar from ${playerAvatarUrl}:`, error);
-        context.fillStyle = "red";
-        context.fillRect(player.posX * BLOCK_SIZE, 0, BLOCK_SIZE, BLOCK_SIZE);
-        context.font = `${BLOCK_SIZE / 8}px sans-serif`;
-        context.fillStyle = "white";
-        context.textAlign = "center";
-        context.textBaseline = "middle";
-        context.fillText(appUser.database.username, player.posX * BLOCK_SIZE + BLOCK_SIZE / 2, BLOCK_SIZE / 2);
+        console.log("Failed to load gladiator image");
+    }
+
+    let playerAvatar;
+    let pfpImagePosXStart = player.posX * BLOCK_WIDTH;
+    pfpImagePosXStart = isOtherSide ? pfpImagePosXStart + BLOCK_WIDTH - pfpSize : pfpImagePosXStart;
+    try {
+        playerAvatar = await loadImage(playerAvatarUrl);
+        context.drawImage(playerAvatar, pfpImagePosXStart, 0, pfpSize, pfpSize);
+        if (BorderImage !== undefined) {
+            context.drawImage(BorderImage, pfpImagePosXStart, 0, pfpSize, pfpSize);
+        }
+    } catch (error) {
+        console.error(`Failed to load player avatar from ${playerAvatarUrl}:`, error);
+        context.fillText(appUser.database.username, pfpImagePosXStart + pfpSize / 2, pfpSize / 2);
+        context.strokeText(appUser.database.username, pfpImagePosXStart + pfpSize / 2, pfpSize / 2);
     }
 }
 
-export async function getFieldImage(currentGame: FightGame) {
-    const FIELD_HEIGHT = BLOCK_SIZE;
-    const FIELD_WIDTH = currentGame.arenaSize * BLOCK_SIZE;
+async function addImageToContext(context: SKRSContext2D, pathToImage: string, startX: number, startY: number, wdith: number, height: number) {
+    try {
+        let img = await loadImage(pathToImage);
+        context.drawImage(img, startX, startY, wdith, height);
+    } catch (error) {
+        console.log("Failed to load image");
+    }
+}
 
-    const canvas = createCanvas(FIELD_WIDTH, FIELD_HEIGHT);
+function addTextToContext(context: SKRSContext2D, text: string, startX: number, startY: number) {
+    context.fillText(text, startX, startY);
+    context.strokeText(text, startX, startY);
+}
+
+function getPosSign(num: number) {
+    return num > 0 ? "+" : "";
+}
+
+async function addAction(context: SKRSContext2D, currentGame: FightGame, action: PlayerAction) {
+    context.font = `30px Bangers`;
+    const attackedPlayer = currentGame.getNextPlayer();
+
+    const currentPlayer = currentGame.getCurrentPlayer();
+
+    switch (action.type) {
+        case "attack":
+            if (!action.damageTaken || action.damageTaken == 0) {
+                await addImageToContext(context, "./assets/block.png", attackedPlayer.posX * BLOCK_WIDTH, BLOCK_HEIGHT / 5, BLOCK_WIDTH, BLOCK_WIDTH);
+                await addImageToContext(
+                    context,
+                    "./assets/mana.png",
+                    currentPlayer.posX * BLOCK_WIDTH,
+                    BLOCK_HEIGHT / 2,
+                    BLOCK_WIDTH / 2,
+                    BLOCK_WIDTH / 2,
+                );
+                addTextToContext(context, `-1`, currentPlayer.posX * BLOCK_WIDTH + BLOCK_WIDTH / 4, BLOCK_HEIGHT / 2 + BLOCK_HEIGHT / 8);
+            } else {
+                await addImageToContext(
+                    context,
+                    "./assets/hearth.png",
+                    attackedPlayer.posX * BLOCK_WIDTH,
+                    BLOCK_HEIGHT / 5,
+                    BLOCK_WIDTH / 2,
+                    BLOCK_WIDTH / 2,
+                );
+                addTextToContext(
+                    context,
+                    action.damageTaken.toFixed(1),
+                    attackedPlayer.posX * BLOCK_WIDTH + BLOCK_WIDTH / 4,
+                    BLOCK_HEIGHT / 5 + BLOCK_HEIGHT / 10,
+                );
+                await addImageToContext(
+                    context,
+                    "./assets/mana.png",
+                    currentPlayer.posX * BLOCK_WIDTH,
+                    BLOCK_HEIGHT / 2,
+                    BLOCK_WIDTH / 2,
+                    BLOCK_WIDTH / 2,
+                );
+                addTextToContext(context, `-1`, currentPlayer.posX * BLOCK_WIDTH + BLOCK_WIDTH / 4, BLOCK_HEIGHT / 2 + BLOCK_HEIGHT / 8);
+            }
+
+            break;
+        case "sleep":
+            await addImageToContext(
+                context,
+                "./assets/hearth.png",
+                currentPlayer.posX * BLOCK_WIDTH,
+                BLOCK_HEIGHT / 5,
+                BLOCK_WIDTH / 2,
+                BLOCK_WIDTH / 2,
+            );
+            addTextToContext(
+                context,
+                `+${action.healthRegained?.toFixed(1)}`,
+                currentPlayer.posX * BLOCK_WIDTH + BLOCK_WIDTH / 4,
+                BLOCK_HEIGHT / 5 + BLOCK_HEIGHT / 10,
+            );
+            await addImageToContext(
+                context,
+                "./assets/mana.png",
+                currentPlayer.posX * BLOCK_WIDTH,
+                BLOCK_HEIGHT / 2,
+                BLOCK_WIDTH / 2,
+                BLOCK_WIDTH / 2,
+            );
+            addTextToContext(
+                context,
+                `+${action.manaRegained?.toFixed(1)}`,
+                currentPlayer.posX * BLOCK_WIDTH + BLOCK_WIDTH / 4,
+                BLOCK_HEIGHT / 2 + BLOCK_HEIGHT / 8,
+            );
+
+            break;
+        case "move":
+            await addImageToContext(
+                context,
+                "./assets/mana.png",
+                currentPlayer.posX * BLOCK_WIDTH,
+                BLOCK_HEIGHT / 2,
+                BLOCK_WIDTH / 2,
+                BLOCK_WIDTH / 2,
+            );
+            addTextToContext(context, `-1`, currentPlayer.posX * BLOCK_WIDTH + BLOCK_WIDTH / 4, BLOCK_HEIGHT / 2 + BLOCK_HEIGHT / 8);
+            break;
+        case "escape":
+            await addImageToContext(context, "./assets/escape.png", currentPlayer.posX * BLOCK_WIDTH, BLOCK_HEIGHT / 2, BLOCK_WIDTH, BLOCK_WIDTH);
+            break;
+    }
+}
+
+export async function getFieldImage(currentGame: FightGame, action: PlayerAction) {
+    const FIELD_WIDTH = currentGame.arenaSize * BLOCK_WIDTH;
+
+    const canvas = createCanvas(FIELD_WIDTH, BLOCK_HEIGHT);
     const context = canvas.getContext("2d");
-    const squareBlockImagePath = "./assets/square.png";
+    const squareBlockImagePath = "./assets/SAS-Background.png";
     const borderImagePath = "./assets/border.png";
 
     let defaultBlockImage;
@@ -60,16 +200,17 @@ export async function getFieldImage(currentGame: FightGame) {
     }
 
     for (let i = 0; i < currentGame.arenaSize; i++) {
-        const x = i * BLOCK_SIZE;
+        const x = i * BLOCK_WIDTH;
         if (defaultBlockImage) {
-            context.drawImage(defaultBlockImage, x, 0, BLOCK_SIZE, BLOCK_SIZE);
+            context.drawImage(defaultBlockImage, x, 0, BLOCK_WIDTH, BLOCK_HEIGHT);
         } else {
-            context.fillRect(x, 0, BLOCK_SIZE, BLOCK_SIZE);
+            context.fillRect(x, 0, BLOCK_WIDTH, BLOCK_HEIGHT);
         }
     }
     const players: AppUser[] = currentGame.appUsers;
-    await addPlayerToConext(players[0]!, context, currentGame.playerTurn === 1 ? BorderImage! : undefined);
-    await addPlayerToConext(players[1]!, context, currentGame.playerTurn === 0 ? BorderImage! : undefined);
+    await addPlayerToConext(players[0]!, context, currentGame.playerTurn === 1 ? BorderImage! : undefined, false);
+    await addPlayerToConext(players[1]!, context, currentGame.playerTurn === 0 ? BorderImage! : undefined, true);
+    await addAction(context, currentGame, action);
     const buffer = await canvas.encode("png");
     const attachment = new AttachmentBuilder(buffer, {
         name: "game-field.png",
@@ -147,7 +288,7 @@ export async function getStatsDisplay(player: Fighter) {
     };
 }
 
-export async function getFightDisplay(currentGame: FightGame, action: string): Promise<InteractionUpdateOptions> {
+export async function getFightDisplay(currentGame: FightGame, action: PlayerAction): Promise<InteractionUpdateOptions> {
     const currentPlayer = currentGame.getCurrentPlayer();
     const nextPlayer = currentGame.getNextPlayer();
     const player1 = currentGame.appUsers[0]!.fighter;
@@ -156,11 +297,11 @@ export async function getFightDisplay(currentGame: FightGame, action: string): P
     const player1ManaBar = await createStatBar(player1.currentMana, player1.getMaxManaStats(), player1.getMaxManaStats(), "34");
     const player2HealthBar = await createStatBar(player2.currentHealth, player2.getMaxHealthStats(), player2.getMaxHealthStats(), "31");
     const player2ManaBar = await createStatBar(player2.currentMana, player2.getMaxManaStats(), player2.getMaxManaStats(), "34");
-    const player1ItemDisplay = await getItemDisplay(player1);
-    const player2ItemDisplay = await getItemDisplay(player2);
+    // const player1ItemDisplay = await getItemDisplay(player1);
+    // const player2ItemDisplay = await getItemDisplay(player2);
     const player1StatsDisplay = await getStatsDisplay(player1);
     const player2StatsDisplay = await getStatsDisplay(player2);
-    const fieldImageAttachment = await getFieldImage(currentGame);
+    const fieldImageAttachment = await getFieldImage(currentGame, action);
     const builder = new EmbedBuilder()
         .setColor(0x0099ff)
         .setAuthor({
@@ -168,7 +309,7 @@ export async function getFightDisplay(currentGame: FightGame, action: string): P
             iconURL: nextPlayer.appUser.discord.avatarURL()!,
         })
         .setImage("attachment://game-field.png")
-        .addFields(player1ItemDisplay, { name: "\u200B", value: "\u200B", inline: true }, player2ItemDisplay)
+        // .addFields(player1ItemDisplay, { name: "\u200B", value: "\u200B", inline: true }, player2ItemDisplay)
         .addFields(player1StatsDisplay, { name: "\u200B", value: "\u200B", inline: true }, player2StatsDisplay)
         .addFields(
             {
@@ -196,10 +337,6 @@ export async function getFightDisplay(currentGame: FightGame, action: string): P
                 inline: true,
             },
         )
-        .addFields({
-            name: "\n**Action**",
-            value: `${currentPlayer.appUser.discord.displayName} : ${action}`,
-        })
         .setFooter({
             text: `➡️ It's ${nextPlayer.appUser.discord.displayName}'s Turn!`,
             iconURL: nextPlayer.appUser.discord.avatarURL()!,
