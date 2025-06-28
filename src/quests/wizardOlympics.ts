@@ -43,6 +43,8 @@ export default class WizardOlympicsQuest extends Quest.Base {
             const user = await AppUser.fromID(participant);
             const strengh = user.getStat("agility") + user.getStat("charisma") + user.getStat("magicka") * 2;
 
+            await user.addXP(strengh).save();
+
             participantStrengh.set(participant, strengh);
         }
 
