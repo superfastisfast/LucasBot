@@ -221,7 +221,7 @@ export default class ItemCommand extends Command.Base {
         });
 
         const embed = new EmbedBuilder()
-            .setTitle(`${item.name} ${Globals.ATTRIBUTES.items.emoji}`)
+            .setTitle(`${item.name} ${Globals.ATTRIBUTES.item.emoji}`)
             .setDescription(`Worth: ${item.cost} ${Globals.ATTRIBUTES.gold.emoji}\nType: ${item.type}\n\n${modifers}`)
             .setColor("#CD9F61")
             .setThumbnail(item.image_url)
@@ -237,7 +237,7 @@ export default class ItemCommand extends Command.Base {
         const filteredItems: Array<[boolean, string]> = Item.manager.getAll().map((item) => [false, item.name] as [boolean, string]);
 
         const options = filteredItems.map(([isEquipped, name]) => ({
-            name: `${Globals.ATTRIBUTES.items.emoji} ${name}`,
+            name: `${Globals.ATTRIBUTES.item.emoji} ${name}`,
             value: name,
         }));
 

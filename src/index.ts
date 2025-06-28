@@ -1,6 +1,6 @@
-import { Service } from "@/service";
-import { Client, GatewayIntentBits, Partials, Events, TextChannel } from "discord.js";
+import { Client, GatewayIntentBits, Partials, Events, TextChannel, REST, Routes } from "discord.js";
 import mongoose from "mongoose";
+import { Service } from "@/service";
 import { Quest } from "./quest";
 import { Command } from "./commands";
 
@@ -56,7 +56,7 @@ export namespace Globals {
             value: "skillpoint",
             emoji: ":bulb:",
         },
-        items: {
+        item: {
             name: "Items",
             value: "items",
             emoji: "📦",
@@ -103,6 +103,9 @@ export const client = new Client({
     partials: [Partials.Message, Partials.Reaction, Partials.User],
 });
 
+const token = process.env.BOT_TOKEN;
+if (!token) throw new Error("Invalid bot token");
+
 client.once(Events.ClientReady, async (readyClient) => {
     console.log(`${new Date().toISOString()} Bot connected as '${readyClient.user.tag}'`);
 
@@ -122,4 +125,16 @@ client.once(Events.ClientReady, async (readyClient) => {
     await Service.stop(client);
 });
 
-client.login(process.env.BOT_TOKEN);
+await client.login(token);
+
+const rest = new REST().setToken(token);
+
+const allowed = [...Command.commands.keys()]; // allowed command names
+const guilds = client.guilds.cache;
+
+for (const [guildId, guild] of guilds) {
+    const guildCommands = await guild.commands.fetch();
+
+    for (const [_, command] of guildCommands)
+        if (!allowed.includes(command.name)) await rest.delete(Routes.applicationGuildCommand(client.user?.id || "", guildId, command.id));
+}
