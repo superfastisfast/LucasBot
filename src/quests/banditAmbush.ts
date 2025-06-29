@@ -41,7 +41,7 @@ export default class BanditAmbushQuest extends Quest.Base {
         });
     }
 
-    public override async end(): Promise<Quest.EndReturn> {
+    public override async end() {
         const users: AppUser[] = [];
         for (const index in this.players) users.push(await AppUser.fromID(this.players[index]!));
 
@@ -77,8 +77,6 @@ export default class BanditAmbushQuest extends Quest.Base {
         this.message.edit({
             embeds: [embed],
         });
-
-        return Quest.end(this.name);
     }
 
     private async onPressHelp(interaction: ButtonInteraction): Promise<void> {

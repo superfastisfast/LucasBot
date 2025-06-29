@@ -32,10 +32,6 @@ export default class PackageQuest extends Quest.Base {
         });
     }
 
-    public override async end(): Promise<Quest.EndReturn> {
-        return Quest.end(this.name);
-    }
-
     private async onPressOpen(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
         await interaction.deferUpdate();
@@ -56,8 +52,7 @@ export default class PackageQuest extends Quest.Base {
         this.message.edit({
             embeds: [embed],
         });
-
-        this.end();
+        Quest.end(this.name);
     }
 
     private async onPressOwner(interaction: ButtonInteraction): Promise<void> {
@@ -85,7 +80,7 @@ export default class PackageQuest extends Quest.Base {
             embeds: [embed],
         });
 
-        this.end();
+        Quest.end(this.name);
     }
 
     private async onPressSell(interaction: ButtonInteraction): Promise<void> {
@@ -106,6 +101,6 @@ export default class PackageQuest extends Quest.Base {
             embeds: [embed],
         });
 
-        this.end();
+        Quest.end(this.name);
     }
 }

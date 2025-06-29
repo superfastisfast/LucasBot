@@ -38,7 +38,7 @@ export default class IllegalPartyQuest extends Quest.Base {
         });
     }
 
-    public override async end(): Promise<Quest.EndReturn> {
+    public override async end() {
         if (this.joined && this.joined.length > 0) {
             const randomEnding = this.endings[Globals.random(0, this.endings.length - 1)];
             if (!randomEnding) this.endRefund();
@@ -50,8 +50,6 @@ export default class IllegalPartyQuest extends Quest.Base {
                 embeds: [embed],
             });
         }
-
-        return Quest.end(this.name);
     }
 
     private async onPressJoin(interaction: ButtonInteraction): Promise<void> {
@@ -135,12 +133,12 @@ export default class IllegalPartyQuest extends Quest.Base {
 
         let winnerString: string = "";
         winners.forEach(([user, item]) => {
-            winnerString += `${user.discord} got a ${item ? `${item.name} ${Globals.ATTRIBUTES.items.emoji}` : "Nothing"} worth ${item ? `${item.cost} ${Globals.ATTRIBUTES.gold.emoji}` : "Nothing"}`;
+            winnerString += `${user.discord} got a ${item ? `${item.name} ${Globals.ATTRIBUTES.item.emoji}` : "Nothing"} worth ${item ? `${item.cost} ${Globals.ATTRIBUTES.gold.emoji}` : "Nothing"}`;
         });
 
         const embed = new EmbedBuilder()
             .setTitle("Result")
-            .setDescription(`Everyone got a gift ${Globals.ATTRIBUTES.items.emoji}!\n${winnerString}`)
+            .setDescription(`Everyone got a gift ${Globals.ATTRIBUTES.item.emoji}!\n${winnerString}`)
             .setColor(this.color)
             .setURL(Globals.LINK);
 

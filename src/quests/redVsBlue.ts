@@ -32,7 +32,7 @@ export default class SubscribePortalQuest extends Quest.Base {
         });
     }
 
-    public override async end(): Promise<Quest.EndReturn> {
+    public override async end() {
         let winningTeam = this.teamRed;
         let winningTeamName = "red";
         if (Math.random() > 0.5) {
@@ -61,8 +61,6 @@ export default class SubscribePortalQuest extends Quest.Base {
         this.message.edit({
             embeds: [embed],
         });
-
-        return Quest.end(this.name);
     }
 
     private async onPressRed(interaction: ButtonInteraction): Promise<void> {

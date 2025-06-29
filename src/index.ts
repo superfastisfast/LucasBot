@@ -58,8 +58,8 @@ export namespace Globals {
             emoji: ":bulb:",
         },
         item: {
-            name: "Items",
-            value: "items",
+            name: "Item",
+            value: "item",
             emoji: "📦",
         },
         level: {
@@ -68,12 +68,12 @@ export namespace Globals {
             emoji: "⬆️",
         },
         health: {
-            name: "health",
+            name: "Health",
             value: "health",
             emoji: "❤️",
         },
         mana: {
-            name: "mana",
+            name: "Mana",
             value: "mana",
             emoji: "🔵",
         },

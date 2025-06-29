@@ -15,8 +15,8 @@ export namespace Quest {
         public async start(): Promise<Message<true>> {
             return undefined!;
         }
-        public async end(): Promise<EndReturn> {
-            return Quest.end(this.name);
+        public async end() {
+            console.log("Called inbuilt end for " + this.name);
         }
 
         get class(): new (...args: any[]) => this {

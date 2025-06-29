@@ -36,7 +36,7 @@ export default class WizardOlympicsQuest extends Quest.Base {
         });
     }
 
-    public override async end(): Promise<Quest.EndReturn> {
+    public override async end() {
         const participantStrengh: Map<string, number> = new Map();
 
         for (const participant of this.participants) {
@@ -71,8 +71,6 @@ export default class WizardOlympicsQuest extends Quest.Base {
         this.message.edit({
             embeds: [embed],
         });
-
-        return Quest.end(this.name);
     }
 
     private async onPressParticipate(interaction: ButtonInteraction): Promise<void> {

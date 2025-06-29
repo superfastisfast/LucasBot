@@ -18,10 +18,6 @@ export default class TestQuest extends Quest.Base {
         });
     }
 
-    public override async end(): Promise<Quest.EndReturn> {
-        return Quest.end(this.name);
-    }
-
     private async onPressTest(interaction: ButtonInteraction): Promise<void> {
         this.amount += 1;
         await interaction.reply({
@@ -29,7 +25,7 @@ export default class TestQuest extends Quest.Base {
             flags: "Ephemeral",
         });
 
-        if (this.amount >= 3) this.end();
+        if (this.amount >= 3) Quest.end(this.name);
 
         this.message.edit({
             content: this.amount >= 3 ? `Final amount was: ${this.amount}` : `Amount is now: ${this.amount}`,

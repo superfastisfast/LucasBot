@@ -72,8 +72,4 @@ export default class CelebrationQuest extends Quest.Base {
             embeds: [embed],
         });
     }
-
-    public override async end(): Promise<Quest.EndReturn> {
-        return Quest.end(this.name);
-    }
 }

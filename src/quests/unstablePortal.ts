@@ -59,7 +59,7 @@ export default class UnstablePortalQuest extends Quest.Base {
         if (this.isDestroyed == false) Quest.end(this.name);
     }
 
-    public override async end(): Promise<Quest.EndReturn> {
+    public override async end() {
         this.isDestroyed = true;
         const embed = new EmbedBuilder()
             .setTitle("Unstable Portal")
@@ -73,6 +73,5 @@ export default class UnstablePortalQuest extends Quest.Base {
         await this.message.edit({
             embeds: [embed],
         });
-        return Quest.end(this.name);
     }
 }
