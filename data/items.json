@@ -324,5 +324,18 @@
             "vitality": 0.11
         },
         "image_url": ""
+    },
+    {
+        "name": "snazzy sunglasses",
+        "type": "helmet",
+        "cost": 1200,
+        "flatModifiers": {
+            "charisma": 11,
+            "vitality": 1.2
+        },
+        "percentageModifiers": {
+            "defense": 0.1
+        },
+        "image_url": ""
     }
 ]

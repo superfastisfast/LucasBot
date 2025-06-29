@@ -32,8 +32,8 @@ async function addPlayerToConext(appUser: AppUser, context: SKRSContext2D, Borde
 
     const player: Fighter = appUser.fighter;
 
-    const gladiatorBody = "./assets/Player.png";
-    const gladiatorDeadBody = "./assets/gladiatorDead.png";
+    const gladiatorBody = "./assets/Gladiator.png";
+    const gladiatorDeadBody = "./assets/GladiatorDead.png";
     try {
         let gladiatorImg = undefined;
         if (player.currentHealth <= 0) {
