@@ -224,7 +224,7 @@ export default class ItemCommand extends Command.Base {
             .setTitle(`${item.name} ${Globals.ATTRIBUTES.item.emoji}`)
             .setDescription(`Worth: ${item.cost} ${Globals.ATTRIBUTES.gold.emoji}\nType: ${item.type}\n\n${modifers}`)
             .setColor("#CD9F61")
-            .setThumbnail(item.image_url)
+            // .setThumbnail(item.image_url)
             .setFooter({ text: `Item View of ${item.name}` })
             .setTimestamp();
         return interaction.reply({
