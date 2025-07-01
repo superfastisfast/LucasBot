@@ -72,7 +72,8 @@
         "flatModifiers": {
             "defense": 1,
             "charisma": 0.5
-        }
+        },
+        "percentageModifiers": {}
     },
     {
         "name": "Leather Helmet",
