@@ -1,8 +1,17 @@
 import { Command } from "@/commands";
 import { Item } from "@/models/item";
 import { AppUser } from "@/user";
-import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType, AutocompleteInteraction } from "discord.js";
+import {
+    CommandInteraction,
+    InteractionResponse,
+    ApplicationCommandOptionType,
+    AutocompleteInteraction,
+    EmbedBuilder,
+    ButtonInteraction,
+    ButtonStyle,
+} from "discord.js";
 import { Globals } from "..";
+import { AppButton } from "@/ui";
 
 export default class QuestCommand extends Command.Base {
     public override main: Command.Command = new Command.Command("inventory", "Inventory related stuff", []);
@@ -88,6 +97,43 @@ export default class QuestCommand extends Command.Base {
             this.onSell,
             this.onAutocomplete,
         ),
+        // new Command.Command(
+        //     "trade",
+        //     "Trade an item with another businessperson.",
+        //     [
+        //         {
+        //             name: "person",
+        //             description: "The user you want to trade with.",
+        //             type: ApplicationCommandOptionType.User,
+        //             required: true,
+        //         },
+        //         {
+        //             name: "offer",
+        //             description: "The item you want to offer.",
+        //             type: ApplicationCommandOptionType.String,
+        //             required: true,
+        //             autocomplete: true,
+        //         },
+        //         {
+        //             name: "request",
+        //             description: "The item you want in return.",
+        //             type: ApplicationCommandOptionType.String,
+        //             required: true,
+        //             autocomplete: true,
+        //         },
+        //         {
+        //             name: "offer_amount",
+        //             description: "How many of the item (or how much gold) you're offering.",
+        //             type: ApplicationCommandOptionType.Number,
+        //         },
+        //         {
+        //             name: "request_amount",
+        //             description: "How many of the item (or how much gold) you want in return.",
+        //             type: ApplicationCommandOptionType.Number,
+        //         },
+        //     ],
+        //     this.onTrade,
+        // ),
     ];
 
     public async onEquip(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
@@ -216,6 +262,43 @@ export default class QuestCommand extends Command.Base {
             flags: "Ephemeral",
         });
     }
+
+    // public async onTrade(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
+    //     const offerItemNameOpt = interaction.options.get("offer")?.value as string;
+    //     const returnItemNameOpt = interaction.options.get("return")?.value as string;
+    //     const offerAmountOpt = interaction.options.get("offerAmount");
+    //     const offerAmount: number = offerAmountOpt ? (offerAmountOpt.value as number) : 1;
+    //     const returnAmountOpt = interaction.options.get("returnAmount");
+    //     const returnAmount: number = returnAmountOpt ? (returnAmountOpt.value as number) : 1;
+    //     const offerer = await AppUser.fromID(interaction.options.get("buyer")?.user.id);
+    //     const returner = await AppUser.fromID(interaction.user.id);
+
+    //     const embed = new EmbedBuilder()
+    //         .setTitle(`Trade ${returner.discord} ${offerer.discord}`)
+    //         .setDescription(`${returner.discord} want to buy ${returnAmount}x ${returnItemNameOpt} for x${offerAmount} ${offerItemNameOpt}`);
+
+    //     const accept = new AppButton(
+    //         "Accept 🤝",
+    //         async (interaction: ButtonInteraction) => {
+    //             if (interaction.user.id !== returner.discord.id) {
+    //                 interaction.reply({
+    //                     content: "Are are not apart of this trade",
+    //                     flags: "Ephemeral",
+    //                 });
+    //             }
+
+    //             offerer.interaction.reply("Accepted");
+    //         },
+    //         ButtonStyle.Secondary,
+    //     );
+
+    //     const actionRow = AppButton.createActionRow([accept]);
+
+    //     return interaction.reply({
+    //         embeds: [embed],
+    //         components: actionRow,
+    //     });
+    // }
 
     public async onAutocomplete(interaction: AutocompleteInteraction): Promise<void> {
         const sub = (interaction.options as any).getSubcommand();

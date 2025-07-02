@@ -60,7 +60,7 @@ export default class XpCommand extends Command.Base {
         const lines = await Promise.all(
             topUsers.map(async (user, index) => {
                 const name = (await AppUser.fromID(user.id)).discord.displayName;
-                return `#${index + 1} ${name}:   ${user.xp} ${Globals.ATTRIBUTES.xp.emoji}`;
+                return `#${index + 1} ${name}:   ${user.xp.toFixed(2)} ${Globals.ATTRIBUTES.xp.emoji}`;
             }),
         );
         const description = lines.join("\n");

@@ -71,7 +71,7 @@ export default class ProfileCommand extends Command.Base {
             }
             const value = user.database.stats[attribute.value as UserDB.StatDB.Type];
             const valueFromItems = user.getStat(attribute.value as UserDB.StatDB.Type) - value;
-            statField.value += `${attribute.emoji} ${attribute.name}: ${value.toFixed(2)} + ${valueFromItems.toFixed(2)}\n`;
+            statField.value += `${attribute.emoji} ${attribute.name}: ${value.toFixed(2)} ${valueFromItems > 0 ? "+" : ""} ${valueFromItems.toFixed(2)}\n`;
         });
 
         let inventoryField: APIEmbedField = { name: "Inventory", value: "", inline: false };
@@ -120,7 +120,7 @@ export default class ProfileCommand extends Command.Base {
                 const item = Item.manager.findByName(name);
                 if (!item) return;
 
-                let modifierString = "";
+                let modifierString: string = undefined!;
                 const flat = Object.entries(item.flatModifiers);
                 const percent = Object.entries(item.percentageModifiers);
                 const all = [...flat, ...percent];
@@ -132,11 +132,14 @@ export default class ProfileCommand extends Command.Base {
                     }
 
                     const isPercent = index >= flat.length;
-                    modifierString += `*${attribute.emoji} +${isPercent ? (value * 100).toFixed(0) : value.toFixed(2)}${isPercent ? "%" : ""}*\n`;
+                    modifierString += `*${attribute.emoji} ${value > 0 ? "+" : ""}${isPercent ? (value * 100).toFixed(0) : value.toFixed(2)}${isPercent ? "%" : ""}*\n`;
                 }
 
-                (equipped ? equippedField : unequippedField).value += `**x${times} ${item.name}**\n*Type: ${item.type}*\n${modifierString}\n`;
+                (equipped ? equippedField : unequippedField).value += `**x${times} ${item.name}**\n*Type: ${item.type}*\n${modifierString || ""}\n`;
             });
+
+        equippedField.value = equippedField.value.slice(0, 1000);
+        equippedField.value = equippedField.value.slice(0, 1000);
 
         return new EmbedBuilder()
             .setTitle(`${user.discord.displayName}'s Profile`)

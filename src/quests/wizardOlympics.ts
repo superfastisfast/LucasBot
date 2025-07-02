@@ -50,20 +50,20 @@ export default class WizardOlympicsQuest extends Quest.Base {
 
         const sortedParticipants = new Map([...participantStrengh.entries()].sort((a, b) => b[1] - a[1]));
 
-        const reward: number = 1;
-
         let resultString: string = "";
         for (let i: number = 0; i < 3; i++) {
             const person = [...sortedParticipants.entries()].length > i ? await AppUser.fromID([...sortedParticipants.keys()][i] || "") : null;
 
-            if (person) await person.addSkillPoints(reward / (i + 1)).save();
+            const rewards = [1, 0.5, 0.25];
 
-            resultString += person ? `#${i + 1} ${person.discord} +${reward / (i + 1)} ${Globals.ATTRIBUTES.skillpoint.emoji}\n` : "";
+            if (person) await person.addSkillPoints(rewards[i] || 0).save();
+
+            resultString += person ? `#${i + 1} ${person.discord} +${(rewards[i] || 0).toFixed()} ${Globals.ATTRIBUTES.skillpoint.emoji}\n` : "";
         }
 
         const embed = new EmbedBuilder()
             .setTitle("Result")
-            .setDescription(resultString.length > 0 ? `Everyone got XP\n🏆 Leaderboard\n${resultString}` : "No one joined")
+            .setDescription(resultString.length > 0 ? `Everyone got XP\n🏆 Winners\n${resultString}` : "No one joined")
             .setColor("#D22B2B")
             .setURL(Globals.LINK)
             .toJSON();
