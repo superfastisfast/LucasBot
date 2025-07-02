@@ -5,7 +5,7 @@ import { Globals } from "..";
 import { InventoryDB } from "@/models/inventory";
 
 export default class GoldCommand extends Command.Base {
-    public override main: Command.Command = new Command.Command("gold", "Gold related stuff", [], undefined, undefined, true);
+    public override main: Command.Command = new Command.Command("gold", "Gold related stuff", []);
     public override subs: Command.Command[] = [
         new Command.Command("top", "Shows you the top 10 people based on gold", [], this.onTop),
         new Command.Command(
@@ -60,7 +60,7 @@ export default class GoldCommand extends Command.Base {
         const lines = await Promise.all(
             topUsers.map(async (dbuser, index) => {
                 const user = await AppUser.fromID(dbuser.id);
-                return `#${index + 1} ${user.discord.displayName}:   ${user.inventory.gold} ${Globals.ATTRIBUTES.gold.emoji}`;
+                return `#${index + 1} ${user.discord.displayName}:   ${user.inventory.gold.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}`;
             }),
         );
         const description = lines.join("\n");

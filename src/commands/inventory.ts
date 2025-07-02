@@ -88,6 +88,28 @@ export default class QuestCommand extends Command.Base {
             this.onSell,
             this.onAutocomplete,
         ),
+        new Command.Command(
+            "trade",
+            "Trade an item with a fellow business man",
+            [
+                {
+                    name: "offer",
+                    description: "The item you want to trade",
+                    type: ApplicationCommandOptionType.String,
+                    required: true,
+                    autocomplete: true,
+                },
+                {
+                    name: "return",
+                    description: "The item you want in return",
+                    type: ApplicationCommandOptionType.String,
+                    required: true,
+                    autocomplete: true,
+                },
+            ],
+            this.onSell,
+            this.onAutocomplete,
+        ),
     ];
 
     public async onEquip(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
@@ -213,6 +235,17 @@ export default class QuestCommand extends Command.Base {
 
         return interaction.reply({
             content: `Sold item ${item.name} for ${prize.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}`,
+            flags: "Ephemeral",
+        });
+    }
+
+    public async onTrade(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
+        const offerItemNameOpt = interaction.options.get("offer")?.value as string;
+        const returnItemNameOpt = interaction.options.get("return")?.value as string;
+        const user = await AppUser.fromID(interaction.user.id);
+
+        return interaction.reply({
+            content: "AAAA",
             flags: "Ephemeral",
         });
     }
