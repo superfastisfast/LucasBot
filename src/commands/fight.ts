@@ -39,13 +39,13 @@ export default class FightCommand extends Command.Base {
     public async onExecute(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
         const opponentOpt = interaction.options.get("opponent", true).user;
         if (!opponentOpt)
-            return interaction.reply({ content: `Failed to get user option... wait how did you mess this up 😭`, ephemeral: true });
+            return interaction.reply({ content: `Failed to get user option... wait how did you mess this up 😭`, flags: "Ephemeral" });
 
         if (opponentOpt.id === interaction.user.id)
-            return interaction.reply({ content: `You can't fight yourself, mr. shadowboxer`, ephemeral: true });
+            return interaction.reply({ content: `You can't fight yourself, mr. shadowboxer`, flags: "Ephemeral" });
 
         if (this.isUserPartOfFight(opponentOpt.id) || this.isUserPartOfFight(interaction.user.id))
-            return interaction.reply({ content: `Hold up, someone's already throwing hands elsewhere. Wait your turn.`, ephemeral: true });
+            return interaction.reply({ content: `Hold up, someone's already throwing hands elsewhere. Wait your turn.`, flags: "Ephemeral" });
 
         const betOpt = interaction.options.get("bet", true).value as number;
         const opponentUser = await AppUser.fromID(opponentOpt.id);
