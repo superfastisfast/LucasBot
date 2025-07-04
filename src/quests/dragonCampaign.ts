@@ -65,13 +65,13 @@ export default class DragonCampaignQuest extends Quest.Base {
 
         const message = !playersWon
             ? "The dragon won against the players"
-            : `The players won over the dragon!\nRewards:\n1x${Globals.ATTRIBUTES.skillpoint.emoji}\n10 + ${Globals.ATTRIBUTES.charisma.name}: ${Globals.ATTRIBUTES.gold.emoji}\n10 + ${Globals.ATTRIBUTES.charisma.value}: ${Globals.ATTRIBUTES.xp.emoji}`;
+            : `The players won over the dragon!\nRewards:\n1x${Globals.ATTRIBUTES.skillpoint.emoji}\n${this.reward}${Globals.ATTRIBUTES.gold.emoji}\n${this.reward}${Globals.ATTRIBUTES.xp.emoji}\n (Bonus for ${Globals.ATTRIBUTES.charisma.emoji})`;
         if (playersWon) {
             users.forEach(async (user) => {
                 await user
                     .addSkillPoints(1)
-                    .addXP(10 + user.getStat("charisma"))
-                    .addGold(10 + user.getStat("charisma"))
+                    .addXP(this.reward + user.getStat("charisma"))
+                    .addGold(this.reward + user.getStat("charisma"))
                     .save();
             });
         }
