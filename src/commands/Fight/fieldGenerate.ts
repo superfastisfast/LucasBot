@@ -29,10 +29,12 @@ async function renderPlayers(ctx: SKRSContext2D, game: FightGame, border: Canvas
   async function drawPlayer(ctx: SKRSContext2D, user: AppUser, isCurrent: boolean, otherSide: boolean) {
     const fighter = user.fighter;
     const x = fighter.posX * BLOCK_WIDTH;
+    // Draw body
     const bodyPath = fighter.currentHealth > 0 ? "./assets/Gladiator.png" : "./assets/GladiatorDead.png";
     const bodyImg = await loadImg(bodyPath);
     if (bodyImg) ctx.drawImage(bodyImg, x, otherSide ? BLOCK_HEIGHT/2 : 0, BLOCK_WIDTH, BLOCK_HEIGHT);
 
+    // Draw avatar
     const size = BLOCK_WIDTH / PFP_RATIO;
     const posX = otherSide ? x + BLOCK_WIDTH - size : x;
     try {
@@ -68,11 +70,14 @@ async function renderAction(ctx: SKRSContext2D, game: FightGame, action: any) {
       ctx.fillText(`+${action.healthRegained?.toFixed(1)}`, current.posX*BLOCK_WIDTH + BLOCK_WIDTH/4, BLOCK_HEIGHT/5 + BLOCK_HEIGHT/10);
       break;
     case 'move':
+      // no animation beyond mana cost
       break;
     case 'escape':
       await mapIcon('escape', current.posX*BLOCK_WIDTH, BLOCK_HEIGHT/2, BLOCK_WIDTH, BLOCK_WIDTH);
       break;
   }
+
+  // universal mana cost
   if (['attack','move','sleep'].includes(action.type)) {
     await mapIcon('mana', current.posX*BLOCK_WIDTH, BLOCK_HEIGHT/2, BLOCK_WIDTH/2, BLOCK_WIDTH/2);
     ctx.fillText(action.type === 'move' ? '-1' : '-1', current.posX*BLOCK_WIDTH + BLOCK_WIDTH/4, BLOCK_HEIGHT/2 + BLOCK_HEIGHT/8);
