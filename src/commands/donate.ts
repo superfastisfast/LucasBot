@@ -34,7 +34,7 @@ export default class DonateCommand extends Command.Base {
 
         if (user.discord.id === poor.discord.id)
             return interaction.reply({
-                content: "You can't donate money to yourself idiot",
+                content: "You can't donate money to yourself idiot (im kidding my love)",
                 flags: "Ephemeral",
             });
 
